@@ -90,12 +90,17 @@
             <div id="user-info" class="mt-4 text-sm text-gray-500"></div>
         </header>
 
-        <!-- Main View: Shortcut Selection -->
+        <!-- Main View: Category/Shortcut Selection -->
         <main id="main-view">
-            <div class="flex justify-center mb-6">
-                <button id="review-btn" class="btn btn-primary text-lg px-8 py-3">Start Review Session</button>
+            <div id="main-view-controls" class="flex justify-center mb-6 space-x-4">
+                 <button id="review-btn" class="btn btn-primary text-lg px-8 py-3">Start Review Session</button>
+                 <button id="back-to-categories-btn" class="btn btn-secondary text-lg px-8 py-3 hidden">&larr; Back to Categories</button>
             </div>
-            <div id="shortcut-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+           
+            <div id="category-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Category cards will be injected here -->
+            </div>
+            <div id="shortcut-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
                 <!-- Shortcut cards will be injected here -->
             </div>
         </main>
@@ -103,7 +108,7 @@
         <!-- Learn View: Shortcut Explanation & Examples -->
         <section id="learn-view" class="hidden">
             <div class="card p-8 max-w-4xl mx-auto">
-                <button id="back-to-main-btn" class="btn btn-secondary mb-6">&larr; Back to Shortcuts</button>
+                <button id="back-to-main-btn" class="btn btn-secondary mb-6">&larr; Back to Tips</button>
                 <h2 id="learn-title" class="text-3xl font-bold mb-4"></h2>
                 <p id="learn-explanation" class="text-lg text-gray-600 mb-6"></p>
                 <h3 class="text-2xl font-semibold mb-4">Examples</h3>
@@ -152,7 +157,11 @@
         import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- FIREBASE CONFIG (will be populated in the environment) ---
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "YOUR_API_KEY", authDomain: "YOUR_AUTH_DOMAIN", projectId: "YOUR_PROJECT_ID" };
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { 
+            apiKey: "YOUR_API_KEY", 
+            authDomain: "YOUR_AUTH_DOMAIN", 
+            projectId: "YOUR_PROJECT_ID" 
+        };
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
         // --- FIREBASE INITIALIZATION ---
@@ -163,6 +172,7 @@
         // --- GLOBAL STATE & DOM ELEMENTS ---
         let userId = null;
         let userProgress = {};
+        let currentCategory = null;
         let currentShortcut = null;
         let quizQuestions = [];
         let currentQuestionIndex = 0;
@@ -171,178 +181,89 @@
         const mainView = document.getElementById('main-view');
         const learnView = document.getElementById('learn-view');
         const quizView = document.getElementById('quiz-view');
+        const categoryGrid = document.getElementById('category-grid');
         const shortcutGrid = document.getElementById('shortcut-grid');
         const reviewBtn = document.getElementById('review-btn');
+        const backToCategoriesBtn = document.getElementById('back-to-categories-btn');
         const userInfo = document.getElementById('user-info');
         
         // --- MATH SHORTCUTS DATA ---
-        const shortcuts = {
-            multiplyBy11: {
-                title: 'Multiply by 11',
-                explanation: 'To multiply a two-digit number by 11, add the two digits together and place the sum in between them. If the sum is 10 or more, carry the "1" over to the first digit.',
-                examples: [
-                    { q: '25 x 11', a: '2 (2+5) 5 = 275' },
-                    { q: '53 x 11', a: '5 (5+3) 8 = 583' },
-                    { q: '71 x 11', a: '7 (7+1) 8 = 781' },
-                    { q: '85 x 11', a: '8 (8+5) 5 = 8 (13) 5 -> (8+1) 3 5 = 935' },
-                    { q: '99 x 11', a: '9 (9+9) 9 = 9 (18) 9 -> (9+1) 8 9 = 1089' },
-                ],
-                generateQuestion: () => {
-                    const num = Math.floor(Math.random() * 89) + 11; // 11 to 99
-                    return { question: `${num} x 11`, answer: num * 11 };
-                }
-            },
-            squareEndingIn5: {
-                title: 'Square a number ending in 5',
-                explanation: 'To square a two-digit number ending in 5, take the first digit, multiply it by the next consecutive integer, and then place "25" at the end.',
-                examples: [
-                    { q: '25 x 25', a: '2 x (2+1) = 6. Result: 625' },
-                    { q: '35 x 35', a: '3 x (3+1) = 12. Result: 1225' },
-                    { q: '65 x 65', a: '6 x (6+1) = 42. Result: 4225' },
-                    { q: '95 x 95', a: '9 x (9+1) = 90. Result: 9025' },
-                    { q: '115 x 115', a: '11 x (11+1) = 132. Result: 13225' },
-                ],
-                generateQuestion: () => {
-                    const num = (Math.floor(Math.random() * 10) + 2) * 10 + 5; // 25, 35...115
-                    return { question: `${num}²`, answer: num * num };
-                }
-            },
-            multiplyBy5: {
-                title: 'Multiply by 5',
-                explanation: 'To multiply a number by 5, simply divide it by 2 and then multiply by 10. (Or, multiply by 10 then divide by 2).',
-                examples: [
-                    { q: '48 x 5', a: '48 / 2 = 24. Result: 240' },
-                    { q: '120 x 5', a: '120 / 2 = 60. Result: 600' },
-                    { q: '63 x 5', a: '63 / 2 = 31.5. Result: 315' },
-                    { q: '246 x 5', a: '246 / 2 = 123. Result: 1230' },
-                    { q: '99 x 5', a: '99 / 2 = 49.5. Result: 495' },
-                ],
-                generateQuestion: () => {
-                    const num = Math.floor(Math.random() * 200) + 10;
-                    return { question: `${num} x 5`, answer: num * 5 };
-                }
-            },
-            divideBy5: {
-                title: 'Divide by 5',
-                explanation: 'To divide a number by 5, multiply it by 2 and then divide by 10 (move the decimal point one place to the left).',
-                examples: [
-                    { q: '80 / 5', a: '80 x 2 = 160. Result: 16.0' },
-                    { q: '145 / 5', a: '145 x 2 = 290. Result: 29.0' },
-                    { q: '37 / 5', a: '37 x 2 = 74. Result: 7.4' },
-                    { q: '450 / 5', a: '450 x 2 = 900. Result: 90.0' },
-                    { q: '123 / 5', a: '123 x 2 = 246. Result: 24.6' },
-                ],
-                generateQuestion: () => {
-                    const num = (Math.floor(Math.random() * 100) + 10) * 5;
-                    return { question: `${num} / 5`, answer: num / 5 };
-                }
-            },
-            subtractFrom1000: {
-                title: 'Subtract from 1000',
-                explanation: 'To subtract a three-digit number from 1000, subtract the first two digits from 9, and the last digit from 10.',
-                examples: [
-                    { q: '1000 - 473', a: '(9-4)(9-7)(10-3) = 527' },
-                    { q: '1000 - 812', a: '(9-8)(9-1)(10-2) = 188' },
-                    { q: '1000 - 259', a: '(9-2)(9-5)(10-9) = 741' },
-                    { q: '1000 - 901', a: '(9-9)(9-0)(10-1) = 099 = 99' },
-                    { q: '1000 - 160', a: '(9-1)(9-6)(10-0) = 840' },
-                ],
-                generateQuestion: () => {
-                    const num = Math.floor(Math.random() * 899) + 100;
-                    return { question: `1000 - ${num}`, answer: 1000 - num };
-                }
-            },
-             multiplyBy99: {
-                title: 'Multiply by 99',
-                explanation: 'To multiply a number by 99, multiply it by 100 and then subtract the original number.',
-                examples: [
-                    { q: '45 x 99', a: '(45 x 100) - 45 = 4500 - 45 = 4455' },
-                    { q: '67 x 99', a: '(67 x 100) - 67 = 6700 - 67 = 6633' },
-                    { q: '120 x 99', a: '(120 x 100) - 120 = 12000 - 120 = 11880' },
-                    { q: '15 x 99', a: '(15 x 100) - 15 = 1500 - 15 = 1485' },
-                    { q: '88 x 99', a: '(88 x 100) - 88 = 8800 - 88 = 8712' },
-                ],
-                generateQuestion: () => {
-                    const num = Math.floor(Math.random() * 90) + 10;
-                    return { question: `${num} x 99`, answer: num * 99 };
-                }
-            },
-            sumTo10Rule: {
-                title: 'Multiply 2-digit numbers (same 1st digit, 2nd digits sum to 10)',
-                explanation: 'If two 2-digit numbers have the same first digit and their last digits sum to 10, multiply the first digit by the next integer. Then, multiply the two last digits. Combine the results.',
-                examples: [
-                    { q: '23 x 27', a: 'First part: 2 x (2+1) = 6. Second part: 3 x 7 = 21. Result: 621.' },
-                    { q: '42 x 48', a: 'First part: 4 x (4+1) = 20. Second part: 2 x 8 = 16. Result: 2016.' },
-                    { q: '81 x 89', a: 'First part: 8 x (8+1) = 72. Second part: 1 x 9 = 09. Result: 7209.' },
-                    { q: '66 x 64', a: 'First part: 6 x (6+1) = 42. Second part: 6 x 4 = 24. Result: 4224.' },
-                    { q: '95 x 95', a: 'First part: 9 x (9+1) = 90. Second part: 5 x 5 = 25. Result: 9025. (Same as squaring rule!)' },
-                ],
-                generateQuestion: () => {
-                    const tens = Math.floor(Math.random() * 9) + 1; // 1 to 9
-                    const ones1 = Math.floor(Math.random() * 9) + 1; // 1 to 9
-                    const ones2 = 10 - ones1;
-                    const num1 = tens * 10 + ones1;
-                    const num2 = tens * 10 + ones2;
-                    return { question: `${num1} x ${num2}`, answer: num1 * num2 };
-                }
-            },
-            multiplyBy101: {
-                title: 'Multiply a 2-digit number by 101',
-                explanation: 'To multiply a two-digit number by 101, simply write the number twice.',
-                examples: [
-                    { q: '23 x 101', a: '2323' },
-                    { q: '57 x 101', a: '5757' },
-                    { q: '81 x 101', a: '8181' },
-                    { q: '99 x 101', a: '9999' },
-                    { q: '12 x 101', a: '1212' },
-                ],
-                generateQuestion: () => {
-                    const num = Math.floor(Math.random() * 90) + 10;
-                    return { question: `${num} x 101`, answer: num * 101 };
-                }
-            },
-            closeTo100: {
-                title: 'Multiply numbers near 100',
-                explanation: 'To multiply two numbers close to 100, find their differences from 100. Multiply the differences for the last two digits. Subtract one difference from the other number for the first part.',
-                examples: [
-                    { q: '98 x 97', a: 'Diffs: 2 and 3. Last part: 2x3=06. First part: 98-3=95 (or 97-2=95). Result: 9506.' },
-                    { q: '95 x 96', a: 'Diffs: 5 and 4. Last part: 5x4=20. First part: 95-4=91. Result: 9120.' },
-                    { q: '91 x 99', a: 'Diffs: 9 and 1. Last part: 9x1=09. First part: 91-1=90. Result: 9009.' },
-                    { q: '103 x 104', a: 'Diffs: +3 and +4. Last part: 3x4=12. First part: 103+4=107. Result: 10712.' },
-                    { q: '97 x 105', a: 'Diffs: -3 and +5. Last part: -3x5=-15. First part: 97+5=102. Result: 10200-15 = 10185.' },
-                ],
-                generateQuestion: () => {
-                    const num1 = Math.floor(Math.random() * 10) + 91; // 91-100
-                    const num2 = Math.floor(Math.random() * 10) + 91; // 91-100
-                    return { question: `${num1} x ${num2}`, answer: num1 * num2 };
-                }
-            },
-            divideBy9: {
-                title: 'Divisibility by 9',
-                explanation: 'A number is divisible by 9 if the sum of its digits is divisible by 9. This can also be used to find the remainder.',
-                examples: [
-                    { q: 'Is 108 divisible by 9?', a: '1+0+8 = 9. Yes. 108/9 = 12.' },
-                    { q: 'Is 543 divisible by 9?', a: '5+4+3 = 12. No. Remainder will be 1+2=3.' },
-                    { q: 'Is 9873 divisible by 9?', a: '9+8+7+3 = 27. 2+7=9. Yes.' },
-                    { q: 'Remainder of 46 / 9?', a: '4+6 = 10. 1+0=1. Remainder is 1.' },
-                    { q: 'Remainder of 1234 / 9?', a: '1+2+3+4=10. 1+0=1. Remainder is 1.' },
-                ],
-                generateQuestion: () => {
-                    const type = Math.random() > 0.5; // True for divisible, false for not
-                    let num;
-                    if (type) {
-                        num = (Math.floor(Math.random() * 100) + 10) * 9;
-                        return { question: `What is ${num} / 9?`, answer: num / 9 };
-                    } else {
-                        num = Math.floor(Math.random() * 200) + 100;
-                        let sum = String(num).split('').reduce((acc, digit) => acc + parseInt(digit), 0);
-                        while(sum > 9) {
-                            sum = String(sum).split('').reduce((acc, digit) => acc + parseInt(digit), 0);
+        const allShortcuts = {
+            addition: {
+                title: 'Addition Tips',
+                shortcuts: {
+                    add100: { title: 'Adding 100', explanation: 'To add 100 to a number, just add 1 to the digit in the hundreds place.', generateQuestion: () => { const n = Math.floor(Math.random() * 899) + 100; return { question: `${n} + 100`, answer: n + 100 }; } },
+                    bridge10: { title: 'Bridging Through 10', explanation: 'To add numbers like 8+5, first go to 10 (8+2=10), then add the rest (10+3=13).', generateQuestion: () => { const n1 = Math.floor(Math.random() * 4) + 6; const n2 = Math.floor(Math.random() * 4) + 6; return { question: `${n1} + ${n2}`, answer: n1 + n2 }; } },
+                    doubles: { title: 'Learning Doubles', explanation: 'Adding a number to itself is called a double. Knowing these helps you add faster!', generateQuestion: () => { const n = Math.floor(Math.random() * 10) + 1; return { question: `${n} + ${n}`, answer: n * 2 }; } },
+                    make10: { title: 'Making 10', explanation: 'Look for pairs of numbers that add up to 10. (1+9, 2+8, 3+7, 4+6, 5+5).', generateQuestion: () => { const n = Math.floor(Math.random() * 9) + 1; return { question: `${n} + ? = 10`, answer: 10 - n }; } },
+                    add10: { title: 'Adding 10', explanation: 'To add 10 to a number, just add 1 to the digit in the tens place.', generateQuestion: () => { const n = Math.floor(Math.random() * 90) + 10; return { question: `${n} + 10`, answer: n + 10 }; } },
+                    add9: { title: 'Adding 9', explanation: 'To add 9, you can add 10 first and then just subtract 1. It\'s often easier!', generateQuestion: () => { const n = Math.floor(Math.random() * 90) + 10; return { question: `${n} + 9`, answer: n + 9 }; } },
+                    order: { title: 'Order Doesn\'t Matter', explanation: 'You can swap the numbers in an addition problem and still get the same answer. (e.g., 3 + 5 is the same as 5 + 3)', generateQuestion: () => { const n1 = Math.floor(Math.random() * 20); const n2 = Math.floor(Math.random() * 20); return { question: `${n1} + ${n2}`, answer: n1 + n2 }; } },
+                    nearDoubles: { title: 'Near Doubles', explanation: 'If numbers are close together (like 6+7), use a double you know! (6+6=12), then add 1 more.', generateQuestion: () => { const n = Math.floor(Math.random() * 10) + 1; return { question: `${n} + ${n+1}`, answer: n * 2 + 1 }; } },
+                    breakApart: { 
+                        title: 'Break Apart Numbers', 
+                        explanation: 'Break one number into smaller parts to make it easier. For 7+5, you can do 7+3=10, then add the leftover 2 to get 12.', 
+                        generateQuestion: () => {
+                            const n1 = Math.floor(Math.random() * 4) + 6; // 6, 7, 8, 9
+                            const n2 = Math.floor(Math.random() * 5) + 5; // 5, 6, 7, 8, 9
+                            const needed = 10 - n1;
+                            const leftover = n2 - needed;
+
+                            return {
+                                question: `${n1} + ${n2}`,
+                                answer: n1 + n2,
+                                steps: { n1, n2, needed, leftover }
+                            };
                         }
-                        return { question: `What is the remainder of ${num} / 9?`, answer: sum === 9 ? 0 : sum };
-                    }
+                    },
+                    addInChunks: { title: 'Add in Chunks', explanation: 'When adding bigger numbers like 23+45, add the tens first (20+40=60), then add the ones (3+5=8). Finally, add the results (60+8=68).', generateQuestion: () => { const t1 = (Math.floor(Math.random()*4)+1)*10; const o1 = Math.floor(Math.random()*9)+1; const t2 = (Math.floor(Math.random()*4)+1)*10; const o2 = Math.floor(Math.random()*9)+1; return { question: `${t1+o1} + ${t2+o2}`, answer: t1+o1+t2+o2 }; } },
                 }
             },
+            subtraction: {
+                title: 'Subtraction Tips',
+                shortcuts: {
+                    sub100: { title: 'Subtracting 100', explanation: 'To subtract 100, just take 1 away from the digit in the hundreds place.', generateQuestion: () => { const n = Math.floor(Math.random() * 899) + 101; return { question: `${n} - 100`, answer: n - 100 }; } },
+                    subAcross10: { title: 'Subtracting Across 10', explanation: 'For 14-6, first go down to 10 (14-4=10), then subtract the rest (10-2=8).', generateQuestion: () => { const n1 = Math.floor(Math.random() * 8) + 11; const n2 = Math.floor(Math.random() * 5) + (n1 - 9); return { question: `${n1} - ${n2}`, answer: n1 - n2 }; } },
+                    subFromFriendly: { title: 'Subtract from Friendly Numbers', explanation: 'For 50-24, you can think 50-20=30, then 30-4=26.', generateQuestion: () => { const t1 = (Math.floor(Math.random()*5)+3)*10; const n2 = Math.floor(Math.random()*20)+11; return { question: `${t1} - ${n2}`, answer: t1 - n2 }; } },
+                    countUp: { title: 'Counting Up', explanation: 'For 12 - 9, start at 9 and count how many steps it takes to get to 12. (10, 11, 12... That\'s 3 steps!)', generateQuestion: () => { const n2 = Math.floor(Math.random() * 10) + 1; const diff = Math.floor(Math.random() * 5) + 2; const n1 = n2 + diff; return { question: `${n1} - ${n2}`, answer: diff }; } },
+                    sub10: { title: 'Subtracting 10', explanation: 'To subtract 10 from a number, just take 1 away from the digit in the tens place.', generateQuestion: () => { const n = Math.floor(Math.random() * 90) + 11; return { question: `${n} - 10`, answer: n - 10 }; } },
+                    sub9: { title: 'Subtracting 9', explanation: 'To subtract 9, you can subtract 10 first and then just add 1 back.', generateQuestion: () => { const n = Math.floor(Math.random() * 90) + 11; return { question: `${n} - 9`, answer: n - 9 }; } },
+                    useAddition: { title: 'Use Addition', explanation: 'Thinking "15 - 7 = ?" is hard. Try thinking "7 + what equals 15?". They are the same problem!', generateQuestion: () => { const n2 = Math.floor(Math.random() * 10) + 1; const ans = Math.floor(Math.random() * 10) + 1; const n1 = n2 + ans; return { question: `${n1} - ${n2}`, answer: ans }; } },
+                    factFamilies: { title: 'Fact Families', explanation: 'If you know 8 + 4 = 12, then you also know two subtraction facts: 12 - 8 = 4 and 12 - 4 = 8.', generateQuestion: () => { const n1 = Math.floor(Math.random()*10)+1; const n2 = Math.floor(Math.random()*10)+1; return { question: `If ${n1}+${n2}=${n1+n2}, what is ${n1+n2}-${n1}?`, answer: n2 }; } },
+                    breakApartSub: { title: 'Break Apart to Subtract', explanation: 'For 15 - 8, you can do 15 - 5 = 10, then subtract the leftover 3 to get 7.', generateQuestion: () => { const n1 = Math.floor(Math.random() * 9) + 11; const n2 = Math.floor(Math.random() * 5) + (n1-9); return { question: `${n1} - ${n2}`, answer: n1 - n2 }; } },
+                    constantDiff: { title: 'Keep the Difference', explanation: '27-19 is hard. If you add 1 to both numbers, it becomes 28-20, which is an easy 8! The answer is the same.', generateQuestion: () => { const n2 = Math.floor(Math.random() * 50) + 9; const n1 = n2 + Math.floor(Math.random()*10)+5; return { question: `${n1} - ${n2}`, answer: n1-n2}; } }
+                }
+            },
+            multiplication: {
+                title: 'Multiplication Tips',
+                shortcuts: {
+                    multBy25: { title: 'Multiply by 25', explanation: 'To multiply by 25, think about quarters. 4 x 25 = 100. So, divide the other number by 4 and add two zeros.', generateQuestion: () => { const n = (Math.floor(Math.random()*10)+1)*4; return { question: `${n} x 25`, answer: n * 25 }; } },
+                    multByMultiplesOf10: { title: 'Multiply by Multiples of 10', explanation: 'For 7 x 30, just do 7 x 3 = 21, and then add the zero back on. Answer: 210.', generateQuestion: () => { const n1 = Math.floor(Math.random()*9)+2; const n2 = (Math.floor(Math.random()*9)+2)*10; return { question: `${n1} x ${n2}`, answer: n1 * n2 }; } },
+                    mult2: { title: 'Multiply by 2 (Doubling)', explanation: 'Multiplying by 2 is the same as adding a number to itself (doubling it).', generateQuestion: () => { const n = Math.floor(Math.random() * 20) + 1; return { question: `${n} x 2`, answer: n * 2 }; } },
+                    mult5: { title: 'Multiply by 5', explanation: 'Numbers multiplied by 5 always end in a 0 or a 5. You can also multiply by 10 and then cut it in half.', generateQuestion: () => { const n = Math.floor(Math.random() * 20) + 1; return { question: `${n} x 5`, answer: n * 5 }; } },
+                    mult10: { title: 'Multiply by 10', explanation: 'To multiply any number by 10, just put a 0 on the end of it.', generateQuestion: () => { const n = Math.floor(Math.random() * 50) + 1; return { question: `${n} x 10`, answer: n * 10 }; } },
+                    mult11simple: { title: 'Multiply by 11 (Easy)', explanation: 'To multiply a single-digit number by 11, just write that digit twice (e.g., 4 x 11 = 44).', generateQuestion: () => { const n = Math.floor(Math.random() * 9) + 1; return { question: `${n} x 11`, answer: n * 11 }; } },
+                    orderMult: { title: 'Order Doesn\'t Matter', explanation: 'You can swap numbers in a multiplication problem and get the same answer (e.g., 3 x 6 is the same as 6 x 3).', generateQuestion: () => { const n1 = Math.floor(Math.random() * 10); const n2 = Math.floor(Math.random() * 10); return { question: `${n1} x ${n2}`, answer: n1 * n2 }; } },
+                    mult4: { title: 'Multiply by 4', explanation: 'To multiply a number by 4, just double it, and then double the result.', generateQuestion: () => { const n = Math.floor(Math.random() * 15) + 1; return { question: `${n} x 4`, answer: n * 4 }; } },
+                    mult9fingers: { title: 'Multiply by 9 (Finger Trick)', explanation: 'Hold up 10 fingers. To multiply 9x3, bend down your 3rd finger. You have 2 fingers on the left and 7 on the right. The answer is 27!', generateQuestion: () => { const n = Math.floor(Math.random() * 9) + 2; return { question: `${n} x 9`, answer: n * 9 }; } },
+                    mult11adv: { title: 'Multiply by 11 (Advanced)', explanation: 'To multiply a two-digit number by 11 (like 25x11), add the two digits (2+5=7) and put the sum in the middle. Answer: 275.', generateQuestion: () => { const n = Math.floor(Math.random() * 8) + 2; const n2 = Math.floor(Math.random()*(9-n))+1; const finalNum = n*10+n2; return { question: `${finalNum} x 11`, answer: finalNum*11}; } },
+                }
+            },
+            division: {
+                title: 'Division Tips',
+                shortcuts: {
+                    divBy4: { title: 'Divide by 4', explanation: 'To divide by 4, you can just cut the number in half, and then cut it in half again.', generateQuestion: () => { const n = (Math.floor(Math.random()*10)+1)*4; return { question: `${n} / 4`, answer: n / 4 }; } },
+                    ruleFor3: { title: 'Rule for 3', explanation: 'You can divide a number by 3 if the sum of its digits is divisible by 3.', generateQuestion: () => { const n = Math.floor(Math.random() * 100) + 10; const sumOfDigits = String(n).split('').reduce((acc, digit) => acc + parseInt(digit), 0); return { question: `Is ${n} divisible by 3? (1 for yes, 0 for no)`, answer: sumOfDigits % 3 === 0 ? 1 : 0 }; } },
+                    div0: { title: 'Dividing 0', explanation: '0 divided by any other number is always 0.', generateQuestion: () => { const n = Math.floor(Math.random() * 100) + 1; return { question: `0 / ${n}`, answer: 0 }; } },
+                    div2: { title: 'Divide by 2 (Halving)', explanation: 'Dividing by 2 is the same as cutting a number in half.', generateQuestion: () => { const n = (Math.floor(Math.random() * 25) + 1) * 2; return { question: `${n} / 2`, answer: n / 2 }; } },
+                    div10: { title: 'Divide by 10', explanation: 'To divide a number ending in 0 by 10, just remove the 0.', generateQuestion: () => { const n = (Math.floor(Math.random() * 20) + 1) * 10; return { question: `${n} / 10`, answer: n / 10 }; } },
+                    useMult: { title: 'Use Multiplication', explanation: 'Thinking "30 / 6 = ?" is hard. Try thinking "6 x what equals 30?".', generateQuestion: () => { const ans = Math.floor(Math.random()*10)+1; const n2 = Math.floor(Math.random()*10)+1; return { question: `${ans*n2} / ${n2}`, answer: ans}; } },
+                    factFamiliesDiv: { title: 'Fact Families', explanation: 'If you know 5 x 6 = 30, you also know two division facts: 30 / 5 = 6 and 30 / 6 = 5.', generateQuestion: () => { const n1 = Math.floor(Math.random()*10)+1; const n2 = Math.floor(Math.random()*10)+1; return { question: `If ${n1}x${n2}=${n1*n2}, what is ${n1*n2}/${n1}?`, answer: n2 }; } },
+                    ruleFor2: { title: 'Rule for 2', explanation: 'You can divide a number by 2 if it is an even number (it ends in 0, 2, 4, 6, or 8).', generateQuestion: () => { const n = Math.floor(Math.random() * 100); return { question: `Is ${n} divisible by 2? (1 for yes, 0 for no)`, answer: n % 2 === 0 ? 1 : 0 }; } },
+                    ruleFor5: { title: 'Rule for 5', explanation: 'You can divide a number by 5 if it ends in a 0 or a 5.', generateQuestion: () => { const n = Math.floor(Math.random() * 100); return { question: `Is ${n} divisible by 5? (1 for yes, 0 for no)`, answer: n % 5 === 0 ? 1 : 0 }; } },
+                    ruleFor10: { title: 'Rule for 10', explanation: 'You can divide a number by 10 if it ends in a 0.', generateQuestion: () => { const n = Math.floor(Math.random() * 100); return { question: `Is ${n} divisible by 10? (1 for yes, 0 for no)`, answer: n % 10 === 0 ? 1 : 0 }; } },
+                }
+            }
         };
         
         // --- AUTHENTICATION & DATA HANDLING ---
@@ -363,7 +284,7 @@
                 }
             } catch (error) {
                 console.error("Authentication failed:", error);
-                userInfo.textContent = "Could not sign in. Progress will not be saved.";
+                userInfo.innerHTML = `<span class="text-red-600 font-semibold">Could not save progress.</span> Is the Firebase config correct and is Anonymous Sign-in enabled in your project?`;
             }
         }
         
@@ -374,14 +295,17 @@
                 if (docSnap.exists()) {
                     userProgress = docSnap.data();
                 } else {
-                    // Initialize progress if it's a new user
+                    // Initialize progress for new nested structure
                     userProgress = {};
-                    Object.keys(shortcuts).forEach(key => {
-                        userProgress[key] = { strength: 0, lastReviewed: null };
-                    });
+                    for (const catKey in allShortcuts) {
+                        userProgress[catKey] = {};
+                        for (const shortKey in allShortcuts[catKey].shortcuts) {
+                            userProgress[catKey][shortKey] = { strength: 0, lastReviewed: null };
+                        }
+                    }
                     saveProgress();
                 }
-                renderMainView();
+                renderCategories();
             }, (error) => {
                 console.error("Error listening to progress:", error);
             });
@@ -398,7 +322,6 @@
         }
         
         // --- VIEW RENDERING & SWITCHING ---
-
         function switchView(view) {
             mainView.classList.add('hidden');
             learnView.classList.add('hidden');
@@ -406,10 +329,35 @@
             document.getElementById(view).classList.remove('hidden');
         }
 
-        function renderMainView() {
+        function renderCategories() {
+            currentCategory = null;
+            categoryGrid.innerHTML = '';
+            categoryGrid.classList.remove('hidden');
+            shortcutGrid.classList.add('hidden');
+            backToCategoriesBtn.classList.add('hidden');
+            reviewBtn.classList.remove('hidden');
+
+            Object.entries(allShortcuts).forEach(([key, category]) => {
+                const card = document.createElement('div');
+                card.className = 'card p-8 cursor-pointer text-center';
+                card.dataset.category = key;
+                card.innerHTML = `<h2 class="text-3xl font-bold">${category.title}</h2>`;
+                card.addEventListener('click', () => renderShortcutGrid(key));
+                categoryGrid.appendChild(card);
+            });
+        }
+
+        function renderShortcutGrid(categoryKey) {
+            currentCategory = categoryKey;
             shortcutGrid.innerHTML = '';
-            Object.entries(shortcuts).forEach(([key, shortcut]) => {
-                const progress = userProgress[key] || { strength: 0 };
+            categoryGrid.classList.add('hidden');
+            shortcutGrid.classList.remove('hidden');
+            backToCategoriesBtn.classList.remove('hidden');
+            reviewBtn.classList.add('hidden');
+
+            const category = allShortcuts[categoryKey];
+            Object.entries(category.shortcuts).forEach(([key, shortcut]) => {
+                const progress = userProgress[categoryKey]?.[key] || { strength: 0 };
                 const strength = progress.strength || 0;
                 const card = document.createElement('div');
                 card.className = 'card p-6 cursor-pointer';
@@ -421,37 +369,69 @@
                     </div>
                     <span class="text-sm text-gray-500 mt-1 block">Mastery: ${strength}/5</span>
                 `;
-                card.addEventListener('click', () => showLearnView(key));
+                card.addEventListener('click', () => showLearnView(categoryKey, key));
                 shortcutGrid.appendChild(card);
             });
         }
 
-        function showLearnView(key) {
-            currentShortcut = key;
-            const shortcut = shortcuts[key];
+        function showLearnView(categoryKey, shortcutKey) {
+            currentCategory = categoryKey;
+            currentShortcut = shortcutKey;
+            const shortcut = allShortcuts[categoryKey].shortcuts[shortcutKey];
             document.getElementById('learn-title').textContent = shortcut.title;
             document.getElementById('learn-explanation').textContent = shortcut.explanation;
             
             const examplesContainer = document.getElementById('learn-examples');
-            examplesContainer.innerHTML = shortcut.examples.map(ex => 
-                `<div class="bg-gray-100 p-3 rounded-md">
-                    <span class="font-semibold">${ex.q}</span> = <span class="text-indigo-600">${ex.a}</span>
-                </div>`
-            ).join('');
+            examplesContainer.innerHTML = ''; // Clear previous examples
+            
+            // Generate 5 examples
+            for (let i = 0; i < 5; i++) {
+                const ex = shortcut.generateQuestion();
+                let questionText = ex.question;
+
+                // SPECIAL CASE: Detailed example for 'Break Apart Numbers'
+                if (shortcutKey === 'breakApart' && ex.steps) {
+                    const { n1, n2, needed, leftover } = ex.steps;
+                    examplesContainer.innerHTML += `
+                        <div class="bg-gray-100 p-4 rounded-md space-y-1">
+                            <p class="font-semibold text-lg">${n1} + ${n2}</p>
+                            <p class="text-gray-600 pl-4">Break ${n2} into <span class="font-semibold">${needed} + ${leftover}</span> to help ${n1} get to 10.</p>
+                            <p class="pl-4 font-mono text-gray-800">${n1} + (${needed} + ${leftover})</p>
+                            <p class="pl-4 font-mono text-gray-800">(${n1} + ${needed}) + ${leftover}</p>
+                            <p class="pl-4 font-mono text-gray-800">10 + ${leftover} = <span class="text-indigo-600 font-bold">${ex.answer}</span></p>
+                        </div>`;
+                } 
+                // CASE: For 'yes/no' divisibility questions
+                else if (questionText.includes('? (1 for yes, 0 for no)')) {
+                    questionText = questionText.replace('? (1 for yes, 0 for no)', '');
+                    examplesContainer.innerHTML += `<div class="bg-gray-100 p-3 rounded-md">
+                        <span class="font-semibold">${questionText}</span>: <span class="text-indigo-600 font-bold">${ex.answer === 1 ? 'Yes' : 'No'}</span>
+                    </div>`;
+                } 
+                // DEFAULT: Simple question = answer format
+                else {
+                     examplesContainer.innerHTML += `<div class="bg-gray-100 p-3 rounded-md">
+                        <span class="font-semibold">${ex.question}</span> = <span class="text-indigo-600 font-bold">${ex.answer}</span>
+                    </div>`;
+                }
+            }
 
             switchView('learn-view');
         }
 
+
         // --- QUIZ LOGIC ---
-        function startQuiz(key) {
-            currentShortcut = key;
+        function startQuiz(categoryKey, shortcutKey) {
+            currentCategory = categoryKey;
+            currentShortcut = shortcutKey;
             currentQuestionIndex = 0;
             score = 0;
             quizQuestions = [];
+            const shortcut = allShortcuts[categoryKey].shortcuts[shortcutKey];
             for (let i = 0; i < 10; i++) {
-                quizQuestions.push(shortcuts[key].generateQuestion());
+                quizQuestions.push(shortcut.generateQuestion());
             }
-            document.getElementById('quiz-title').textContent = `${shortcuts[key].title} Quiz`;
+            document.getElementById('quiz-title').textContent = `${shortcut.title} Quiz`;
             switchView('quiz-view');
             displayNextQuestion();
         }
@@ -472,6 +452,7 @@
         }
         
         function handleSubmitAnswer() {
+            if (currentQuestionIndex >= quizQuestions.length) return; // FIX: Prevent running after quiz ends
             const feedbackEl = document.getElementById('feedback');
             const userAnswer = parseInt(document.getElementById('quiz-answer').value, 10);
             const correctAnswer = quizQuestions[currentQuestionIndex].answer;
@@ -496,7 +477,7 @@
         }
 
         function endQuiz() {
-            const progress = userProgress[currentShortcut] || { strength: 0 };
+            const progress = userProgress[currentCategory][currentShortcut];
             
             if (score >= 8) {
                 progress.strength = Math.min(5, progress.strength + 1);
@@ -505,44 +486,44 @@
             }
             progress.lastReviewed = new Date().toISOString();
             
-            userProgress[currentShortcut] = progress;
             saveProgress();
-            
             showResultsModal();
         }
 
         // --- SPACED REPETITION ---
         function startReviewSession() {
-            // Simple SRS: find the shortcut with the lowest strength.
-            // Tie-break with the one least recently reviewed.
-            let nextShortcutKey = null;
+            let nextShortcut = null;
             let minStrength = 6;
             let oldestDate = new Date().toISOString();
 
-            Object.entries(userProgress).forEach(([key, progress]) => {
-                // Ignore mastered shortcuts unless all are mastered
-                if (progress.strength >= 5) return;
+            for (const catKey in userProgress) {
+                for (const shortKey in userProgress[catKey]) {
+                    const progress = userProgress[catKey][shortKey];
+                    if (progress.strength >= 5) continue;
 
-                if (progress.strength < minStrength) {
-                    minStrength = progress.strength;
-                    oldestDate = progress.lastReviewed || '1970-01-01T00:00:00.000Z';
-                    nextShortcutKey = key;
-                } else if (progress.strength === minStrength) {
-                    const currentLastReviewed = progress.lastReviewed || '1970-01-01T00:00:00.000Z';
-                    if (currentLastReviewed < oldestDate) {
-                        oldestDate = currentLastReviewed;
-                        nextShortcutKey = key;
+                    if (progress.strength < minStrength) {
+                        minStrength = progress.strength;
+                        oldestDate = progress.lastReviewed || '1970-01-01T00:00:00.000Z';
+                        nextShortcut = { category: catKey, shortcut: shortKey };
+                    } else if (progress.strength === minStrength) {
+                        const currentLastReviewed = progress.lastReviewed || '1970-01-01T00:00:00.000Z';
+                        if (currentLastReviewed < oldestDate) {
+                            oldestDate = currentLastReviewed;
+                            nextShortcut = { category: catKey, shortcut: shortKey };
+                        }
                     }
                 }
-            });
+            }
             
-            // If all are mastered, just pick a random one
-            if (!nextShortcutKey) {
-                const keys = Object.keys(shortcuts);
-                nextShortcutKey = keys[Math.floor(Math.random() * keys.length)];
+            if (!nextShortcut) { // If all are mastered, pick a random one
+                const categories = Object.keys(allShortcuts);
+                const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+                const shortcuts = Object.keys(allShortcuts[randomCategory].shortcuts);
+                const randomShortcut = shortcuts[Math.floor(Math.random() * shortcuts.length)];
+                nextShortcut = { category: randomCategory, shortcut: randomShortcut };
             }
 
-            showLearnView(nextShortcutKey);
+            showLearnView(nextShortcut.category, nextShortcut.shortcut);
         }
         
         // --- MODAL & UI ---
@@ -558,13 +539,22 @@
 
         function closeResultsModal() {
             document.getElementById('results-modal').classList.add('hidden');
-            renderMainView();
             switchView('main-view');
+            // If we were in a category, go back to that category grid
+            if(currentCategory) {
+                renderShortcutGrid(currentCategory);
+            } else {
+                renderCategories();
+            }
         }
         
         // --- EVENT LISTENERS ---
-        document.getElementById('back-to-main-btn').addEventListener('click', () => switchView('main-view'));
-        document.getElementById('start-quiz-btn').addEventListener('click', () => startQuiz(currentShortcut));
+        backToCategoriesBtn.addEventListener('click', renderCategories);
+        document.getElementById('back-to-main-btn').addEventListener('click', () => {
+             switchView('main-view');
+             renderShortcutGrid(currentCategory);
+        });
+        document.getElementById('start-quiz-btn').addEventListener('click', () => startQuiz(currentCategory, currentShortcut));
         document.getElementById('submit-answer-btn').addEventListener('click', handleSubmitAnswer);
         document.getElementById('quiz-answer').addEventListener('keyup', (e) => {
             if (e.key === 'Enter') handleSubmitAnswer();
