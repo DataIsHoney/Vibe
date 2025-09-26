@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Shortcut Teacher</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overscroll-behavior: none;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .btn {
+            display: inline-block;
+            font-weight: 600;
+            text-align: center;
+            vertical-align: middle;
+            cursor: pointer;
+            user-select: none;
+            border: 1px solid transparent;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.15s ease-in-out;
+        }
+        .btn-primary {
+            background-color: #4f46e5;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #4338ca;
+        }
+        .btn-secondary {
+            background-color: #e5e7eb;
+            color: #1f2937;
+        }
+        .btn-secondary:hover {
+            background-color: #d1d5db;
+        }
+        .progress-bar-bg {
+            background-color: #e5e7eb;
+            border-radius: 9999px;
+            height: 8px;
+        }
+        .progress-bar {
+            background-color: #4ade80;
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 0.3s ease-in-out;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            max-width: 90%;
+            width: 500px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div id="app" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-900 sm:text-5xl">Math Shortcut Teacher</h1>
+            <p class="mt-4 text-xl text-gray-600">Learn mental math tricks with spaced repetition.</p>
+            <div id="user-info" class="mt-4 text-sm text-gray-500"></div>
+        </header>
+
+        <!-- Main View: Shortcut Selection -->
+        <main id="main-view">
+            <div class="flex justify-center mb-6">
+                <button id="review-btn" class="btn btn-primary text-lg px-8 py-3">Start Review Session</button>
+            </div>
+            <div id="shortcut-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Shortcut cards will be injected here -->
+            </div>
+        </main>
+
+        <!-- Learn View: Shortcut Explanation & Examples -->
+        <section id="learn-view" class="hidden">
+            <div class="card p-8 max-w-4xl mx-auto">
+                <button id="back-to-main-btn" class="btn btn-secondary mb-6">&larr; Back to Shortcuts</button>
+                <h2 id="learn-title" class="text-3xl font-bold mb-4"></h2>
+                <p id="learn-explanation" class="text-lg text-gray-600 mb-6"></p>
+                <h3 class="text-2xl font-semibold mb-4">Examples</h3>
+                <div id="learn-examples" class="space-y-3 text-gray-700 text-lg"></div>
+                <div class="text-center mt-8">
+                    <button id="start-quiz-btn" class="btn btn-primary px-8 py-3 text-lg">I'm Ready for the Quiz!</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quiz View -->
+        <section id="quiz-view" class="hidden">
+             <div class="card p-8 max-w-2xl mx-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="quiz-title" class="text-2xl font-bold">Quiz Time!</h2>
+                    <div id="quiz-progress" class="text-lg font-medium"></div>
+                </div>
+                <div class="mb-6">
+                    <div class="text-5xl font-bold text-center text-gray-800 py-8" id="quiz-question"></div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <input type="number" id="quiz-answer" class="text-center text-2xl p-3 border-2 border-gray-300 rounded-lg w-full max-w-xs focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Your Answer">
+                    <button id="submit-answer-btn" class="btn btn-primary mt-4 w-full max-w-xs text-lg">Submit</button>
+                    <p id="feedback" class="mt-4 h-6 text-lg font-medium"></p>
+                </div>
+             </div>
+        </section>
+
+    </div>
+
+    <!-- Quiz Results Modal -->
+    <div id="results-modal" class="modal-overlay hidden">
+        <div class="modal-content text-center">
+            <h2 class="text-3xl font-bold mb-4">Quiz Complete!</h2>
+            <p class="text-5xl font-extrabold mb-2" id="results-score"></p>
+            <p class="text-lg text-gray-600 mb-6" id="results-message"></p>
+            <button id="close-results-btn" class="btn btn-primary">Continue Learning</button>
+        </div>
+    </div>
+
+
+    <script type="module">
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- FIREBASE CONFIG (will be populated in the environment) ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "YOUR_API_KEY", authDomain: "YOUR_AUTH_DOMAIN", projectId: "YOUR_PROJECT_ID" };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // --- FIREBASE INITIALIZATION ---
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // --- GLOBAL STATE & DOM ELEMENTS ---
+        let userId = null;
+        let userProgress = {};
+        let currentShortcut = null;
+        let quizQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        const mainView = document.getElementById('main-view');
+        const learnView = document.getElementById('learn-view');
+        const quizView = document.getElementById('quiz-view');
+        const shortcutGrid = document.getElementById('shortcut-grid');
+        const reviewBtn = document.getElementById('review-btn');
+        const userInfo = document.getElementById('user-info');
+        
+        // --- MATH SHORTCUTS DATA ---
+        const shortcuts = {
+            multiplyBy11: {
+                title: 'Multiply by 11',
+                explanation: 'To multiply a two-digit number by 11, add the two digits together and place the sum in between them. If the sum is 10 or more, carry the "1" over to the first digit.',
+                examples: [
+                    { q: '25 x 11', a: '2 (2+5) 5 = 275' },
+                    { q: '53 x 11', a: '5 (5+3) 8 = 583' },
+                    { q: '71 x 11', a: '7 (7+1) 8 = 781' },
+                    { q: '85 x 11', a: '8 (8+5) 5 = 8 (13) 5 -> (8+1) 3 5 = 935' },
+                    { q: '99 x 11', a: '9 (9+9) 9 = 9 (18) 9 -> (9+1) 8 9 = 1089' },
+                ],
+                generateQuestion: () => {
+                    const num = Math.floor(Math.random() * 89) + 11; // 11 to 99
+                    return { question: `${num} x 11`, answer: num * 11 };
+                }
+            },
+            squareEndingIn5: {
+                title: 'Square a number ending in 5',
+                explanation: 'To square a two-digit number ending in 5, take the first digit, multiply it by the next consecutive integer, and then place "25" at the end.',
+                examples: [
+                    { q: '25 x 25', a: '2 x (2+1) = 6. Result: 625' },
+                    { q: '35 x 35', a: '3 x (3+1) = 12. Result: 1225' },
+                    { q: '65 x 65', a: '6 x (6+1) = 42. Result: 4225' },
+                    { q: '95 x 95', a: '9 x (9+1) = 90. Result: 9025' },
+                    { q: '115 x 115', a: '11 x (11+1) = 132. Result: 13225' },
+                ],
+                generateQuestion: () => {
+                    const num = (Math.floor(Math.random() * 10) + 2) * 10 + 5; // 25, 35...115
+                    return { question: `${num}²`, answer: num * num };
+                }
+            },
+            multiplyBy5: {
+                title: 'Multiply by 5',
+                explanation: 'To multiply a number by 5, simply divide it by 2 and then multiply by 10. (Or, multiply by 10 then divide by 2).',
+                examples: [
+                    { q: '48 x 5', a: '48 / 2 = 24. Result: 240' },
+                    { q: '120 x 5', a: '120 / 2 = 60. Result: 600' },
+                    { q: '63 x 5', a: '63 / 2 = 31.5. Result: 315' },
+                    { q: '246 x 5', a: '246 / 2 = 123. Result: 1230' },
+                    { q: '99 x 5', a: '99 / 2 = 49.5. Result: 495' },
+                ],
+                generateQuestion: () => {
+                    const num = Math.floor(Math.random() * 200) + 10;
+                    return { question: `${num} x 5`, answer: num * 5 };
+                }
+            },
+            divideBy5: {
+                title: 'Divide by 5',
+                explanation: 'To divide a number by 5, multiply it by 2 and then divide by 10 (move the decimal point one place to the left).',
+                examples: [
+                    { q: '80 / 5', a: '80 x 2 = 160. Result: 16.0' },
+                    { q: '145 / 5', a: '145 x 2 = 290. Result: 29.0' },
+                    { q: '37 / 5', a: '37 x 2 = 74. Result: 7.4' },
+                    { q: '450 / 5', a: '450 x 2 = 900. Result: 90.0' },
+                    { q: '123 / 5', a: '123 x 2 = 246. Result: 24.6' },
+                ],
+                generateQuestion: () => {
+                    const num = (Math.floor(Math.random() * 100) + 10) * 5;
+                    return { question: `${num} / 5`, answer: num / 5 };
+                }
+            },
+            subtractFrom1000: {
+                title: 'Subtract from 1000',
+                explanation: 'To subtract a three-digit number from 1000, subtract the first two digits from 9, and the last digit from 10.',
+                examples: [
+                    { q: '1000 - 473', a: '(9-4)(9-7)(10-3) = 527' },
+                    { q: '1000 - 812', a: '(9-8)(9-1)(10-2) = 188' },
+                    { q: '1000 - 259', a: '(9-2)(9-5)(10-9) = 741' },
+                    { q: '1000 - 901', a: '(9-9)(9-0)(10-1) = 099 = 99' },
+                    { q: '1000 - 160', a: '(9-1)(9-6)(10-0) = 840' },
+                ],
+                generateQuestion: () => {
+                    const num = Math.floor(Math.random() * 899) + 100;
+                    return { question: `1000 - ${num}`, answer: 1000 - num };
+                }
+            },
+             multiplyBy99: {
+                title: 'Multiply by 99',
+                explanation: 'To multiply a number by 99, multiply it by 100 and then subtract the original number.',
+                examples: [
+                    { q: '45 x 99', a: '(45 x 100) - 45 = 4500 - 45 = 4455' },
+                    { q: '67 x 99', a: '(67 x 100) - 67 = 6700 - 67 = 6633' },
+                    { q: '120 x 99', a: '(120 x 100) - 120 = 12000 - 120 = 11880' },
+                    { q: '15 x 99', a: '(15 x 100) - 15 = 1500 - 15 = 1485' },
+                    { q: '88 x 99', a: '(88 x 100) - 88 = 8800 - 88 = 8712' },
+                ],
+                generateQuestion: () => {
+                    const num = Math.floor(Math.random() * 90) + 10;
+                    return { question: `${num} x 99`, answer: num * 99 };
+                }
+            },
+            sumTo10Rule: {
+                title: 'Multiply 2-digit numbers (same 1st digit, 2nd digits sum to 10)',
+                explanation: 'If two 2-digit numbers have the same first digit and their last digits sum to 10, multiply the first digit by the next integer. Then, multiply the two last digits. Combine the results.',
+                examples: [
+                    { q: '23 x 27', a: 'First part: 2 x (2+1) = 6. Second part: 3 x 7 = 21. Result: 621.' },
+                    { q: '42 x 48', a: 'First part: 4 x (4+1) = 20. Second part: 2 x 8 = 16. Result: 2016.' },
+                    { q: '81 x 89', a: 'First part: 8 x (8+1) = 72. Second part: 1 x 9 = 09. Result: 7209.' },
+                    { q: '66 x 64', a: 'First part: 6 x (6+1) = 42. Second part: 6 x 4 = 24. Result: 4224.' },
+                    { q: '95 x 95', a: 'First part: 9 x (9+1) = 90. Second part: 5 x 5 = 25. Result: 9025. (Same as squaring rule!)' },
+                ],
+                generateQuestion: () => {
+                    const tens = Math.floor(Math.random() * 9) + 1; // 1 to 9
+                    const ones1 = Math.floor(Math.random() * 9) + 1; // 1 to 9
+                    const ones2 = 10 - ones1;
+                    const num1 = tens * 10 + ones1;
+                    const num2 = tens * 10 + ones2;
+                    return { question: `${num1} x ${num2}`, answer: num1 * num2 };
+                }
+            },
+            multiplyBy101: {
+                title: 'Multiply a 2-digit number by 101',
+                explanation: 'To multiply a two-digit number by 101, simply write the number twice.',
+                examples: [
+                    { q: '23 x 101', a: '2323' },
+                    { q: '57 x 101', a: '5757' },
+                    { q: '81 x 101', a: '8181' },
+                    { q: '99 x 101', a: '9999' },
+                    { q: '12 x 101', a: '1212' },
+                ],
+                generateQuestion: () => {
+                    const num = Math.floor(Math.random() * 90) + 10;
+                    return { question: `${num} x 101`, answer: num * 101 };
+                }
+            },
+            closeTo100: {
+                title: 'Multiply numbers near 100',
+                explanation: 'To multiply two numbers close to 100, find their differences from 100. Multiply the differences for the last two digits. Subtract one difference from the other number for the first part.',
+                examples: [
+                    { q: '98 x 97', a: 'Diffs: 2 and 3. Last part: 2x3=06. First part: 98-3=95 (or 97-2=95). Result: 9506.' },
+                    { q: '95 x 96', a: 'Diffs: 5 and 4. Last part: 5x4=20. First part: 95-4=91. Result: 9120.' },
+                    { q: '91 x 99', a: 'Diffs: 9 and 1. Last part: 9x1=09. First part: 91-1=90. Result: 9009.' },
+                    { q: '103 x 104', a: 'Diffs: +3 and +4. Last part: 3x4=12. First part: 103+4=107. Result: 10712.' },
+                    { q: '97 x 105', a: 'Diffs: -3 and +5. Last part: -3x5=-15. First part: 97+5=102. Result: 10200-15 = 10185.' },
+                ],
+                generateQuestion: () => {
+                    const num1 = Math.floor(Math.random() * 10) + 91; // 91-100
+                    const num2 = Math.floor(Math.random() * 10) + 91; // 91-100
+                    return { question: `${num1} x ${num2}`, answer: num1 * num2 };
+                }
+            },
+            divideBy9: {
+                title: 'Divisibility by 9',
+                explanation: 'A number is divisible by 9 if the sum of its digits is divisible by 9. This can also be used to find the remainder.',
+                examples: [
+                    { q: 'Is 108 divisible by 9?', a: '1+0+8 = 9. Yes. 108/9 = 12.' },
+                    { q: 'Is 543 divisible by 9?', a: '5+4+3 = 12. No. Remainder will be 1+2=3.' },
+                    { q: 'Is 9873 divisible by 9?', a: '9+8+7+3 = 27. 2+7=9. Yes.' },
+                    { q: 'Remainder of 46 / 9?', a: '4+6 = 10. 1+0=1. Remainder is 1.' },
+                    { q: 'Remainder of 1234 / 9?', a: '1+2+3+4=10. 1+0=1. Remainder is 1.' },
+                ],
+                generateQuestion: () => {
+                    const type = Math.random() > 0.5; // True for divisible, false for not
+                    let num;
+                    if (type) {
+                        num = (Math.floor(Math.random() * 100) + 10) * 9;
+                        return { question: `What is ${num} / 9?`, answer: num / 9 };
+                    } else {
+                        num = Math.floor(Math.random() * 200) + 100;
+                        let sum = String(num).split('').reduce((acc, digit) => acc + parseInt(digit), 0);
+                        while(sum > 9) {
+                            sum = String(sum).split('').reduce((acc, digit) => acc + parseInt(digit), 0);
+                        }
+                        return { question: `What is the remainder of ${num} / 9?`, answer: sum === 9 ? 0 : sum };
+                    }
+                }
+            },
+        };
+        
+        // --- AUTHENTICATION & DATA HANDLING ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                userInfo.textContent = `User ID: ${userId}`;
+                await setupUserListener();
+            }
+        });
+        
+        async function authenticateUser() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Authentication failed:", error);
+                userInfo.textContent = "Could not sign in. Progress will not be saved.";
+            }
+        }
+        
+        async function setupUserListener() {
+            if (!userId) return;
+            const docRef = doc(db, `artifacts/${appId}/users/${userId}/mathShortcutsProgress/data`);
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    userProgress = docSnap.data();
+                } else {
+                    // Initialize progress if it's a new user
+                    userProgress = {};
+                    Object.keys(shortcuts).forEach(key => {
+                        userProgress[key] = { strength: 0, lastReviewed: null };
+                    });
+                    saveProgress();
+                }
+                renderMainView();
+            }, (error) => {
+                console.error("Error listening to progress:", error);
+            });
+        }
+        
+        async function saveProgress() {
+            if (!userId) return;
+            const docRef = doc(db, `artifacts/${appId}/users/${userId}/mathShortcutsProgress/data`);
+            try {
+                await setDoc(docRef, userProgress);
+            } catch (error) {
+                console.error("Error saving progress: ", error);
+            }
+        }
+        
+        // --- VIEW RENDERING & SWITCHING ---
+
+        function switchView(view) {
+            mainView.classList.add('hidden');
+            learnView.classList.add('hidden');
+            quizView.classList.add('hidden');
+            document.getElementById(view).classList.remove('hidden');
+        }
+
+        function renderMainView() {
+            shortcutGrid.innerHTML = '';
+            Object.entries(shortcuts).forEach(([key, shortcut]) => {
+                const progress = userProgress[key] || { strength: 0 };
+                const strength = progress.strength || 0;
+                const card = document.createElement('div');
+                card.className = 'card p-6 cursor-pointer';
+                card.dataset.shortcut = key;
+                card.innerHTML = `
+                    <h3 class="text-xl font-bold mb-2">${shortcut.title}</h3>
+                    <div class="progress-bar-bg w-full">
+                        <div class="progress-bar" style="width: ${strength * 20}%"></div>
+                    </div>
+                    <span class="text-sm text-gray-500 mt-1 block">Mastery: ${strength}/5</span>
+                `;
+                card.addEventListener('click', () => showLearnView(key));
+                shortcutGrid.appendChild(card);
+            });
+        }
+
+        function showLearnView(key) {
+            currentShortcut = key;
+            const shortcut = shortcuts[key];
+            document.getElementById('learn-title').textContent = shortcut.title;
+            document.getElementById('learn-explanation').textContent = shortcut.explanation;
+            
+            const examplesContainer = document.getElementById('learn-examples');
+            examplesContainer.innerHTML = shortcut.examples.map(ex => 
+                `<div class="bg-gray-100 p-3 rounded-md">
+                    <span class="font-semibold">${ex.q}</span> = <span class="text-indigo-600">${ex.a}</span>
+                </div>`
+            ).join('');
+
+            switchView('learn-view');
+        }
+
+        // --- QUIZ LOGIC ---
+        function startQuiz(key) {
+            currentShortcut = key;
+            currentQuestionIndex = 0;
+            score = 0;
+            quizQuestions = [];
+            for (let i = 0; i < 10; i++) {
+                quizQuestions.push(shortcuts[key].generateQuestion());
+            }
+            document.getElementById('quiz-title').textContent = `${shortcuts[key].title} Quiz`;
+            switchView('quiz-view');
+            displayNextQuestion();
+        }
+
+        function displayNextQuestion() {
+            if (currentQuestionIndex >= quizQuestions.length) {
+                endQuiz();
+                return;
+            }
+
+            const q = quizQuestions[currentQuestionIndex];
+            document.getElementById('quiz-progress').textContent = `Question ${currentQuestionIndex + 1}/10`;
+            document.getElementById('quiz-question').textContent = q.question;
+            const answerInput = document.getElementById('quiz-answer');
+            answerInput.value = '';
+            answerInput.focus();
+            document.getElementById('feedback').textContent = '';
+        }
+        
+        function handleSubmitAnswer() {
+            const feedbackEl = document.getElementById('feedback');
+            const userAnswer = parseInt(document.getElementById('quiz-answer').value, 10);
+            const correctAnswer = quizQuestions[currentQuestionIndex].answer;
+
+            if (isNaN(userAnswer)) {
+                feedbackEl.textContent = "Please enter a number.";
+                feedbackEl.className = "mt-4 h-6 text-lg font-medium text-yellow-600";
+                return;
+            }
+
+            if (userAnswer === correctAnswer) {
+                score++;
+                feedbackEl.textContent = "Correct!";
+                feedbackEl.className = "mt-4 h-6 text-lg font-medium text-green-600";
+            } else {
+                feedbackEl.textContent = `Incorrect. The answer was ${correctAnswer}.`;
+                feedbackEl.className = "mt-4 h-6 text-lg font-medium text-red-600";
+            }
+
+            currentQuestionIndex++;
+            setTimeout(displayNextQuestion, 1200);
+        }
+
+        function endQuiz() {
+            const progress = userProgress[currentShortcut] || { strength: 0 };
+            
+            if (score >= 8) {
+                progress.strength = Math.min(5, progress.strength + 1);
+            } else if (score < 5 && progress.strength > 0) {
+                 progress.strength = Math.max(0, progress.strength - 1);
+            }
+            progress.lastReviewed = new Date().toISOString();
+            
+            userProgress[currentShortcut] = progress;
+            saveProgress();
+            
+            showResultsModal();
+        }
+
+        // --- SPACED REPETITION ---
+        function startReviewSession() {
+            // Simple SRS: find the shortcut with the lowest strength.
+            // Tie-break with the one least recently reviewed.
+            let nextShortcutKey = null;
+            let minStrength = 6;
+            let oldestDate = new Date().toISOString();
+
+            Object.entries(userProgress).forEach(([key, progress]) => {
+                // Ignore mastered shortcuts unless all are mastered
+                if (progress.strength >= 5) return;
+
+                if (progress.strength < minStrength) {
+                    minStrength = progress.strength;
+                    oldestDate = progress.lastReviewed || '1970-01-01T00:00:00.000Z';
+                    nextShortcutKey = key;
+                } else if (progress.strength === minStrength) {
+                    const currentLastReviewed = progress.lastReviewed || '1970-01-01T00:00:00.000Z';
+                    if (currentLastReviewed < oldestDate) {
+                        oldestDate = currentLastReviewed;
+                        nextShortcutKey = key;
+                    }
+                }
+            });
+            
+            // If all are mastered, just pick a random one
+            if (!nextShortcutKey) {
+                const keys = Object.keys(shortcuts);
+                nextShortcutKey = keys[Math.floor(Math.random() * keys.length)];
+            }
+
+            showLearnView(nextShortcutKey);
+        }
+        
+        // --- MODAL & UI ---
+        function showResultsModal() {
+            const modal = document.getElementById('results-modal');
+            document.getElementById('results-score').textContent = `${score} / 10`;
+            let message = "Good effort! Keep practicing.";
+            if (score >= 8) message = "Excellent work! You're getting the hang of it.";
+            if (score === 10) message = "Perfect score! You've mastered this.";
+            document.getElementById('results-message').textContent = message;
+            modal.classList.remove('hidden');
+        }
+
+        function closeResultsModal() {
+            document.getElementById('results-modal').classList.add('hidden');
+            renderMainView();
+            switchView('main-view');
+        }
+        
+        // --- EVENT LISTENERS ---
+        document.getElementById('back-to-main-btn').addEventListener('click', () => switchView('main-view'));
+        document.getElementById('start-quiz-btn').addEventListener('click', () => startQuiz(currentShortcut));
+        document.getElementById('submit-answer-btn').addEventListener('click', handleSubmitAnswer);
+        document.getElementById('quiz-answer').addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') handleSubmitAnswer();
+        });
+        document.getElementById('close-results-btn').addEventListener('click', closeResultsModal);
+        reviewBtn.addEventListener('click', startReviewSession);
+
+        // --- APP INITIALIZATION ---
+        authenticateUser();
+
+    </script>
+</body>
+</html>
+
