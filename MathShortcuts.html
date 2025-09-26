@@ -151,12 +151,13 @@
 
 
     <script type="module">
-        // Firebase Imports
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // Firebase Imports (Commented Out)
+        // import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        // import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        // import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- FIREBASE CONFIG (will be populated in the environment) ---
+        // --- FIREBASE CONFIG (Commented Out) ---
+        /*
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { 
             apiKey: "YOUR_API_KEY", 
             authDomain: "YOUR_AUTH_DOMAIN", 
@@ -164,13 +165,14 @@
         };
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-        // --- FIREBASE INITIALIZATION ---
+        // --- FIREBASE INITIALIZATION (Commented Out) ---
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        */
 
         // --- GLOBAL STATE & DOM ELEMENTS ---
-        let userId = null;
+        // let userId = null;
         let userProgress = {};
         let currentCategory = null;
         let currentShortcut = null;
@@ -266,7 +268,8 @@
             }
         };
         
-        // --- AUTHENTICATION & DATA HANDLING ---
+        // --- FIREBASE AUTHENTICATION & DATA HANDLING (Commented Out) ---
+        /*
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 userId = user.uid;
@@ -277,14 +280,11 @@
         
         async function authenticateUser() {
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                // Defaulting to Anonymous Sign-in as requested.
+                await signInAnonymously(auth);
             } catch (error) {
                 console.error("Authentication failed:", error);
-                userInfo.innerHTML = `<span class="text-red-600 font-semibold">Could not save progress.</span> Is the Firebase config correct and is Anonymous Sign-in enabled in your project?`;
+                userInfo.innerHTML = `<span class="text-red-600 font-semibold">Could not save progress.</span> Please ensure Anonymous Sign-in is enabled in your Firebase project's settings.`;
             }
         }
         
@@ -319,6 +319,26 @@
             } catch (error) {
                 console.error("Error saving progress: ", error);
             }
+        }
+        */
+
+        // --- LOCAL PROGRESS HANDLING (Replaces Firebase) ---
+        function initializeLocalProgress() {
+            // This function creates an empty progress object for all shortcuts.
+            userProgress = {};
+            for (const catKey in allShortcuts) {
+                userProgress[catKey] = {};
+                for (const shortKey in allShortcuts[catKey].shortcuts) {
+                    userProgress[catKey][shortKey] = { strength: 0, lastReviewed: null };
+                }
+            }
+            userInfo.textContent = "Progress will not be saved between sessions.";
+            renderCategories();
+        }
+
+        function saveProgress() {
+            // This function now does nothing, as progress is only in memory.
+            console.log("Progress updated in memory (will be lost on refresh).");
         }
         
         // --- VIEW RENDERING & SWITCHING ---
@@ -563,7 +583,8 @@
         reviewBtn.addEventListener('click', startReviewSession);
 
         // --- APP INITIALIZATION ---
-        authenticateUser();
+        // authenticateUser(); // Firebase call commented out
+        initializeLocalProgress(); // Use local progress instead
 
     </script>
 </body>
