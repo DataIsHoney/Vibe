@@ -3,91 +3,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Shortcut Teacher</title>
+    <title>🚇 Subway Math Express</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --subway-yellow: #FCCC0A;
+            --subway-orange: #FF6319;
+            --subway-blue: #0039A6;
+            --subway-green: #6CBE45;
+            --subway-red: #EE352E;
+            --dark-bg: #0a0e1a;
+            --card-bg: #141824;
+            --card-hover: #1a1f2e;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             overscroll-behavior: none;
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 100%);
+            background-attachment: fixed;
         }
+
+        .subway-bg {
+            background-image:
+                repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(255,255,255,0.03) 50px, rgba(255,255,255,0.03) 51px),
+                repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(255,255,255,0.03) 50px, rgba(255,255,255,0.03) 51px);
+        }
+
         .card {
-            background-color: white;
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            background: linear-gradient(135deg, var(--card-bg) 0%, #1a1f2e 100%);
+            border-radius: 1rem;
+            border: 2px solid rgba(252, 204, 10, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease-in-out;
         }
+
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            transform: translateY(-8px) scale(1.02);
+            border-color: var(--subway-yellow);
+            box-shadow: 0 12px 48px rgba(252, 204, 10, 0.3);
         }
+
         .btn {
             display: inline-block;
-            font-weight: 600;
+            font-weight: 700;
             text-align: center;
             vertical-align: middle;
             cursor: pointer;
             user-select: none;
-            border: 1px solid transparent;
-            padding: 0.5rem 1rem;
+            border: 2px solid transparent;
+            padding: 0.75rem 1.5rem;
             font-size: 1rem;
-            border-radius: 0.5rem;
-            transition: all 0.15s ease-in-out;
+            border-radius: 0.75rem;
+            transition: all 0.2s ease-in-out;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
+
         .btn-primary {
-            background-color: #4f46e5;
-            color: white;
+            background: linear-gradient(135deg, var(--subway-yellow) 0%, var(--subway-orange) 100%);
+            color: #000;
+            border-color: var(--subway-yellow);
         }
+
         .btn-primary:hover {
-            background-color: #4338ca;
+            transform: scale(1.05);
+            box-shadow: 0 8px 24px rgba(252, 204, 10, 0.4);
         }
+
         .btn-secondary {
-            background-color: #e5e7eb;
-            color: #1f2937;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.3);
         }
+
         .btn-secondary:hover {
-            background-color: #d1d5db;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
         }
+
         .progress-bar-bg {
-            background-color: #e5e7eb;
+            background-color: rgba(255, 255, 255, 0.1);
             border-radius: 9999px;
-            height: 8px;
+            height: 12px;
+            overflow: hidden;
         }
+
         .progress-bar {
-            background-color: #4ade80;
+            background: linear-gradient(90deg, var(--subway-green) 0%, var(--subway-yellow) 100%);
             height: 100%;
             border-radius: 9999px;
-            transition: width 0.3s ease-in-out;
+            transition: width 0.5s ease-in-out;
+            box-shadow: 0 0 20px rgba(108, 190, 69, 0.5);
         }
+
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 50;
         }
+
         .modal-content {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 0.75rem;
+            background: linear-gradient(135deg, var(--card-bg) 0%, #1a1f2e 100%);
+            border: 2px solid var(--subway-yellow);
+            padding: 2.5rem;
+            border-radius: 1rem;
             max-width: 90%;
             width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+
+        .coin-float {
+            animation: coinFloat 1s ease-out forwards;
+        }
+
+        @keyframes coinFloat {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
+        }
+
+        .level-up {
+            animation: levelUp 0.6s ease-out;
+        }
+
+        @keyframes levelUp {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .pulse-glow {
+            animation: pulseGlow 2s infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(252, 204, 10, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(252, 204, 10, 0.6); }
+        }
+
+        .subway-line {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            font-weight: 900;
+            font-size: 14px;
+            color: white;
+            margin-right: 8px;
+        }
+
+        .express-train {
+            animation: expressTrain 0.5s ease-in-out;
+            background: linear-gradient(45deg, var(--subway-red), var(--subway-orange));
+        }
+
+        @keyframes expressTrain {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .coin-icon {
+            display: inline-block;
+            color: var(--subway-yellow);
+            font-weight: 900;
+            text-shadow: 0 0 10px rgba(252, 204, 10, 0.5);
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="text-white subway-bg">
 
     <div id="app" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        <header class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-gray-900 sm:text-5xl">Math Shortcut Teacher</h1>
-            <p class="mt-4 text-xl text-gray-600">Learn mental math tricks with spaced repetition.</p>
-            <div id="user-info" class="mt-4 text-sm text-gray-500"></div>
+
+        <!-- Game Stats Header -->
+        <header class="mb-8">
+            <div class="text-center mb-6">
+                <h1 class="text-5xl font-black sm:text-6xl bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
+                    🚇 SUBWAY MATH EXPRESS
+                </h1>
+                <p class="mt-3 text-xl text-gray-300">Master Vedic Math • Earn Coins • Level Up!</p>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <!-- Coins -->
+                <div class="card p-4 text-center">
+                    <div class="text-3xl font-black coin-icon">💰 <span id="coin-count">0</span></div>
+                    <div class="text-xs text-gray-400 mt-1">COINS</div>
+                </div>
+
+                <!-- Level & Station -->
+                <div class="card p-4 text-center">
+                    <div class="text-2xl font-bold">
+                        <span class="subway-line" style="background-color: var(--subway-yellow); color: #000;" id="level-badge">1</span>
+                        <span id="station-name" class="text-white">1st St</span>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-1">STATION LEVEL</div>
+                </div>
+
+                <!-- XP Progress -->
+                <div class="card p-4">
+                    <div class="text-xs text-gray-400 mb-2">XP TO NEXT STATION</div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar" id="xp-bar" style="width: 0%"></div>
+                    </div>
+                    <div class="text-xs text-gray-300 mt-1 text-center"><span id="xp-current">0</span>/<span id="xp-needed">100</span></div>
+                </div>
+
+                <!-- Express Train Status -->
+                <div class="card p-4 text-center" id="express-card">
+                    <div class="text-2xl font-bold">🚄 <span id="multiplier">1x</span></div>
+                    <div class="text-xs text-gray-400 mt-1" id="express-status">PLAY 3 MIN FOR EXPRESS!</div>
+                </div>
+            </div>
+
+            <div id="user-info" class="text-center text-sm text-gray-500"></div>
         </header>
 
         <!-- Main View: Category/Shortcut Selection -->
@@ -108,31 +248,33 @@
         <!-- Learn View: Shortcut Explanation & Examples -->
         <section id="learn-view" class="hidden">
             <div class="card p-8 max-w-4xl mx-auto">
-                <button id="back-to-main-btn" class="btn btn-secondary mb-6">&larr; Back to Tips</button>
-                <h2 id="learn-title" class="text-3xl font-bold mb-4"></h2>
-                <p id="learn-explanation" class="text-lg text-gray-600 mb-6"></p>
-                <h3 class="text-2xl font-semibold mb-4">Examples</h3>
-                <div id="learn-examples" class="space-y-3 text-gray-700 text-lg"></div>
+                <button id="back-to-main-btn" class="btn btn-secondary mb-6">⬅️ Back to Station</button>
+                <h2 id="learn-title" class="text-4xl font-black text-yellow-400 mb-4"></h2>
+                <p id="learn-explanation" class="text-xl text-gray-300 mb-8 leading-relaxed"></p>
+                <h3 class="text-2xl font-bold text-white mb-4">📝 Examples</h3>
+                <div id="learn-examples" class="space-y-3 text-lg"></div>
                 <div class="text-center mt-8">
-                    <button id="start-quiz-btn" class="btn btn-primary px-8 py-3 text-lg">I'm Ready for the Quiz!</button>
+                    <button id="start-quiz-btn" class="btn btn-primary px-12 py-4 text-xl">🚀 START QUIZ!</button>
                 </div>
             </div>
         </section>
 
         <!-- Quiz View -->
         <section id="quiz-view" class="hidden">
-             <div class="card p-8 max-w-2xl mx-auto">
+             <div class="card p-8 max-w-2xl mx-auto relative">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 id="quiz-title" class="text-2xl font-bold">Quiz Time!</h2>
-                    <div id="quiz-progress" class="text-lg font-medium"></div>
+                    <h2 id="quiz-title" class="text-2xl font-bold text-white">Quiz Time!</h2>
+                    <div id="quiz-progress" class="text-lg font-medium text-gray-300"></div>
                 </div>
                 <div class="mb-6">
-                    <div class="text-5xl font-bold text-center text-gray-800 py-8" id="quiz-question"></div>
+                    <div class="text-6xl font-black text-center text-yellow-400 py-8" id="quiz-question"></div>
                 </div>
-                <div class="flex flex-col items-center">
-                    <input type="number" id="quiz-answer" class="text-center text-2xl p-3 border-2 border-gray-300 rounded-lg w-full max-w-xs focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Your Answer">
-                    <button id="submit-answer-btn" class="btn btn-primary mt-4 w-full max-w-xs text-lg">Submit</button>
-                    <p id="feedback" class="mt-4 h-6 text-lg font-medium"></p>
+                <div class="flex flex-col items-center relative" id="answer-container">
+                    <input type="number" id="quiz-answer" class="text-center text-3xl p-4 border-2 border-yellow-400 rounded-lg w-full max-w-xs bg-gray-900 text-white focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500" placeholder="?">
+                    <button id="submit-answer-btn" class="btn btn-primary mt-4 w-full max-w-xs text-lg">Submit Answer</button>
+                    <p id="feedback" class="mt-4 h-8 text-xl font-bold"></p>
+                    <!-- Coin animation container -->
+                    <div id="coin-animation-container" class="absolute top-0 left-1/2 transform -translate-x-1/2"></div>
                 </div>
              </div>
         </section>
@@ -142,10 +284,42 @@
     <!-- Quiz Results Modal -->
     <div id="results-modal" class="modal-overlay hidden">
         <div class="modal-content text-center">
-            <h2 class="text-3xl font-bold mb-4">Quiz Complete!</h2>
-            <p class="text-5xl font-extrabold mb-2" id="results-score"></p>
-            <p class="text-lg text-gray-600 mb-6" id="results-message"></p>
-            <button id="close-results-btn" class="btn btn-primary">Continue Learning</button>
+            <h2 class="text-4xl font-black text-yellow-400 mb-4">🎉 STATION COMPLETE! 🎉</h2>
+            <p class="text-6xl font-extrabold mb-4 text-white" id="results-score"></p>
+            <div class="text-3xl font-bold mb-4 coin-icon">
+                💰 +<span id="coins-earned">0</span> COINS
+            </div>
+            <div class="text-xl font-bold mb-6 text-green-400">
+                +<span id="xp-earned">0</span> XP
+            </div>
+            <p class="text-lg text-gray-300 mb-6" id="results-message"></p>
+            <button id="close-results-btn" class="btn btn-primary">Continue Journey</button>
+        </div>
+    </div>
+
+    <!-- Express Train Bonus Modal -->
+    <div id="express-modal" class="modal-overlay hidden">
+        <div class="modal-content text-center express-train">
+            <h2 class="text-5xl font-black text-white mb-4">🚄 EXPRESS TRAIN ACTIVATED! 🚄</h2>
+            <p class="text-3xl font-bold text-yellow-300 mb-6">2x COIN MULTIPLIER!</p>
+            <p class="text-xl text-white mb-6">You've been grinding for 3 minutes! All coins are now DOUBLED!</p>
+            <button id="close-express-btn" class="btn btn-primary">LET'S GO!</button>
+        </div>
+    </div>
+
+    <!-- Level Up Modal -->
+    <div id="levelup-modal" class="modal-overlay hidden">
+        <div class="modal-content text-center level-up">
+            <h2 class="text-5xl font-black text-yellow-400 mb-4">🎊 LEVEL UP! 🎊</h2>
+            <p class="text-4xl font-bold text-white mb-6">
+                <span class="subway-line" style="background-color: var(--subway-yellow); color: #000;" id="new-level-badge">2</span>
+                <span id="new-station-name">14th St</span>
+            </p>
+            <p class="text-2xl text-gray-300 mb-6">New station unlocked!</p>
+            <div class="text-3xl font-bold mb-6 coin-icon">
+                💰 +<span id="levelup-bonus">50</span> BONUS COINS
+            </div>
+            <button id="close-levelup-btn" class="btn btn-primary">Continue</button>
         </div>
     </div>
 
@@ -179,6 +353,27 @@
         let quizQuestions = [];
         let currentQuestionIndex = 0;
         let score = 0;
+
+        // GAME MECHANICS
+        let gameStats = {
+            coins: 0,
+            xp: 0,
+            level: 1,
+            multiplier: 1,
+            startTime: Date.now(),
+            expressUnlocked: false
+        };
+
+        const SUBWAY_STATIONS = [
+            '1st St', '14th St', '23rd St', '34th St', '42nd St',
+            '59th St', '72nd St', '86th St', '96th St', '125th St',
+            'Bronx', 'Queens', 'Brooklyn', 'Manhattan', 'Express Hub'
+        ];
+
+        const XP_PER_LEVEL = [100, 150, 200, 300, 400, 500, 700, 900, 1200, 1500, 2000, 2500, 3000, 4000, 5000];
+        const COINS_PER_CORRECT = 10;
+        const XP_PER_CORRECT = 15;
+        const EXPRESS_TIME = 180000; // 3 minutes in milliseconds
 
         const mainView = document.getElementById('main-view');
         const learnView = document.getElementById('learn-view');
@@ -515,6 +710,86 @@
             // This function now does nothing, as progress is only in memory.
             console.log("Progress updated in memory (will be lost on refresh).");
         }
+
+        // --- GAME MECHANICS FUNCTIONS ---
+        function updateGameStats() {
+            document.getElementById('coin-count').textContent = gameStats.coins;
+            document.getElementById('level-badge').textContent = gameStats.level;
+            document.getElementById('station-name').textContent = SUBWAY_STATIONS[gameStats.level - 1] || 'Final Stop';
+            document.getElementById('multiplier').textContent = gameStats.multiplier + 'x';
+
+            const xpNeeded = XP_PER_LEVEL[gameStats.level - 1] || 5000;
+            const xpProgress = (gameStats.xp / xpNeeded) * 100;
+            document.getElementById('xp-bar').style.width = Math.min(xpProgress, 100) + '%';
+            document.getElementById('xp-current').textContent = gameStats.xp;
+            document.getElementById('xp-needed').textContent = xpNeeded;
+
+            // Check for express train
+            checkExpressTrain();
+        }
+
+        function awardCoins(amount) {
+            const coins = amount * gameStats.multiplier;
+            gameStats.coins += coins;
+            updateGameStats();
+            showCoinAnimation(coins);
+            return coins;
+        }
+
+        function awardXP(amount) {
+            gameStats.xp += amount;
+            const xpNeeded = XP_PER_LEVEL[gameStats.level - 1] || 5000;
+
+            if (gameStats.xp >= xpNeeded) {
+                gameStats.xp -= xpNeeded;
+                levelUp();
+            }
+            updateGameStats();
+        }
+
+        function showCoinAnimation(amount) {
+            const container = document.getElementById('coin-animation-container');
+            const coinEl = document.createElement('div');
+            coinEl.className = 'coin-float text-4xl font-bold coin-icon absolute';
+            coinEl.textContent = '+' + amount + ' 💰';
+            container.appendChild(coinEl);
+
+            setTimeout(() => {
+                container.removeChild(coinEl);
+            }, 1000);
+        }
+
+        function levelUp() {
+            gameStats.level++;
+            const bonus = gameStats.level * 50;
+            gameStats.coins += bonus;
+
+            document.getElementById('new-level-badge').textContent = gameStats.level;
+            document.getElementById('new-station-name').textContent = SUBWAY_STATIONS[gameStats.level - 1] || 'Final Stop';
+            document.getElementById('levelup-bonus').textContent = bonus;
+
+            // Show level up modal
+            document.getElementById('levelup-modal').classList.remove('hidden');
+        }
+
+        function checkExpressTrain() {
+            const elapsed = Date.now() - gameStats.startTime;
+            if (!gameStats.expressUnlocked && elapsed >= EXPRESS_TIME) {
+                gameStats.expressUnlocked = true;
+                gameStats.multiplier = 2;
+                document.getElementById('express-modal').classList.remove('hidden');
+                document.getElementById('express-status').textContent = '2x MULTIPLIER ACTIVE!';
+                document.getElementById('express-card').classList.add('pulse-glow');
+            } else if (!gameStats.expressUnlocked) {
+                const remaining = Math.ceil((EXPRESS_TIME - elapsed) / 1000);
+                const minutes = Math.floor(remaining / 60);
+                const seconds = remaining % 60;
+                document.getElementById('express-status').textContent = `${minutes}:${seconds.toString().padStart(2, '0')} TO EXPRESS`;
+            }
+        }
+
+        // Update express timer every second
+        setInterval(checkExpressTrain, 1000);
         
         // --- VIEW RENDERING & SWITCHING ---
         function switchView(view) {
@@ -532,11 +807,19 @@
             backToCategoriesBtn.classList.add('hidden');
             reviewBtn.classList.remove('hidden');
 
-            Object.entries(allShortcuts).forEach(([key, category]) => {
+            const colors = ['var(--subway-yellow)', 'var(--subway-orange)', 'var(--subway-blue)', 'var(--subway-green)'];
+            const lines = ['🟨', '🟧', '🟦', '🟩'];
+
+            Object.entries(allShortcuts).forEach(([key, category], index) => {
                 const card = document.createElement('div');
                 card.className = 'card p-8 cursor-pointer text-center';
                 card.dataset.category = key;
-                card.innerHTML = `<h2 class="text-3xl font-bold">${category.title}</h2>`;
+                card.innerHTML = `
+                    <div class="subway-line mb-4" style="background-color: ${colors[index]}; color: #000; width: 48px; height: 48px; line-height: 48px; font-size: 24px; margin: 0 auto;">
+                        ${lines[index]}
+                    </div>
+                    <h2 class="text-3xl font-bold text-white">${category.title}</h2>
+                `;
                 card.addEventListener('click', () => renderShortcutGrid(key));
                 categoryGrid.appendChild(card);
             });
@@ -558,11 +841,11 @@
                 card.className = 'card p-6 cursor-pointer';
                 card.dataset.shortcut = key;
                 card.innerHTML = `
-                    <h3 class="text-xl font-bold mb-2">${shortcut.title}</h3>
-                    <div class="progress-bar-bg w-full">
+                    <h3 class="text-xl font-bold text-white mb-3">${shortcut.title}</h3>
+                    <div class="progress-bar-bg w-full mb-2">
                         <div class="progress-bar" style="width: ${strength * 20}%"></div>
                     </div>
-                    <span class="text-sm text-gray-500 mt-1 block">Mastery: ${strength}/5</span>
+                    <span class="text-sm text-gray-400 mt-1 block">Mastery: ${strength}/5</span>
                 `;
                 card.addEventListener('click', () => showLearnView(categoryKey, key));
                 shortcutGrid.appendChild(card);
@@ -575,15 +858,15 @@
             const shortcut = allShortcuts[categoryKey].shortcuts[shortcutKey];
             document.getElementById('learn-title').textContent = shortcut.title;
             document.getElementById('learn-explanation').textContent = shortcut.explanation;
-            
+
             const examplesContainer = document.getElementById('learn-examples');
             examplesContainer.innerHTML = ''; // Clear previous examples
-            
+
             // Generate 5 examples
             for (let i = 0; i < 5; i++) {
                 const ex = shortcut.generateQuestion();
-                examplesContainer.innerHTML += `<div class="bg-gray-100 p-3 rounded-md">
-                    <span class="font-semibold">${ex.question}</span> = <span class="text-indigo-600 font-bold">${ex.answer}</span>
+                examplesContainer.innerHTML += `<div class="bg-gray-800 border border-yellow-400/30 p-4 rounded-md">
+                    <span class="font-semibold text-white text-lg">${ex.question}</span> = <span class="text-yellow-400 font-black text-lg">${ex.answer}</span>
                 </div>`;
             }
 
@@ -629,18 +912,20 @@
             const correctAnswer = quizQuestions[currentQuestionIndex].answer;
 
             if (isNaN(userAnswer)) {
-                feedbackEl.textContent = "Please enter a number.";
-                feedbackEl.className = "mt-4 h-6 text-lg font-medium text-yellow-600";
+                feedbackEl.textContent = "⚠️ Please enter a number.";
+                feedbackEl.className = "mt-4 h-8 text-xl font-bold text-yellow-400";
                 return;
             }
 
             if (userAnswer === correctAnswer) {
                 score++;
-                feedbackEl.textContent = "Correct!";
-                feedbackEl.className = "mt-4 h-6 text-lg font-medium text-green-600";
+                const coinsEarned = awardCoins(COINS_PER_CORRECT);
+                awardXP(XP_PER_CORRECT);
+                feedbackEl.textContent = `✅ CORRECT! +${coinsEarned} 💰`;
+                feedbackEl.className = "mt-4 h-8 text-xl font-bold text-green-400";
             } else {
-                feedbackEl.textContent = `Incorrect. The answer was ${correctAnswer}.`;
-                feedbackEl.className = "mt-4 h-6 text-lg font-medium text-red-600";
+                feedbackEl.textContent = `❌ Wrong! Answer: ${correctAnswer}`;
+                feedbackEl.className = "mt-4 h-8 text-xl font-bold text-red-400";
             }
 
             currentQuestionIndex++;
@@ -649,16 +934,29 @@
 
         function endQuiz() {
             const progress = userProgress[currentCategory][currentShortcut];
-            
+
             if (score >= 8) {
                 progress.strength = Math.min(5, progress.strength + 1);
             } else if (score < 5 && progress.strength > 0) {
                  progress.strength = Math.max(0, progress.strength - 1);
             }
             progress.lastReviewed = new Date().toISOString();
-            
+
+            // Calculate bonuses
+            const bonusCoins = score * 5 * gameStats.multiplier;
+            const bonusXP = score * 10;
+
+            gameStats.coins += bonusCoins;
+            gameStats.xp += bonusXP;
+
+            const xpNeeded = XP_PER_LEVEL[gameStats.level - 1] || 5000;
+            if (gameStats.xp >= xpNeeded) {
+                gameStats.xp -= xpNeeded;
+                levelUp();
+            }
+
             saveProgress();
-            showResultsModal();
+            showResultsModal(bonusCoins, bonusXP);
         }
 
         // --- SPACED REPETITION ---
@@ -698,14 +996,18 @@
         }
         
         // --- MODAL & UI ---
-        function showResultsModal() {
+        function showResultsModal(bonusCoins, bonusXP) {
             const modal = document.getElementById('results-modal');
             document.getElementById('results-score').textContent = `${score} / 10`;
-            let message = "Good effort! Keep practicing.";
-            if (score >= 8) message = "Excellent work! You're getting the hang of it.";
-            if (score === 10) message = "Perfect score! You've mastered this.";
+            document.getElementById('coins-earned').textContent = bonusCoins;
+            document.getElementById('xp-earned').textContent = bonusXP;
+
+            let message = "Keep pushing! 🚇";
+            if (score >= 8) message = "Great work! You're on track! 🔥";
+            if (score === 10) message = "PERFECT! You're a math legend! 🏆";
             document.getElementById('results-message').textContent = message;
             modal.classList.remove('hidden');
+            updateGameStats();
         }
 
         function closeResultsModal() {
@@ -731,11 +1033,19 @@
             if (e.key === 'Enter') handleSubmitAnswer();
         });
         document.getElementById('close-results-btn').addEventListener('click', closeResultsModal);
+        document.getElementById('close-express-btn').addEventListener('click', () => {
+            document.getElementById('express-modal').classList.add('hidden');
+        });
+        document.getElementById('close-levelup-btn').addEventListener('click', () => {
+            document.getElementById('levelup-modal').classList.add('hidden');
+            updateGameStats();
+        });
         reviewBtn.addEventListener('click', startReviewSession);
 
         // --- APP INITIALIZATION ---
         // authenticateUser(); // Firebase call commented out
         initializeLocalProgress(); // Use local progress instead
+        updateGameStats(); // Initialize game stats display
 
     </script>
 </body>
