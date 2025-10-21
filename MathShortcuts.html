@@ -692,9 +692,63 @@
         }
         */
 
-        // --- LOCAL PROGRESS HANDLING (Replaces Firebase) ---
+        // --- LOCAL STORAGE HANDLING ---
+        const STORAGE_KEY = 'subwayMathExpress_progress';
+        const STATS_KEY = 'subwayMathExpress_stats';
+
         function initializeLocalProgress() {
-            // This function creates an empty progress object for all shortcuts.
+            // Try to load from localStorage first
+            const savedProgress = localStorage.getItem(STORAGE_KEY);
+            const savedStats = localStorage.getItem(STATS_KEY);
+
+            if (savedProgress) {
+                // Load existing progress
+                try {
+                    userProgress = JSON.parse(savedProgress);
+                    console.log("✅ Progress loaded from localStorage");
+                } catch (e) {
+                    console.error("Error loading progress:", e);
+                    createEmptyProgress();
+                }
+            } else {
+                createEmptyProgress();
+            }
+
+            if (savedStats) {
+                // Load existing game stats
+                try {
+                    const loaded = JSON.parse(savedStats);
+                    gameStats.coins = loaded.coins || 0;
+                    gameStats.xp = loaded.xp || 0;
+                    gameStats.level = loaded.level || 1;
+                    gameStats.multiplier = loaded.multiplier || 1;
+                    gameStats.expressUnlocked = loaded.expressUnlocked || false;
+                    console.log("✅ Game stats loaded from localStorage");
+                } catch (e) {
+                    console.error("Error loading stats:", e);
+                }
+            }
+
+            // Reset start time (don't save this)
+            gameStats.startTime = Date.now();
+
+            // Update UI with controls
+            const hasProgress = savedProgress || savedStats;
+            const welcomeMsg = hasProgress
+                ? `<span class="text-green-400">💾 Progress auto-saved!</span>`
+                : `<span class="text-yellow-400">🎮 New game started!</span>`;
+
+            userInfo.innerHTML = `
+                ${welcomeMsg}
+                <button onclick="exportProgress()" class="ml-3 text-blue-400 hover:text-blue-300 underline">📤 Export</button>
+                <button onclick="importProgress()" class="ml-3 text-green-400 hover:text-green-300 underline">📥 Import</button>
+                <button onclick="resetProgress()" class="ml-3 text-red-400 hover:text-red-300 underline">🗑️ Reset</button>
+            `;
+            renderCategories();
+            updateGameStats();
+        }
+
+        function createEmptyProgress() {
             userProgress = {};
             for (const catKey in allShortcuts) {
                 userProgress[catKey] = {};
@@ -702,14 +756,115 @@
                     userProgress[catKey][shortKey] = { strength: 0, lastReviewed: null };
                 }
             }
-            userInfo.textContent = "Progress will not be saved between sessions.";
-            renderCategories();
         }
 
         function saveProgress() {
-            // This function now does nothing, as progress is only in memory.
-            console.log("Progress updated in memory (will be lost on refresh).");
+            try {
+                // Save user progress (mastery levels)
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(userProgress));
+
+                // Save game stats (coins, xp, level)
+                const statsToSave = {
+                    coins: gameStats.coins,
+                    xp: gameStats.xp,
+                    level: gameStats.level,
+                    multiplier: gameStats.multiplier,
+                    expressUnlocked: gameStats.expressUnlocked
+                };
+                localStorage.setItem(STATS_KEY, JSON.stringify(statsToSave));
+
+                console.log("💾 Progress saved to localStorage");
+            } catch (e) {
+                console.error("Error saving progress:", e);
+                userInfo.innerHTML = `<span class="text-red-400">⚠️ Could not save progress (storage full?)</span>`;
+            }
         }
+
+        // Reset all progress
+        function resetProgress() {
+            if (confirm("🚨 Are you sure? This will delete ALL your coins, XP, and progress!")) {
+                localStorage.removeItem(STORAGE_KEY);
+                localStorage.removeItem(STATS_KEY);
+                location.reload(); // Reload page to reset everything
+            }
+        }
+
+        // Export progress to file
+        function exportProgress() {
+            try {
+                const exportData = {
+                    version: 1,
+                    timestamp: new Date().toISOString(),
+                    progress: userProgress,
+                    stats: {
+                        coins: gameStats.coins,
+                        xp: gameStats.xp,
+                        level: gameStats.level,
+                        multiplier: gameStats.multiplier,
+                        expressUnlocked: gameStats.expressUnlocked
+                    }
+                };
+
+                const dataStr = JSON.stringify(exportData, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `subway-math-backup-${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+                URL.revokeObjectURL(url);
+
+                alert("✅ Progress exported! Save this file to backup your progress.");
+            } catch (e) {
+                console.error("Export error:", e);
+                alert("❌ Failed to export progress.");
+            }
+        }
+
+        // Import progress from file
+        function importProgress() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const importData = JSON.parse(event.target.result);
+
+                        // Validate data structure
+                        if (!importData.progress || !importData.stats) {
+                            throw new Error("Invalid backup file format");
+                        }
+
+                        // Confirm before overwriting
+                        if (confirm("⚠️ This will overwrite your current progress. Continue?")) {
+                            // Save imported data
+                            localStorage.setItem(STORAGE_KEY, JSON.stringify(importData.progress));
+                            localStorage.setItem(STATS_KEY, JSON.stringify(importData.stats));
+
+                            alert("✅ Progress imported successfully! Reloading...");
+                            location.reload();
+                        }
+                    } catch (e) {
+                        console.error("Import error:", e);
+                        alert("❌ Failed to import: Invalid file format.");
+                    }
+                };
+                reader.readAsText(file);
+            };
+
+            input.click();
+        }
+
+        // Make functions available globally
+        window.resetProgress = resetProgress;
+        window.exportProgress = exportProgress;
+        window.importProgress = importProgress;
 
         // --- GAME MECHANICS FUNCTIONS ---
         function updateGameStats() {
@@ -733,6 +888,7 @@
             gameStats.coins += coins;
             updateGameStats();
             showCoinAnimation(coins);
+            saveProgress(); // Auto-save
             return coins;
         }
 
@@ -745,6 +901,7 @@
                 levelUp();
             }
             updateGameStats();
+            saveProgress(); // Auto-save
         }
 
         function showCoinAnimation(amount) {
@@ -770,6 +927,7 @@
 
             // Show level up modal
             document.getElementById('levelup-modal').classList.remove('hidden');
+            saveProgress(); // Auto-save
         }
 
         function checkExpressTrain() {
@@ -780,6 +938,7 @@
                 document.getElementById('express-modal').classList.remove('hidden');
                 document.getElementById('express-status').textContent = '2x MULTIPLIER ACTIVE!';
                 document.getElementById('express-card').classList.add('pulse-glow');
+                saveProgress(); // Auto-save
             } else if (!gameStats.expressUnlocked) {
                 const remaining = Math.ceil((EXPRESS_TIME - elapsed) / 1000);
                 const minutes = Math.floor(remaining / 60);
