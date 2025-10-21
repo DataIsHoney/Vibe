@@ -194,76 +194,251 @@
             addition: {
                 title: 'Addition Tips',
                 shortcuts: {
-                    add100: { title: 'Adding 100', explanation: 'To add 100 to a number, just add 1 to the digit in the hundreds place.', generateQuestion: () => { const n = Math.floor(Math.random() * 899) + 100; return { question: `${n} + 100`, answer: n + 100 }; } },
-                    bridge10: { title: 'Bridging Through 10', explanation: 'To add numbers like 8+5, first go to 10 (8+2=10), then add the rest (10+3=13).', generateQuestion: () => { const n1 = Math.floor(Math.random() * 4) + 6; const n2 = Math.floor(Math.random() * 4) + 6; return { question: `${n1} + ${n2}`, answer: n1 + n2 }; } },
-                    doubles: { title: 'Learning Doubles', explanation: 'Adding a number to itself is called a double. Knowing these helps you add faster!', generateQuestion: () => { const n = Math.floor(Math.random() * 10) + 1; return { question: `${n} + ${n}`, answer: n * 2 }; } },
-                    make10: { title: 'Making 10', explanation: 'Look for pairs of numbers that add up to 10. (1+9, 2+8, 3+7, 4+6, 5+5).', generateQuestion: () => { const n = Math.floor(Math.random() * 9) + 1; return { question: `${n} + ? = 10`, answer: 10 - n }; } },
-                    add10: { title: 'Adding 10', explanation: 'To add 10 to a number, just add 1 to the digit in the tens place.', generateQuestion: () => { const n = Math.floor(Math.random() * 90) + 10; return { question: `${n} + 10`, answer: n + 10 }; } },
-                    add9: { title: 'Adding 9', explanation: 'To add 9, you can add 10 first and then just subtract 1. It\'s often easier!', generateQuestion: () => { const n = Math.floor(Math.random() * 90) + 10; return { question: `${n} + 9`, answer: n + 9 }; } },
-                    order: { title: 'Order Doesn\'t Matter', explanation: 'You can swap the numbers in an addition problem and still get the same answer. (e.g., 3 + 5 is the same as 5 + 3)', generateQuestion: () => { const n1 = Math.floor(Math.random() * 20); const n2 = Math.floor(Math.random() * 20); return { question: `${n1} + ${n2}`, answer: n1 + n2 }; } },
-                    nearDoubles: { title: 'Near Doubles', explanation: 'If numbers are close together (like 6+7), use a double you know! (6+6=12), then add 1 more.', generateQuestion: () => { const n = Math.floor(Math.random() * 10) + 1; return { question: `${n} + ${n+1}`, answer: n * 2 + 1 }; } },
-                    breakApart: { 
-                        title: 'Break Apart Numbers', 
-                        explanation: 'Break one number into smaller parts to make it easier. For 7+5, you can do 7+3=10, then add the leftover 2 to get 12.', 
+                    add9: {
+                        title: 'Adding 9',
+                        explanation: 'To add 9, add 10 first and then subtract 1. For 67+9: think 67+10=77, then 77-1=76.',
                         generateQuestion: () => {
-                            const n1 = Math.floor(Math.random() * 4) + 6; // 6, 7, 8, 9
-                            const n2 = Math.floor(Math.random() * 5) + 5; // 5, 6, 7, 8, 9
-                            const needed = 10 - n1;
-                            const leftover = n2 - needed;
-
-                            return {
-                                question: `${n1} + ${n2}`,
-                                answer: n1 + n2,
-                                steps: { n1, n2, needed, leftover }
-                            };
+                            const n = Math.floor(Math.random() * 90) + 10;
+                            return { question: `${n} + 9`, answer: n + 9 };
                         }
                     },
-                    addInChunks: { title: 'Add in Chunks', explanation: 'When adding bigger numbers like 23+45, add the tens first (20+40=60), then add the ones (3+5=8). Finally, add the results (60+8=68).', generateQuestion: () => { const t1 = (Math.floor(Math.random()*4)+1)*10; const o1 = Math.floor(Math.random()*9)+1; const t2 = (Math.floor(Math.random()*4)+1)*10; const o2 = Math.floor(Math.random()*9)+1; return { question: `${t1+o1} + ${t2+o2}`, answer: t1+o1+t2+o2 }; } },
+                    nearDoubles: {
+                        title: 'Near Doubles',
+                        explanation: 'If numbers are consecutive (like 47+48), double the smaller and add 1. For 47+48: think 47×2=94, then 94+1=95.',
+                        generateQuestion: () => {
+                            const n = Math.floor(Math.random() * 30) + 10;
+                            return { question: `${n} + ${n+1}`, answer: n * 2 + 1 };
+                        }
+                    },
+                    addInChunks: {
+                        title: 'Left-to-Right Addition',
+                        explanation: 'Add from left to right (Vedic style). For 47+38: add tens (40+30=70), then ones (7+8=15), then combine (70+15=85).',
+                        generateQuestion: () => {
+                            const t1 = (Math.floor(Math.random()*5)+2)*10;
+                            const o1 = Math.floor(Math.random()*9)+1;
+                            const t2 = (Math.floor(Math.random()*5)+2)*10;
+                            const o2 = Math.floor(Math.random()*9)+1;
+                            return { question: `${t1+o1} + ${t2+o2}`, answer: t1+o1+t2+o2 };
+                        }
+                    },
+                    complement100: {
+                        title: 'Complement to 100',
+                        explanation: 'To add numbers near 100, use complements. For 97+88: take 97 to 100 (+3), then add remaining 85. Result: 100+85=185.',
+                        generateQuestion: () => {
+                            const n1 = Math.floor(Math.random() * 9) + 91; // 91-99
+                            const n2 = Math.floor(Math.random() * 20) + 80; // 80-99
+                            return { question: `${n1} + ${n2}`, answer: n1 + n2 };
+                        }
+                    },
+                    addNear100: {
+                        title: 'Adding Near Powers of 10',
+                        explanation: 'For numbers near 100/1000, add the round number then adjust. For 156+99: think 156+100=256, then 256-1=255.',
+                        generateQuestion: () => {
+                            const n = Math.floor(Math.random() * 200) + 100;
+                            const near = [99, 98, 999, 1001][Math.floor(Math.random()*4)];
+                            return { question: `${n} + ${near}`, answer: n + near };
+                        }
+                    },
                 }
             },
             subtraction: {
                 title: 'Subtraction Tips',
                 shortcuts: {
-                    sub100: { title: 'Subtracting 100', explanation: 'To subtract 100, just take 1 away from the digit in the hundreds place.', generateQuestion: () => { const n = Math.floor(Math.random() * 899) + 101; return { question: `${n} - 100`, answer: n - 100 }; } },
-                    subAcross10: { title: 'Subtracting Across 10', explanation: 'For 14-6, first go down to 10 (14-4=10), then subtract the rest (10-2=8).', generateQuestion: () => { const n1 = Math.floor(Math.random() * 8) + 11; const n2 = Math.floor(Math.random() * 5) + (n1 - 9); return { question: `${n1} - ${n2}`, answer: n1 - n2 }; } },
-                    subFromFriendly: { title: 'Subtract from Friendly Numbers', explanation: 'For 50-24, you can think 50-20=30, then 30-4=26.', generateQuestion: () => { const t1 = (Math.floor(Math.random()*5)+3)*10; const n2 = Math.floor(Math.random()*20)+11; return { question: `${t1} - ${n2}`, answer: t1 - n2 }; } },
-                    countUp: { title: 'Counting Up', explanation: 'For 12 - 9, start at 9 and count how many steps it takes to get to 12. (10, 11, 12... That\'s 3 steps!)', generateQuestion: () => { const n2 = Math.floor(Math.random() * 10) + 1; const diff = Math.floor(Math.random() * 5) + 2; const n1 = n2 + diff; return { question: `${n1} - ${n2}`, answer: diff }; } },
-                    sub10: { title: 'Subtracting 10', explanation: 'To subtract 10 from a number, just take 1 away from the digit in the tens place.', generateQuestion: () => { const n = Math.floor(Math.random() * 90) + 11; return { question: `${n} - 10`, answer: n - 10 }; } },
-                    sub9: { title: 'Subtracting 9', explanation: 'To subtract 9, you can subtract 10 first and then just add 1 back.', generateQuestion: () => { const n = Math.floor(Math.random() * 90) + 11; return { question: `${n} - 9`, answer: n - 9 }; } },
-                    useAddition: { title: 'Use Addition', explanation: 'Thinking "15 - 7 = ?" is hard. Try thinking "7 + what equals 15?". They are the same problem!', generateQuestion: () => { const n2 = Math.floor(Math.random() * 10) + 1; const ans = Math.floor(Math.random() * 10) + 1; const n1 = n2 + ans; return { question: `${n1} - ${n2}`, answer: ans }; } },
-                    factFamilies: { title: 'Fact Families', explanation: 'If you know 8 + 4 = 12, then you also know two subtraction facts: 12 - 8 = 4 and 12 - 4 = 8.', generateQuestion: () => { const n1 = Math.floor(Math.random()*10)+1; const n2 = Math.floor(Math.random()*10)+1; return { question: `If ${n1}+${n2}=${n1+n2}, what is ${n1+n2}-${n1}?`, answer: n2 }; } },
-                    breakApartSub: { title: 'Break Apart to Subtract', explanation: 'For 15 - 8, you can do 15 - 5 = 10, then subtract the leftover 3 to get 7.', generateQuestion: () => { const n1 = Math.floor(Math.random() * 9) + 11; const n2 = Math.floor(Math.random() * 5) + (n1-9); return { question: `${n1} - ${n2}`, answer: n1 - n2 }; } },
-                    constantDiff: { title: 'Keep the Difference', explanation: '27-19 is hard. If you add 1 to both numbers, it becomes 28-20, which is an easy 8! The answer is the same.', generateQuestion: () => { const n2 = Math.floor(Math.random() * 50) + 9; const n1 = n2 + Math.floor(Math.random()*10)+5; return { question: `${n1} - ${n2}`, answer: n1-n2}; } }
+                    sub9: {
+                        title: 'Subtracting 9',
+                        explanation: 'To subtract 9, subtract 10 first then add 1 back. For 84-9: think 84-10=74, then 74+1=75.',
+                        generateQuestion: () => {
+                            const n = Math.floor(Math.random() * 90) + 20;
+                            return { question: `${n} - 9`, answer: n - 9 };
+                        }
+                    },
+                    nikhilam: {
+                        title: 'Nikhilam (All from 9, Last from 10)',
+                        explanation: 'For 1000-347: subtract each digit from 9 except the last from 10. (9-3=6, 9-4=5, 10-7=3). Answer: 653.',
+                        generateQuestion: () => {
+                            const n = Math.floor(Math.random() * 899) + 100;
+                            return { question: `1000 - ${n}`, answer: 1000 - n };
+                        }
+                    },
+                    constantDiff: {
+                        title: 'Keep the Difference (Equidistance)',
+                        explanation: 'Add or subtract the same amount from both numbers. For 63-47: add 3 to both → 66-50=16.',
+                        generateQuestion: () => {
+                            const n2 = Math.floor(Math.random() * 40) + 40;
+                            const n1 = n2 + Math.floor(Math.random()*25)+10;
+                            return { question: `${n1} - ${n2}`, answer: n1-n2};
+                        }
+                    },
+                    complementSub: {
+                        title: 'Complement Subtraction',
+                        explanation: 'For 150-87, find complement of 87 to 100 (which is 13), then add to 50. Result: 50+13=63.',
+                        generateQuestion: () => {
+                            const hundreds = Math.floor(Math.random() * 3) + 2;
+                            const n1 = hundreds * 100 + Math.floor(Math.random() * 50);
+                            const n2 = (hundreds-1) * 100 + Math.floor(Math.random() * 50) + 50;
+                            return { question: `${n1} - ${n2}`, answer: n1 - n2 };
+                        }
+                    },
+                    leftToRightSub: {
+                        title: 'Left-to-Right Subtraction',
+                        explanation: 'Subtract from left to right. For 156-82: first 100-80=20, then 56-2=54, then 20+54=74.',
+                        generateQuestion: () => {
+                            const n1 = Math.floor(Math.random() * 100) + 100;
+                            const n2 = Math.floor(Math.random() * 50) + 30;
+                            return { question: `${n1} - ${n2}`, answer: n1 - n2 };
+                        }
+                    },
                 }
             },
             multiplication: {
                 title: 'Multiplication Tips',
                 shortcuts: {
-                    multBy25: { title: 'Multiply by 25', explanation: 'To multiply by 25, think about quarters. 4 x 25 = 100. So, divide the other number by 4 and add two zeros.', generateQuestion: () => { const n = (Math.floor(Math.random()*10)+1)*4; return { question: `${n} x 25`, answer: n * 25 }; } },
-                    multByMultiplesOf10: { title: 'Multiply by Multiples of 10', explanation: 'For 7 x 30, just do 7 x 3 = 21, and then add the zero back on. Answer: 210.', generateQuestion: () => { const n1 = Math.floor(Math.random()*9)+2; const n2 = (Math.floor(Math.random()*9)+2)*10; return { question: `${n1} x ${n2}`, answer: n1 * n2 }; } },
-                    mult2: { title: 'Multiply by 2 (Doubling)', explanation: 'Multiplying by 2 is the same as adding a number to itself (doubling it).', generateQuestion: () => { const n = Math.floor(Math.random() * 20) + 1; return { question: `${n} x 2`, answer: n * 2 }; } },
-                    mult5: { title: 'Multiply by 5', explanation: 'Numbers multiplied by 5 always end in a 0 or a 5. You can also multiply by 10 and then cut it in half.', generateQuestion: () => { const n = Math.floor(Math.random() * 20) + 1; return { question: `${n} x 5`, answer: n * 5 }; } },
-                    mult10: { title: 'Multiply by 10', explanation: 'To multiply any number by 10, just put a 0 on the end of it.', generateQuestion: () => { const n = Math.floor(Math.random() * 50) + 1; return { question: `${n} x 10`, answer: n * 10 }; } },
-                    mult11simple: { title: 'Multiply by 11 (Easy)', explanation: 'To multiply a single-digit number by 11, just write that digit twice (e.g., 4 x 11 = 44).', generateQuestion: () => { const n = Math.floor(Math.random() * 9) + 1; return { question: `${n} x 11`, answer: n * 11 }; } },
-                    orderMult: { title: 'Order Doesn\'t Matter', explanation: 'You can swap numbers in a multiplication problem and get the same answer (e.g., 3 x 6 is the same as 6 x 3).', generateQuestion: () => { const n1 = Math.floor(Math.random() * 10); const n2 = Math.floor(Math.random() * 10); return { question: `${n1} x ${n2}`, answer: n1 * n2 }; } },
-                    mult4: { title: 'Multiply by 4', explanation: 'To multiply a number by 4, just double it, and then double the result.', generateQuestion: () => { const n = Math.floor(Math.random() * 15) + 1; return { question: `${n} x 4`, answer: n * 4 }; } },
-                    mult9fingers: { title: 'Multiply by 9 (Finger Trick)', explanation: 'Hold up 10 fingers. To multiply 9x3, bend down your 3rd finger. You have 2 fingers on the left and 7 on the right. The answer is 27!', generateQuestion: () => { const n = Math.floor(Math.random() * 9) + 2; return { question: `${n} x 9`, answer: n * 9 }; } },
-                    mult11adv: { title: 'Multiply by 11 (Advanced)', explanation: 'To multiply a two-digit number by 11 (like 25x11), add the two digits (2+5=7) and put the sum in the middle. Answer: 275.', generateQuestion: () => { const n = Math.floor(Math.random() * 8) + 2; const n2 = Math.floor(Math.random()*(9-n))+1; const finalNum = n*10+n2; return { question: `${finalNum} x 11`, answer: finalNum*11}; } },
+                    squareEnding5: {
+                        title: 'Squaring Numbers Ending in 5',
+                        explanation: 'For 35²: multiply first digit by next number (3×4=12), then append 25. Answer: 1225. For 85²: 8×9=72, append 25 = 7225.',
+                        generateQuestion: () => {
+                            const n = Math.floor(Math.random() * 9) + 1;
+                            const num = n * 10 + 5;
+                            return { question: `${num}²`, answer: num * num };
+                        }
+                    },
+                    nikhilamMult: {
+                        title: 'Nikhilam Multiplication (Near 100)',
+                        explanation: 'For 97×96: both are near 100. Deficiencies: -3, -4. Cross-subtract: 97-4=93 (or 96-3). Multiply deficiencies: 3×4=12. Answer: 9312.',
+                        generateQuestion: () => {
+                            const n1 = Math.floor(Math.random() * 9) + 91;
+                            const n2 = Math.floor(Math.random() * 9) + 91;
+                            return { question: `${n1} × ${n2}`, answer: n1 * n2 };
+                        }
+                    },
+                    verticalCrosswise: {
+                        title: 'Vertically & Crosswise (2-Digit)',
+                        explanation: 'For 23×14: Vertically (2×1=2, 3×4=12), Crosswise (2×4+3×1=11), combine: 2|11|12 = 2+1|1+1|2 = 322.',
+                        generateQuestion: () => {
+                            const n1 = Math.floor(Math.random() * 30) + 11;
+                            const n2 = Math.floor(Math.random() * 30) + 11;
+                            return { question: `${n1} × ${n2}`, answer: n1 * n2 };
+                        }
+                    },
+                    mult11adv: {
+                        title: 'Multiply by 11',
+                        explanation: 'For 47×11: add digits (4+7=11), put sum in middle handling carry: 4|11|7 = 517. For 63×11: 6|9|3 = 693.',
+                        generateQuestion: () => {
+                            const tens = Math.floor(Math.random() * 8) + 1;
+                            const ones = Math.floor(Math.random() * 9) + 1;
+                            const num = tens * 10 + ones;
+                            return { question: `${num} × 11`, answer: num * 11 };
+                        }
+                    },
+                    mult12: {
+                        title: 'Multiply by 12',
+                        explanation: 'To multiply by 12, multiply by 10, then add the number doubled. For 34×12: 340 + 68 = 408.',
+                        generateQuestion: () => {
+                            const n = Math.floor(Math.random() * 30) + 10;
+                            return { question: `${n} × 12`, answer: n * 12 };
+                        }
+                    },
+                    multBy25: {
+                        title: 'Multiply by 25',
+                        explanation: 'For 36×25: divide by 4 (36÷4=9), then multiply by 100. Answer: 900. Works best with multiples of 4.',
+                        generateQuestion: () => {
+                            const n = (Math.floor(Math.random()*15)+2)*4;
+                            return { question: `${n} × 25`, answer: n * 25 };
+                        }
+                    },
+                    baseMult: {
+                        title: 'Base Method Multiplication',
+                        explanation: 'For 43×48 (near 50): Excesses: +3, -2. Cross-add: 43-2=41, append product: 3×-2=-6 (borrow). Answer: 40|56 = 2064.',
+                        generateQuestion: () => {
+                            const n1 = Math.floor(Math.random() * 15) + 40;
+                            const n2 = Math.floor(Math.random() * 15) + 40;
+                            return { question: `${n1} × ${n2}`, answer: n1 * n2 };
+                        }
+                    },
+                    squareNear50: {
+                        title: 'Squaring Near 50',
+                        explanation: 'For 53²: excess is 3. Left: 25+3=28, Right: 3²=09. Answer: 2809. For 47²: deficit -3, Left: 25-3=22, Right: 3²=09 = 2209.',
+                        generateQuestion: () => {
+                            const excess = Math.floor(Math.random() * 10) - 5;
+                            const num = 50 + excess;
+                            return { question: `${num}²`, answer: num * num };
+                        }
+                    },
                 }
             },
             division: {
                 title: 'Division Tips',
                 shortcuts: {
-                    divBy4: { title: 'Divide by 4', explanation: 'To divide by 4, you can just cut the number in half, and then cut it in half again.', generateQuestion: () => { const n = (Math.floor(Math.random()*10)+1)*4; return { question: `${n} / 4`, answer: n / 4 }; } },
-                    ruleFor3: { title: 'Rule for 3', explanation: 'You can divide a number by 3 if the sum of its digits is divisible by 3.', generateQuestion: () => { const n = Math.floor(Math.random() * 100) + 10; const sumOfDigits = String(n).split('').reduce((acc, digit) => acc + parseInt(digit), 0); return { question: `Is ${n} divisible by 3? (1 for yes, 0 for no)`, answer: sumOfDigits % 3 === 0 ? 1 : 0 }; } },
-                    div0: { title: 'Dividing 0', explanation: '0 divided by any other number is always 0.', generateQuestion: () => { const n = Math.floor(Math.random() * 100) + 1; return { question: `0 / ${n}`, answer: 0 }; } },
-                    div2: { title: 'Divide by 2 (Halving)', explanation: 'Dividing by 2 is the same as cutting a number in half.', generateQuestion: () => { const n = (Math.floor(Math.random() * 25) + 1) * 2; return { question: `${n} / 2`, answer: n / 2 }; } },
-                    div10: { title: 'Divide by 10', explanation: 'To divide a number ending in 0 by 10, just remove the 0.', generateQuestion: () => { const n = (Math.floor(Math.random() * 20) + 1) * 10; return { question: `${n} / 10`, answer: n / 10 }; } },
-                    useMult: { title: 'Use Multiplication', explanation: 'Thinking "30 / 6 = ?" is hard. Try thinking "6 x what equals 30?".', generateQuestion: () => { const ans = Math.floor(Math.random()*10)+1; const n2 = Math.floor(Math.random()*10)+1; return { question: `${ans*n2} / ${n2}`, answer: ans}; } },
-                    factFamiliesDiv: { title: 'Fact Families', explanation: 'If you know 5 x 6 = 30, you also know two division facts: 30 / 5 = 6 and 30 / 6 = 5.', generateQuestion: () => { const n1 = Math.floor(Math.random()*10)+1; const n2 = Math.floor(Math.random()*10)+1; return { question: `If ${n1}x${n2}=${n1*n2}, what is ${n1*n2}/${n1}?`, answer: n2 }; } },
-                    ruleFor2: { title: 'Rule for 2', explanation: 'You can divide a number by 2 if it is an even number (it ends in 0, 2, 4, 6, or 8).', generateQuestion: () => { const n = Math.floor(Math.random() * 100); return { question: `Is ${n} divisible by 2? (1 for yes, 0 for no)`, answer: n % 2 === 0 ? 1 : 0 }; } },
-                    ruleFor5: { title: 'Rule for 5', explanation: 'You can divide a number by 5 if it ends in a 0 or a 5.', generateQuestion: () => { const n = Math.floor(Math.random() * 100); return { question: `Is ${n} divisible by 5? (1 for yes, 0 for no)`, answer: n % 5 === 0 ? 1 : 0 }; } },
-                    ruleFor10: { title: 'Rule for 10', explanation: 'You can divide a number by 10 if it ends in a 0.', generateQuestion: () => { const n = Math.floor(Math.random() * 100); return { question: `Is ${n} divisible by 10? (1 for yes, 0 for no)`, answer: n % 10 === 0 ? 1 : 0 }; } },
+                    divBy5: {
+                        title: 'Divide by 5',
+                        explanation: 'To divide by 5, multiply by 2 and divide by 10. For 340÷5: 340×2=680, then 680÷10=68.',
+                        generateQuestion: () => {
+                            const n = (Math.floor(Math.random()*40)+10)*5;
+                            return { question: `${n} ÷ 5`, answer: n / 5 };
+                        }
+                    },
+                    divBy9: {
+                        title: 'Division by 9 (Digit Sum)',
+                        explanation: 'For 234÷9: sum digits (2+3+4=9), divisible! To find quotient, use pattern: 234≈9×26. Check: 9×26=234.',
+                        generateQuestion: () => {
+                            const ans = Math.floor(Math.random()*30)+10;
+                            const n = ans * 9;
+                            return { question: `${n} ÷ 9`, answer: ans };
+                        }
+                    },
+                    ekadhikena: {
+                        title: 'Ekadhikena (One More Than Previous)',
+                        explanation: 'For 1÷19: divisor 19, one more than previous digit: 1+1=2. Pattern: 0.052631... For simple cases like 4÷19≈0.21.',
+                        generateQuestion: () => {
+                            const quotient = Math.floor(Math.random()*9)+1;
+                            const n = quotient * 19;
+                            return { question: `${n} ÷ 19`, answer: quotient };
+                        }
+                    },
+                    divBy4: {
+                        title: 'Divide by 4',
+                        explanation: 'Halve the number twice. For 144÷4: first 144÷2=72, then 72÷2=36.',
+                        generateQuestion: () => {
+                            const n = (Math.floor(Math.random()*30)+5)*4;
+                            return { question: `${n} ÷ 4`, answer: n / 4 };
+                        }
+                    },
+                    divBy8: {
+                        title: 'Divide by 8',
+                        explanation: 'Halve the number three times. For 128÷8: 128÷2=64, 64÷2=32, 32÷2=16.',
+                        generateQuestion: () => {
+                            const n = (Math.floor(Math.random()*20)+5)*8;
+                            return { question: `${n} ÷ 8`, answer: n / 8 };
+                        }
+                    },
+                    divBy11: {
+                        title: 'Divisibility by 11',
+                        explanation: 'Alternating sum of digits must be divisible by 11. For 121: 1-2+1=0 (divisible). For 253: 2-5+3=0 (yes!).',
+                        generateQuestion: () => {
+                            const ans = Math.floor(Math.random()*20)+5;
+                            const n = ans * 11;
+                            return { question: `${n} ÷ 11`, answer: ans };
+                        }
+                    },
+                    paravartya: {
+                        title: 'Paravartya (Transpose & Adjust)',
+                        explanation: 'For division by numbers with last digit 9, use complement. 1÷19: use 2 (20-19+1). Advanced technique for complex divisions.',
+                        generateQuestion: () => {
+                            const divisor = [29, 39, 49, 19][Math.floor(Math.random()*4)];
+                            const quotient = Math.floor(Math.random()*5)+2;
+                            const n = quotient * divisor;
+                            return { question: `${n} ÷ ${divisor}`, answer: quotient };
+                        }
+                    },
+                    ruleFor3: {
+                        title: 'Divisibility by 3',
+                        explanation: 'Sum all digits. If sum is divisible by 3, so is the number. For 147: 1+4+7=12, 12÷3=4, so 147÷3 works!',
+                        generateQuestion: () => {
+                            const ans = Math.floor(Math.random()*50)+10;
+                            const n = ans * 3;
+                            return { question: `${n} ÷ 3`, answer: ans };
+                        }
+                    },
                 }
             }
         };
@@ -407,33 +582,9 @@
             // Generate 5 examples
             for (let i = 0; i < 5; i++) {
                 const ex = shortcut.generateQuestion();
-                let questionText = ex.question;
-
-                // SPECIAL CASE: Detailed example for 'Break Apart Numbers'
-                if (shortcutKey === 'breakApart' && ex.steps) {
-                    const { n1, n2, needed, leftover } = ex.steps;
-                    examplesContainer.innerHTML += `
-                        <div class="bg-gray-100 p-4 rounded-md space-y-1">
-                            <p class="font-semibold text-lg">${n1} + ${n2}</p>
-                            <p class="text-gray-600 pl-4">Break ${n2} into <span class="font-semibold">${needed} + ${leftover}</span> to help ${n1} get to 10.</p>
-                            <p class="pl-4 font-mono text-gray-800">${n1} + (${needed} + ${leftover})</p>
-                            <p class="pl-4 font-mono text-gray-800">(${n1} + ${needed}) + ${leftover}</p>
-                            <p class="pl-4 font-mono text-gray-800">10 + ${leftover} = <span class="text-indigo-600 font-bold">${ex.answer}</span></p>
-                        </div>`;
-                } 
-                // CASE: For 'yes/no' divisibility questions
-                else if (questionText.includes('? (1 for yes, 0 for no)')) {
-                    questionText = questionText.replace('? (1 for yes, 0 for no)', '');
-                    examplesContainer.innerHTML += `<div class="bg-gray-100 p-3 rounded-md">
-                        <span class="font-semibold">${questionText}</span>: <span class="text-indigo-600 font-bold">${ex.answer === 1 ? 'Yes' : 'No'}</span>
-                    </div>`;
-                } 
-                // DEFAULT: Simple question = answer format
-                else {
-                     examplesContainer.innerHTML += `<div class="bg-gray-100 p-3 rounded-md">
-                        <span class="font-semibold">${ex.question}</span> = <span class="text-indigo-600 font-bold">${ex.answer}</span>
-                    </div>`;
-                }
+                examplesContainer.innerHTML += `<div class="bg-gray-100 p-3 rounded-md">
+                    <span class="font-semibold">${ex.question}</span> = <span class="text-indigo-600 font-bold">${ex.answer}</span>
+                </div>`;
             }
 
             switchView('learn-view');
