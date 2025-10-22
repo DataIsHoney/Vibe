@@ -8,14 +8,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --subway-yellow: #FCCC0A;
+            --subway-red: #EE352E;
+            --subway-dark-red: #B71C1C;
             --subway-orange: #FF6319;
             --subway-blue: #0039A6;
             --subway-green: #6CBE45;
-            --subway-red: #EE352E;
+            --subway-yellow: #FCCC0A;
             --dark-bg: #0a0e1a;
             --card-bg: #141824;
             --card-hover: #1a1f2e;
+            --accent-color: var(--subway-red);
         }
 
         body {
@@ -34,15 +36,15 @@
         .card {
             background: linear-gradient(135deg, var(--card-bg) 0%, #1a1f2e 100%);
             border-radius: 1rem;
-            border: 2px solid rgba(252, 204, 10, 0.2);
+            border: 2px solid rgba(238, 53, 46, 0.2);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             transition: all 0.3s ease-in-out;
         }
 
         .card:hover {
             transform: translateY(-8px) scale(1.02);
-            border-color: var(--subway-yellow);
-            box-shadow: 0 12px 48px rgba(252, 204, 10, 0.3);
+            border-color: var(--subway-red);
+            box-shadow: 0 12px 48px rgba(238, 53, 46, 0.3);
         }
 
         .btn {
@@ -62,14 +64,14 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--subway-yellow) 0%, var(--subway-orange) 100%);
-            color: #000;
-            border-color: var(--subway-yellow);
+            background: linear-gradient(135deg, var(--subway-red) 0%, var(--subway-dark-red) 100%);
+            color: #fff;
+            border-color: var(--subway-red);
         }
 
         .btn-primary:hover {
             transform: scale(1.05);
-            box-shadow: 0 8px 24px rgba(252, 204, 10, 0.4);
+            box-shadow: 0 8px 24px rgba(238, 53, 46, 0.6);
         }
 
         .btn-secondary {
@@ -91,11 +93,11 @@
         }
 
         .progress-bar {
-            background: linear-gradient(90deg, var(--subway-green) 0%, var(--subway-yellow) 100%);
+            background: linear-gradient(90deg, var(--subway-red) 0%, var(--subway-orange) 100%);
             height: 100%;
             border-radius: 9999px;
             transition: width 0.5s ease-in-out;
-            box-shadow: 0 0 20px rgba(108, 190, 69, 0.5);
+            box-shadow: 0 0 20px rgba(238, 53, 46, 0.6);
         }
 
         .modal-overlay {
@@ -114,7 +116,7 @@
 
         .modal-content {
             background: linear-gradient(135deg, var(--card-bg) 0%, #1a1f2e 100%);
-            border: 2px solid var(--subway-yellow);
+            border: 2px solid var(--subway-red);
             padding: 2.5rem;
             border-radius: 1rem;
             max-width: 90%;
@@ -179,6 +181,204 @@
             font-weight: 900;
             text-shadow: 0 0 10px rgba(252, 204, 10, 0.5);
         }
+
+        /* STORE STYLES */
+        .store-item {
+            background: var(--card-bg);
+            border: 2px solid rgba(238, 53, 46, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .store-item:hover:not(.owned) {
+            border-color: var(--subway-red);
+            transform: scale(1.05);
+        }
+
+        .store-item.owned {
+            opacity: 0.6;
+            border-color: var(--subway-green);
+            cursor: not-allowed;
+        }
+
+        .store-item.equipped {
+            border-color: var(--subway-yellow);
+            box-shadow: 0 0 20px rgba(252, 204, 10, 0.4);
+        }
+
+        /* CONDUCTOR VISUAL */
+        .conductor-container {
+            position: relative;
+            width: 200px;
+            height: 300px;
+            margin: 0 auto;
+        }
+
+        .conductor-base {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #4A5568 0%, #2D3748 100%);
+            border-radius: 50% 50% 0 0 / 60% 60% 0 0;
+        }
+
+        .conductor-item {
+            position: absolute;
+            transition: all 0.3s;
+        }
+
+        /* SUBWAY CAR VISUAL */
+        .subway-car-container {
+            position: relative;
+            width: 100%;
+            height: 150px;
+            overflow: hidden;
+            background: linear-gradient(180deg, #1a1f2e 0%, #0a0e1a 100%);
+            border-radius: 1rem;
+            border: 2px solid rgba(238, 53, 46, 0.3);
+        }
+
+        .subway-car {
+            position: absolute;
+            left: 0;
+            transition: left 1s ease-in-out;
+        }
+
+        .subway-track {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            height: 4px;
+            background: repeating-linear-gradient(
+                90deg,
+                #4A5568 0px,
+                #4A5568 20px,
+                transparent 20px,
+                transparent 40px
+            );
+        }
+
+        /* STATION CUTSCENE */
+        .station-cutscene {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .subway-doors {
+            position: relative;
+            width: 80%;
+            max-width: 600px;
+            height: 400px;
+            background: var(--subway-red);
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
+        .door {
+            position: absolute;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, #B71C1C 0%, #EE352E 50%, #B71C1C 100%);
+            transition: transform 1s ease-in-out;
+        }
+
+        .door-left {
+            left: 0;
+            border-right: 4px solid #000;
+        }
+
+        .door-right {
+            right: 0;
+            border-left: 4px solid #000;
+        }
+
+        .doors-open .door-left {
+            transform: translateX(-100%);
+        }
+
+        .doors-open .door-right {
+            transform: translateX(100%);
+        }
+
+        .crowd {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 60%;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .doors-open .crowd {
+            opacity: 1;
+        }
+
+        .person {
+            width: 40px;
+            height: 80px;
+            background: #4A5568;
+            border-radius: 50% 50% 0 0;
+            margin: 0 5px;
+            animation: crowd-shuffle 2s ease-in-out infinite;
+        }
+
+        @keyframes crowd-shuffle {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+
+        .pulse-glow {
+            animation: pulseGlow 2s infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(238, 53, 46, 0.4); }
+            50% { box-shadow: 0 0 40px rgba(238, 53, 46, 0.8); }
+        }
+
+        /* SUBWAY PROGRESS VISUALIZATION */
+        .subway-progress-track {
+            position: relative;
+            width: 100%;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 2rem;
+            overflow: hidden;
+        }
+
+        .train-car {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2rem;
+            transition: left 0.5s ease-out;
+        }
+
+        .station-marker {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            background: var(--subway-red);
+            border-radius: 50%;
+            border: 2px solid #fff;
+        }
     </style>
 </head>
 <body class="text-white subway-bg">
@@ -197,33 +397,43 @@
             <!-- Stats Bar -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <!-- Coins -->
-                <div class="card p-4 text-center">
+                <div class="card p-4 text-center cursor-pointer" onclick="openStore()">
                     <div class="text-3xl font-black coin-icon">💰 <span id="coin-count">0</span></div>
-                    <div class="text-xs text-gray-400 mt-1">COINS</div>
+                    <div class="text-xs text-gray-400 mt-1">COINS - CLICK FOR STORE</div>
                 </div>
 
                 <!-- Level & Station -->
                 <div class="card p-4 text-center">
                     <div class="text-2xl font-bold">
-                        <span class="subway-line" style="background-color: var(--subway-yellow); color: #000;" id="level-badge">1</span>
+                        <span class="subway-line" style="background-color: var(--subway-red); color: #fff;" id="level-badge">1</span>
                         <span id="station-name" class="text-white">1st St</span>
                     </div>
-                    <div class="text-xs text-gray-400 mt-1">STATION LEVEL</div>
-                </div>
-
-                <!-- XP Progress -->
-                <div class="card p-4">
-                    <div class="text-xs text-gray-400 mb-2">XP TO NEXT STATION</div>
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar" id="xp-bar" style="width: 0%"></div>
-                    </div>
-                    <div class="text-xs text-gray-300 mt-1 text-center"><span id="xp-current">0</span>/<span id="xp-needed">100</span></div>
+                    <div class="text-xs text-gray-400 mt-1">CURRENT STATION</div>
                 </div>
 
                 <!-- Express Train Status -->
                 <div class="card p-4 text-center" id="express-card">
                     <div class="text-2xl font-bold">🚄 <span id="multiplier">1x</span></div>
                     <div class="text-xs text-gray-400 mt-1" id="express-status">PLAY 3 MIN FOR EXPRESS!</div>
+                </div>
+
+                <!-- Conductor Button -->
+                <div class="card p-4 text-center cursor-pointer" onclick="toggleConductor()">
+                    <div class="text-3xl font-bold">🧑‍✈️</div>
+                    <div class="text-xs text-gray-400 mt-1">MY CONDUCTOR</div>
+                </div>
+            </div>
+
+            <!-- Subway Progress to Next Station -->
+            <div class="card p-4 mb-6">
+                <div class="text-sm text-gray-400 mb-2 text-center">PROGRESS TO NEXT STATION</div>
+                <div class="subway-progress-track">
+                    <div class="subway-track"></div>
+                    <div class="train-car" id="train-position">🚇</div>
+                    <div id="station-markers"></div>
+                </div>
+                <div class="text-xs text-gray-300 mt-2 text-center">
+                    <span id="distance-current">0</span>m / <span id="distance-needed">100</span>m
                 </div>
             </div>
 
@@ -249,10 +459,11 @@
         <section id="learn-view" class="hidden">
             <div class="card p-8 max-w-4xl mx-auto">
                 <button id="back-to-main-btn" class="btn btn-secondary mb-6">⬅️ Back to Station</button>
-                <h2 id="learn-title" class="text-4xl font-black text-yellow-400 mb-4"></h2>
+                <h2 id="learn-title" class="text-4xl font-black text-red-400 mb-4"></h2>
                 <p id="learn-explanation" class="text-xl text-gray-300 mb-8 leading-relaxed"></p>
                 <h3 class="text-2xl font-bold text-white mb-4">📝 Examples</h3>
                 <div id="learn-examples" class="space-y-3 text-lg"></div>
+                <p class="text-center text-gray-400 mt-4 italic">💡 Pro tip: Watch for patterns and practice mentally!</p>
                 <div class="text-center mt-8">
                     <button id="start-quiz-btn" class="btn btn-primary px-12 py-4 text-xl">🚀 START QUIZ!</button>
                 </div>
@@ -267,10 +478,10 @@
                     <div id="quiz-progress" class="text-lg font-medium text-gray-300"></div>
                 </div>
                 <div class="mb-6">
-                    <div class="text-6xl font-black text-center text-yellow-400 py-8" id="quiz-question"></div>
+                    <div class="text-6xl font-black text-center text-red-400 py-8" id="quiz-question"></div>
                 </div>
                 <div class="flex flex-col items-center relative" id="answer-container">
-                    <input type="number" id="quiz-answer" class="text-center text-3xl p-4 border-2 border-yellow-400 rounded-lg w-full max-w-xs bg-gray-900 text-white focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500" placeholder="?">
+                    <input type="number" id="quiz-answer" class="text-center text-3xl p-4 border-2 border-red-400 rounded-lg w-full max-w-xs bg-gray-900 text-white focus:ring-2 focus:ring-red-500 focus:border-red-500" placeholder="?">
                     <button id="submit-answer-btn" class="btn btn-primary mt-4 w-full max-w-xs text-lg">Submit Answer</button>
                     <p id="feedback" class="mt-4 h-8 text-xl font-bold"></p>
                     <!-- Coin animation container -->
@@ -284,13 +495,13 @@
     <!-- Quiz Results Modal -->
     <div id="results-modal" class="modal-overlay hidden">
         <div class="modal-content text-center">
-            <h2 class="text-4xl font-black text-yellow-400 mb-4">🎉 STATION COMPLETE! 🎉</h2>
+            <h2 class="text-4xl font-black text-red-400 mb-4">🎉 QUIZ COMPLETE! 🎉</h2>
             <p class="text-6xl font-extrabold mb-4 text-white" id="results-score"></p>
             <div class="text-3xl font-bold mb-4 coin-icon">
                 💰 +<span id="coins-earned">0</span> COINS
             </div>
-            <div class="text-xl font-bold mb-6 text-green-400">
-                +<span id="xp-earned">0</span> XP
+            <div class="text-xl font-bold mb-6 text-red-400">
+                🚇 +<span id="xp-earned">0</span> METERS
             </div>
             <p class="text-lg text-gray-300 mb-6" id="results-message"></p>
             <button id="close-results-btn" class="btn btn-primary">Continue Journey</button>
@@ -310,16 +521,82 @@
     <!-- Level Up Modal -->
     <div id="levelup-modal" class="modal-overlay hidden">
         <div class="modal-content text-center level-up">
-            <h2 class="text-5xl font-black text-yellow-400 mb-4">🎊 LEVEL UP! 🎊</h2>
+            <h2 class="text-5xl font-black text-red-400 mb-4">🎊 NEXT STATION! 🎊</h2>
             <p class="text-4xl font-bold text-white mb-6">
-                <span class="subway-line" style="background-color: var(--subway-yellow); color: #000;" id="new-level-badge">2</span>
+                <span class="subway-line" style="background-color: var(--subway-red); color: #fff;" id="new-level-badge">2</span>
                 <span id="new-station-name">14th St</span>
             </p>
-            <p class="text-2xl text-gray-300 mb-6">New station unlocked!</p>
+            <p class="text-2xl text-gray-300 mb-6">Station reached!</p>
             <div class="text-3xl font-bold mb-6 coin-icon">
                 💰 +<span id="levelup-bonus">50</span> BONUS COINS
             </div>
-            <button id="close-levelup-btn" class="btn btn-primary">Continue</button>
+            <button id="close-levelup-btn" class="btn btn-primary">Board Train</button>
+        </div>
+    </div>
+
+    <!-- Store Modal -->
+    <div id="store-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 900px; width: 95%;">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-4xl font-black text-red-400">🏪 CONDUCTOR SHOP</h2>
+                <div class="text-2xl font-bold coin-icon">💰 <span id="store-coin-count">0</span></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Left: Store Items -->
+                <div>
+                    <h3 class="text-2xl font-bold mb-4 text-white">Shop Items</h3>
+                    <div id="store-items" class="space-y-3 max-h-96 overflow-y-auto"></div>
+                </div>
+
+                <!-- Right: Conductor Preview -->
+                <div>
+                    <h3 class="text-2xl font-bold mb-4 text-white">Your Conductor</h3>
+                    <div class="conductor-container" id="store-conductor-preview">
+                        <div class="conductor-base"></div>
+                        <div id="conductor-equipped-items"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-6">
+                <button id="close-store-btn" class="btn btn-secondary">Close Shop</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conductor Modal -->
+    <div id="conductor-modal" class="modal-overlay hidden">
+        <div class="modal-content text-center">
+            <h2 class="text-4xl font-black text-red-400 mb-6">🧑‍✈️ MY CONDUCTOR</h2>
+            <div class="conductor-container mx-auto mb-6" id="conductor-display">
+                <div class="conductor-base"></div>
+                <div id="conductor-items"></div>
+            </div>
+            <p class="text-gray-300 mb-4">Visit the store to customize your conductor!</p>
+            <div class="flex justify-center gap-4">
+                <button onclick="openStore()" class="btn btn-primary">Open Store</button>
+                <button id="close-conductor-btn" class="btn btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Station Arrival Cutscene -->
+    <div id="station-cutscene" class="station-cutscene hidden">
+        <div class="subway-doors" id="subway-doors">
+            <div class="door door-left"></div>
+            <div class="door door-right"></div>
+            <div class="crowd">
+                <div class="person"></div>
+                <div class="person"></div>
+                <div class="person"></div>
+                <div class="person"></div>
+                <div class="person"></div>
+            </div>
+            <div class="absolute top-8 w-full text-center">
+                <h1 class="text-5xl font-black text-white mb-4" id="cutscene-station-name">42nd St</h1>
+                <p class="text-2xl text-gray-200" id="cutscene-message">Stand clear of the closing doors!</p>
+            </div>
         </div>
     </div>
 
@@ -357,11 +634,13 @@
         // GAME MECHANICS
         let gameStats = {
             coins: 0,
-            xp: 0,
+            distance: 0, // Changed from XP to distance (meters to next station)
             level: 1,
             multiplier: 1,
             startTime: Date.now(),
-            expressUnlocked: false
+            expressUnlocked: false,
+            ownedItems: [], // Store purchases
+            equippedItems: {} // Currently equipped conductor items
         };
 
         const SUBWAY_STATIONS = [
@@ -370,10 +649,32 @@
             'Bronx', 'Queens', 'Brooklyn', 'Manhattan', 'Express Hub'
         ];
 
-        const XP_PER_LEVEL = [100, 150, 200, 300, 400, 500, 700, 900, 1200, 1500, 2000, 2500, 3000, 4000, 5000];
+        const DISTANCE_PER_LEVEL = [100, 150, 200, 300, 400, 500, 700, 900, 1200, 1500, 2000, 2500, 3000, 4000, 5000];
         const COINS_PER_CORRECT = 10;
-        const XP_PER_CORRECT = 15;
+        const DISTANCE_PER_CORRECT = 15; // meters traveled per correct answer
         const EXPRESS_TIME = 180000; // 3 minutes in milliseconds
+
+        // STORE ITEMS
+        const STORE_ITEMS = {
+            hats: [
+                { id: 'hat_basic', name: '🎩 Basic Cap', price: 50, emoji: '🧢', slot: 'hat' },
+                { id: 'hat_conductor', name: '🎩 Conductor Hat', price: 150, emoji: '🎩', slot: 'hat' },
+                { id: 'hat_vintage', name: '🎓 Vintage Cap', price: 300, emoji: '🎓', slot: 'hat' },
+                { id: 'hat_crown', name: '👑 Golden Crown', price: 1000, emoji: '👑', slot: 'hat' }
+            ],
+            accessories: [
+                { id: 'acc_whistle', name: '🎺 Silver Whistle', price: 100, emoji: '🎺', slot: 'accessory' },
+                { id: 'acc_badge', name: '🏅 Conductor Badge', price: 200, emoji: '🏅', slot: 'accessory' },
+                { id: 'acc_sunglasses', name: '🕶️ Cool Shades', price: 250, emoji: '🕶️', slot: 'accessory' },
+                { id: 'acc_medal', name: '🥇 Gold Medal', price: 500, emoji: '🥇', slot: 'accessory' }
+            ],
+            subwayCar: [
+                { id: 'car_clean', name: '✨ Clean Car', price: 300, emoji: '✨', slot: 'subway' },
+                { id: 'car_modern', name: '🚄 Modern Car', price: 600, emoji: '🚄', slot: 'subway' },
+                { id: 'car_luxury', name: '💎 Luxury Car', price: 1500, emoji: '💎', slot: 'subway' },
+                { id: 'car_express', name: '⚡ Express Car', price: 3000, emoji: '⚡', slot: 'subway' }
+            ]
+        };
 
         const mainView = document.getElementById('main-view');
         const learnView = document.getElementById('learn-view');
@@ -719,10 +1020,12 @@
                 try {
                     const loaded = JSON.parse(savedStats);
                     gameStats.coins = loaded.coins || 0;
-                    gameStats.xp = loaded.xp || 0;
+                    gameStats.distance = loaded.distance || loaded.xp || 0; // Support old XP or new distance
                     gameStats.level = loaded.level || 1;
                     gameStats.multiplier = loaded.multiplier || 1;
                     gameStats.expressUnlocked = loaded.expressUnlocked || false;
+                    gameStats.ownedItems = loaded.ownedItems || [];
+                    gameStats.equippedItems = loaded.equippedItems || {};
                     console.log("✅ Game stats loaded from localStorage");
                 } catch (e) {
                     console.error("Error loading stats:", e);
@@ -763,13 +1066,15 @@
                 // Save user progress (mastery levels)
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(userProgress));
 
-                // Save game stats (coins, xp, level)
+                // Save game stats (coins, distance, level, store items)
                 const statsToSave = {
                     coins: gameStats.coins,
-                    xp: gameStats.xp,
+                    distance: gameStats.distance,
                     level: gameStats.level,
                     multiplier: gameStats.multiplier,
-                    expressUnlocked: gameStats.expressUnlocked
+                    expressUnlocked: gameStats.expressUnlocked,
+                    ownedItems: gameStats.ownedItems,
+                    equippedItems: gameStats.equippedItems
                 };
                 localStorage.setItem(STATS_KEY, JSON.stringify(statsToSave));
 
@@ -793,15 +1098,17 @@
         function exportProgress() {
             try {
                 const exportData = {
-                    version: 1,
+                    version: 2, // Incremented for new format
                     timestamp: new Date().toISOString(),
                     progress: userProgress,
                     stats: {
                         coins: gameStats.coins,
-                        xp: gameStats.xp,
+                        distance: gameStats.distance,
                         level: gameStats.level,
                         multiplier: gameStats.multiplier,
-                        expressUnlocked: gameStats.expressUnlocked
+                        expressUnlocked: gameStats.expressUnlocked,
+                        ownedItems: gameStats.ownedItems,
+                        equippedItems: gameStats.equippedItems
                     }
                 };
 
@@ -866,6 +1173,160 @@
         window.exportProgress = exportProgress;
         window.importProgress = importProgress;
 
+        // --- STORE FUNCTIONS ---
+        function openStore() {
+            document.getElementById('store-modal').classList.remove('hidden');
+            document.getElementById('store-coin-count').textContent = gameStats.coins;
+            renderStoreItems();
+            renderConductorPreview();
+        }
+
+        function renderStoreItems() {
+            const container = document.getElementById('store-items');
+            container.innerHTML = '';
+
+            Object.values(STORE_ITEMS).flat().forEach(item => {
+                const owned = gameStats.ownedItems.includes(item.id);
+                const equipped = gameStats.equippedItems[item.slot] === item.id;
+                const canAfford = gameStats.coins >= item.price;
+
+                const itemEl = document.createElement('div');
+                itemEl.className = `store-item ${owned ? 'owned' : ''} ${equipped ? 'equipped' : ''}`;
+                itemEl.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="text-2xl mb-1">${item.emoji}</div>
+                            <div class="text-white font-bold">${item.name}</div>
+                            <div class="text-sm text-gray-400">${owned ? (equipped ? 'Equipped' : 'Owned') : `${item.price} coins`}</div>
+                        </div>
+                        <div>
+                            ${!owned && canAfford ? `<button onclick="purchaseItem('${item.id}')" class="btn btn-primary text-sm px-3 py-1">Buy</button>` : ''}
+                            ${owned && !equipped ? `<button onclick="equipItem('${item.id}')" class="btn btn-secondary text-sm px-3 py-1">Equip</button>` : ''}
+                            ${equipped ? '<span class="text-yellow-400 text-sm">✓ Equipped</span>' : ''}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(itemEl);
+            });
+        }
+
+        function purchaseItem(itemId) {
+            const allItems = Object.values(STORE_ITEMS).flat();
+            const item = allItems.find(i => i.id === itemId);
+
+            if (!item || gameStats.coins < item.price) {
+                alert("❌ Not enough coins!");
+                return;
+            }
+
+            if (gameStats.ownedItems.includes(itemId)) {
+                alert("✅ You already own this item!");
+                return;
+            }
+
+            gameStats.coins -= item.price;
+            gameStats.ownedItems.push(itemId);
+            saveProgress();
+            renderStoreItems();
+            updateGameStats();
+            alert(`✅ Purchased ${item.name}!`);
+        }
+
+        function equipItem(itemId) {
+            const allItems = Object.values(STORE_ITEMS).flat();
+            const item = allItems.find(i => i.id === itemId);
+
+            if (!item || !gameStats.ownedItems.includes(itemId)) {
+                return;
+            }
+
+            gameStats.equippedItems[item.slot] = itemId;
+            saveProgress();
+            renderStoreItems();
+            renderConductorPreview();
+        }
+
+        function renderConductorPreview() {
+            const container = document.getElementById('conductor-equipped-items');
+            container.innerHTML = '';
+
+            const allItems = Object.values(STORE_ITEMS).flat();
+            Object.entries(gameStats.equippedItems).forEach(([slot, itemId]) => {
+                const item = allItems.find(i => i.id === itemId);
+                if (item) {
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'conductor-item text-5xl';
+                    itemEl.style.cssText = slot === 'hat' ? 'top: 10px; left: 50%; transform: translateX(-50%);' :
+                                          slot === 'accessory' ? 'top: 40%; left: 50%; transform: translateX(-50%);' :
+                                          'bottom: 10px; left: 50%; transform: translateX(-50%);';
+                    itemEl.textContent = item.emoji;
+                    container.appendChild(itemEl);
+                }
+            });
+        }
+
+        function toggleConductor() {
+            const modal = document.getElementById('conductor-modal');
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                renderConductor();
+            }
+        }
+
+        function renderConductor() {
+            const container = document.getElementById('conductor-items');
+            container.innerHTML = '';
+
+            const allItems = Object.values(STORE_ITEMS).flat();
+            Object.entries(gameStats.equippedItems).forEach(([slot, itemId]) => {
+                const item = allItems.find(i => i.id === itemId);
+                if (item) {
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'conductor-item text-5xl';
+                    itemEl.style.cssText = slot === 'hat' ? 'top: 10px; left: 50%; transform: translateX(-50%);' :
+                                          slot === 'accessory' ? 'top: 40%; left: 50%; transform: translateX(-50%);' :
+                                          'bottom: 10px; left: 50%; transform: translateX(-50%);';
+                    itemEl.textContent = item.emoji;
+                    container.appendChild(itemEl);
+                }
+            });
+        }
+
+        // Station cutscene animation
+        function playStationCutscene(stationName) {
+            return new Promise((resolve) => {
+                const cutscene = document.getElementById('station-cutscene');
+                const doors = document.getElementById('subway-doors');
+                document.getElementById('cutscene-station-name').textContent = stationName;
+                document.getElementById('cutscene-message').textContent = 'Now arriving at...';
+
+                cutscene.classList.remove('hidden');
+
+                // Play ding-dong sound (placeholder - would need actual audio)
+                console.log('🔔 Ding-dong!');
+
+                setTimeout(() => {
+                    doors.classList.add('doors-open');
+                    document.getElementById('cutscene-message').textContent = 'Stand clear of the closing doors!';
+                }, 1000);
+
+                setTimeout(() => {
+                    doors.classList.remove('doors-open');
+                }, 3000);
+
+                setTimeout(() => {
+                    cutscene.classList.add('hidden');
+                    resolve();
+                }, 4500);
+            });
+        }
+
+        // Make store functions globally available
+        window.openStore = openStore;
+        window.purchaseItem = purchaseItem;
+        window.equipItem = equipItem;
+        window.toggleConductor = toggleConductor;
+
         // --- GAME MECHANICS FUNCTIONS ---
         function updateGameStats() {
             document.getElementById('coin-count').textContent = gameStats.coins;
@@ -873,11 +1334,18 @@
             document.getElementById('station-name').textContent = SUBWAY_STATIONS[gameStats.level - 1] || 'Final Stop';
             document.getElementById('multiplier').textContent = gameStats.multiplier + 'x';
 
-            const xpNeeded = XP_PER_LEVEL[gameStats.level - 1] || 5000;
-            const xpProgress = (gameStats.xp / xpNeeded) * 100;
-            document.getElementById('xp-bar').style.width = Math.min(xpProgress, 100) + '%';
-            document.getElementById('xp-current').textContent = gameStats.xp;
-            document.getElementById('xp-needed').textContent = xpNeeded;
+            // Update distance/progress to next station
+            const distanceNeeded = DISTANCE_PER_LEVEL[gameStats.level - 1] || 5000;
+            const distanceProgress = (gameStats.distance / distanceNeeded) * 100;
+
+            // Update train position on track
+            const trainEl = document.getElementById('train-position');
+            if (trainEl) {
+                trainEl.style.left = Math.min(distanceProgress, 100) + '%';
+            }
+
+            document.getElementById('distance-current').textContent = gameStats.distance;
+            document.getElementById('distance-needed').textContent = distanceNeeded;
 
             // Check for express train
             checkExpressTrain();
@@ -892,12 +1360,12 @@
             return coins;
         }
 
-        function awardXP(amount) {
-            gameStats.xp += amount;
-            const xpNeeded = XP_PER_LEVEL[gameStats.level - 1] || 5000;
+        function awardDistance(amount) {
+            gameStats.distance += amount;
+            const distanceNeeded = DISTANCE_PER_LEVEL[gameStats.level - 1] || 5000;
 
-            if (gameStats.xp >= xpNeeded) {
-                gameStats.xp -= xpNeeded;
+            if (gameStats.distance >= distanceNeeded) {
+                gameStats.distance -= distanceNeeded;
                 levelUp();
             }
             updateGameStats();
@@ -916,16 +1384,19 @@
             }, 1000);
         }
 
-        function levelUp() {
+        async function levelUp() {
             gameStats.level++;
             const bonus = gameStats.level * 50;
             gameStats.coins += bonus;
+            const newStation = SUBWAY_STATIONS[gameStats.level - 1] || 'Final Stop';
 
-            document.getElementById('new-level-badge').textContent = gameStats.level;
-            document.getElementById('new-station-name').textContent = SUBWAY_STATIONS[gameStats.level - 1] || 'Final Stop';
-            document.getElementById('levelup-bonus').textContent = bonus;
+            // Play station cutscene animation
+            await playStationCutscene(newStation);
 
             // Show level up modal
+            document.getElementById('new-level-badge').textContent = gameStats.level;
+            document.getElementById('new-station-name').textContent = newStation;
+            document.getElementById('levelup-bonus').textContent = bonus;
             document.getElementById('levelup-modal').classList.remove('hidden');
             saveProgress(); // Auto-save
         }
@@ -1024,8 +1495,8 @@
             // Generate 5 examples
             for (let i = 0; i < 5; i++) {
                 const ex = shortcut.generateQuestion();
-                examplesContainer.innerHTML += `<div class="bg-gray-800 border border-yellow-400/30 p-4 rounded-md">
-                    <span class="font-semibold text-white text-lg">${ex.question}</span> = <span class="text-yellow-400 font-black text-lg">${ex.answer}</span>
+                examplesContainer.innerHTML += `<div class="bg-gray-800 border border-red-400/30 p-4 rounded-md">
+                    <span class="font-semibold text-white text-lg">${ex.question}</span> = <span class="text-red-400 font-black text-lg">${ex.answer}</span>
                 </div>`;
             }
 
@@ -1079,8 +1550,8 @@
             if (userAnswer === correctAnswer) {
                 score++;
                 const coinsEarned = awardCoins(COINS_PER_CORRECT);
-                awardXP(XP_PER_CORRECT);
-                feedbackEl.textContent = `✅ CORRECT! +${coinsEarned} 💰`;
+                awardDistance(DISTANCE_PER_CORRECT);
+                feedbackEl.textContent = `✅ CORRECT! +${coinsEarned} 💰 +${DISTANCE_PER_CORRECT}m`;
                 feedbackEl.className = "mt-4 h-8 text-xl font-bold text-green-400";
             } else {
                 feedbackEl.textContent = `❌ Wrong! Answer: ${correctAnswer}`;
@@ -1103,19 +1574,19 @@
 
             // Calculate bonuses
             const bonusCoins = score * 5 * gameStats.multiplier;
-            const bonusXP = score * 10;
+            const bonusDistance = score * 10;
 
             gameStats.coins += bonusCoins;
-            gameStats.xp += bonusXP;
+            gameStats.distance += bonusDistance;
 
-            const xpNeeded = XP_PER_LEVEL[gameStats.level - 1] || 5000;
-            if (gameStats.xp >= xpNeeded) {
-                gameStats.xp -= xpNeeded;
+            const distanceNeeded = DISTANCE_PER_LEVEL[gameStats.level - 1] || 5000;
+            if (gameStats.distance >= distanceNeeded) {
+                gameStats.distance -= distanceNeeded;
                 levelUp();
             }
 
             saveProgress();
-            showResultsModal(bonusCoins, bonusXP);
+            showResultsModal(bonusCoins, bonusDistance);
         }
 
         // --- SPACED REPETITION ---
@@ -1155,11 +1626,11 @@
         }
         
         // --- MODAL & UI ---
-        function showResultsModal(bonusCoins, bonusXP) {
+        function showResultsModal(bonusCoins, bonusDistance) {
             const modal = document.getElementById('results-modal');
             document.getElementById('results-score').textContent = `${score} / 10`;
             document.getElementById('coins-earned').textContent = bonusCoins;
-            document.getElementById('xp-earned').textContent = bonusXP;
+            document.getElementById('xp-earned').textContent = bonusDistance + 'm';
 
             let message = "Keep pushing! 🚇";
             if (score >= 8) message = "Great work! You're on track! 🔥";
@@ -1198,6 +1669,12 @@
         document.getElementById('close-levelup-btn').addEventListener('click', () => {
             document.getElementById('levelup-modal').classList.add('hidden');
             updateGameStats();
+        });
+        document.getElementById('close-store-btn').addEventListener('click', () => {
+            document.getElementById('store-modal').classList.add('hidden');
+        });
+        document.getElementById('close-conductor-btn').addEventListener('click', () => {
+            document.getElementById('conductor-modal').classList.add('hidden');
         });
         reviewBtn.addEventListener('click', startReviewSession);
 
