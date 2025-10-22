@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚇 Subway Math Express</title>
+    <title>🚇 Subway Math</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
@@ -14,16 +14,16 @@
             --subway-blue: #0039A6;
             --subway-green: #6CBE45;
             --subway-yellow: #FCCC0A;
-            --dark-bg: #0a0e1a;
-            --card-bg: #141824;
-            --card-hover: #1a1f2e;
+            --dark-bg: #050810;
+            --card-bg: #0d1117;
+            --card-hover: #161b22;
             --accent-color: var(--subway-red);
         }
 
         body {
             font-family: 'Inter', sans-serif;
             overscroll-behavior: none;
-            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 100%);
+            background: linear-gradient(135deg, #020408 0%, #0a0e14 100%);
             background-attachment: fixed;
         }
 
@@ -283,13 +283,21 @@
             z-index: 2;
         }
 
+        .conductor-item.hat-slot {
+            font-size: 4rem;
+        }
+
+        .conductor-item.accessory-slot {
+            font-size: 3rem;
+        }
+
         /* SUBWAY CAR VISUAL */
         .subway-car-container {
             position: relative;
             width: 100%;
             height: 150px;
             overflow: hidden;
-            background: linear-gradient(180deg, #1a1f2e 0%, #0a0e1a 100%);
+            background: linear-gradient(180deg, #0a0e14 0%, #020408 100%);
             border-radius: 1rem;
             border: 2px solid rgba(238, 53, 46, 0.3);
         }
@@ -404,6 +412,19 @@
             50% { box-shadow: 0 0 40px rgba(238, 53, 46, 0.8); }
         }
 
+        /* Animated Subway Icon */
+        @keyframes subwaySlide {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100vw); }
+        }
+
+        .subway-icon {
+            display: inline-block;
+            animation: subwaySlide 8s linear infinite;
+            font-size: 2.5rem;
+            margin-left: 1rem;
+        }
+
         /* SUBWAY PROGRESS VISUALIZATION */
         .subway-progress-track {
             position: relative;
@@ -441,9 +462,9 @@
 
         <!-- Game Stats Header -->
         <header class="mb-8">
-            <div class="text-center mb-6">
+            <div class="text-center mb-6 relative overflow-hidden">
                 <h1 class="text-5xl font-black sm:text-6xl bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
-                    🚇 SUBWAY MATH EXPRESS
+                    Subway Math <span class="subway-icon">🚇</span>
                 </h1>
                 <p class="mt-3 text-xl text-gray-300">Master Vedic Math • Earn Coins • Level Up!</p>
             </div>
@@ -522,16 +543,9 @@
                 <button id="back-to-main-btn" class="btn btn-secondary mb-6">⬅️ Back to Station</button>
                 <h2 id="learn-title" class="text-4xl font-black text-red-400 mb-4"></h2>
 
-                <!-- Video Tutorial Placeholder -->
+                <!-- Video Tutorial (Dynamically Generated) -->
                 <div id="video-section" class="mb-8 bg-gray-900 border-2 border-red-400/30 rounded-lg p-6">
-                    <h3 class="text-2xl font-bold text-white mb-4">🎥 Video Tutorial</h3>
-                    <div class="aspect-video bg-gray-800 rounded-lg flex items-center justify-center">
-                        <div class="text-center">
-                            <div class="text-6xl mb-4">🎬</div>
-                            <p class="text-gray-400 text-lg">Video tutorial coming soon!</p>
-                            <p class="text-gray-500 text-sm mt-2">Will feature: Animated explanations + Silly narrator voices</p>
-                        </div>
-                    </div>
+                    <!-- Content will be filled by JavaScript -->
                 </div>
 
                 <!-- Written Explanation -->
@@ -1362,8 +1376,8 @@
                 const item = allItems.find(i => i.id === itemId);
                 if (item) {
                     const itemEl = document.createElement('div');
-                    itemEl.className = 'conductor-item text-5xl';
-                    itemEl.style.cssText = slot === 'hat' ? 'top: 10px; left: 50%; transform: translateX(-50%);' :
+                    itemEl.className = `conductor-item ${slot}-slot`;
+                    itemEl.style.cssText = slot === 'hat' ? 'top: -5px; left: 50%; transform: translateX(-50%);' :
                                           slot === 'accessory' ? 'top: 40%; left: 50%; transform: translateX(-50%);' :
                                           'bottom: 10px; left: 50%; transform: translateX(-50%);';
                     itemEl.textContent = item.emoji;
@@ -1389,8 +1403,8 @@
                 const item = allItems.find(i => i.id === itemId);
                 if (item) {
                     const itemEl = document.createElement('div');
-                    itemEl.className = 'conductor-item text-5xl';
-                    itemEl.style.cssText = slot === 'hat' ? 'top: 10px; left: 50%; transform: translateX(-50%);' :
+                    itemEl.className = `conductor-item ${slot}-slot`;
+                    itemEl.style.cssText = slot === 'hat' ? 'top: -5px; left: 50%; transform: translateX(-50%);' :
                                           slot === 'accessory' ? 'top: 40%; left: 50%; transform: translateX(-50%);' :
                                           'bottom: 10px; left: 50%; transform: translateX(-50%);';
                     itemEl.textContent = item.emoji;
@@ -1675,6 +1689,36 @@
             const shortcut = allShortcuts[categoryKey].shortcuts[shortcutKey];
             document.getElementById('learn-title').textContent = shortcut.title;
             document.getElementById('learn-explanation').textContent = shortcut.explanation;
+
+            // Update video section based on shortcut
+            const videoSection = document.getElementById('video-section');
+            if (categoryKey === 'addition' && shortcutKey === 'add9') {
+                // Show actual video link for add9
+                videoSection.innerHTML = `
+                    <h3 class="text-2xl font-bold text-white mb-4">🎥 Video Tutorial</h3>
+                    <div class="aspect-video bg-gray-800 rounded-lg overflow-hidden">
+                        <iframe
+                            src="https://sora.chatgpt.com/p/s_68f84388513881918282ccbaa3fe8f42"
+                            class="w-full h-full border-0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                    <p class="text-gray-400 text-sm mt-3 text-center">Watch how to add 9 quickly!</p>
+                `;
+            } else {
+                // Show placeholder for other shortcuts
+                videoSection.innerHTML = `
+                    <h3 class="text-2xl font-bold text-white mb-4">🎥 Video Tutorial</h3>
+                    <div class="aspect-video bg-gray-800 rounded-lg flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="text-6xl mb-4">🎬</div>
+                            <p class="text-gray-400 text-lg">Video tutorial coming soon!</p>
+                            <p class="text-gray-500 text-sm mt-2">Will feature: Animated explanations + Silly narrator voices</p>
+                        </div>
+                    </div>
+                `;
+            }
 
             // Generate step-by-step breakdown
             const stepContainer = document.getElementById('step-by-step');
