@@ -224,9 +224,63 @@
             border-radius: 50% 50% 0 0 / 60% 60% 0 0;
         }
 
+        .conductor-face {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 120px;
+            background: #FDB07C;
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .conductor-eye {
+            position: absolute;
+            top: 40px;
+            width: 15px;
+            height: 15px;
+            background: #2D3748;
+            border-radius: 50%;
+        }
+
+        .conductor-eye-left {
+            left: 30px;
+        }
+
+        .conductor-eye-right {
+            right: 30px;
+        }
+
+        .conductor-smile {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 25px;
+            border: 3px solid #2D3748;
+            border-top: none;
+            border-radius: 0 0 50px 50px;
+        }
+
+        .conductor-hair {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 130px;
+            height: 60px;
+            background: #3B2817;
+            border-radius: 50%;
+            z-index: 0;
+        }
+
         .conductor-item {
             position: absolute;
             transition: all 0.3s;
+            z-index: 2;
         }
 
         /* SUBWAY CAR VISUAL */
@@ -444,28 +498,69 @@
         <main id="main-view">
             <div id="main-view-controls" class="flex justify-center mb-6 space-x-4">
                  <button id="review-btn" class="btn btn-primary text-lg px-8 py-3">Start Review Session</button>
-                 <button id="back-to-categories-btn" class="btn btn-secondary text-lg px-8 py-3 hidden">&larr; Back to Categories</button>
+                 <button id="back-to-categories-btn" class="btn btn-secondary text-lg px-8 py-3 hidden">⬅️ Back to Categories</button>
             </div>
-           
+
             <div id="category-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Category cards will be injected here -->
             </div>
-            <div id="shortcut-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
-                <!-- Shortcut cards will be injected here -->
+            <div id="shortcut-grid-wrapper" class="hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <button id="back-to-categories-btn-2" class="btn btn-secondary">⬅️ Back to Categories</button>
+                    <h2 id="category-title" class="text-3xl font-bold text-white"></h2>
+                    <div></div>
+                </div>
+                <div id="shortcut-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Shortcut cards will be injected here -->
+                </div>
             </div>
         </main>
 
         <!-- Learn View: Shortcut Explanation & Examples -->
         <section id="learn-view" class="hidden">
-            <div class="card p-8 max-w-4xl mx-auto">
+            <div class="card p-8 max-w-5xl mx-auto">
                 <button id="back-to-main-btn" class="btn btn-secondary mb-6">⬅️ Back to Station</button>
                 <h2 id="learn-title" class="text-4xl font-black text-red-400 mb-4"></h2>
-                <p id="learn-explanation" class="text-xl text-gray-300 mb-8 leading-relaxed"></p>
-                <h3 class="text-2xl font-bold text-white mb-4">📝 Examples</h3>
-                <div id="learn-examples" class="space-y-3 text-lg"></div>
-                <p class="text-center text-gray-400 mt-4 italic">💡 Pro tip: Watch for patterns and practice mentally!</p>
+
+                <!-- Video Tutorial Placeholder -->
+                <div id="video-section" class="mb-8 bg-gray-900 border-2 border-red-400/30 rounded-lg p-6">
+                    <h3 class="text-2xl font-bold text-white mb-4">🎥 Video Tutorial</h3>
+                    <div class="aspect-video bg-gray-800 rounded-lg flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="text-6xl mb-4">🎬</div>
+                            <p class="text-gray-400 text-lg">Video tutorial coming soon!</p>
+                            <p class="text-gray-500 text-sm mt-2">Will feature: Animated explanations + Silly narrator voices</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Written Explanation -->
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold text-white mb-4">📖 How It Works</h3>
+                    <p id="learn-explanation" class="text-xl text-gray-300 leading-relaxed bg-gray-800 p-6 rounded-lg border border-red-400/20"></p>
+                </div>
+
+                <!-- Step-by-Step Breakdown -->
+                <div class="mb-8" id="step-by-step-section">
+                    <h3 class="text-2xl font-bold text-white mb-4">🔢 Step-by-Step</h3>
+                    <div id="step-by-step" class="space-y-3"></div>
+                </div>
+
+                <!-- Subway Word Problems -->
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold text-white mb-4">🚇 Subway Word Problems</h3>
+                    <div id="word-problems" class="space-y-4"></div>
+                </div>
+
+                <!-- Practice Examples -->
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold text-white mb-4">📝 Practice Examples</h3>
+                    <div id="learn-examples" class="space-y-3 text-lg"></div>
+                </div>
+
+                <p class="text-center text-gray-400 mt-6 italic text-lg">💡 Pro tip: Try solving in your head before looking at answers!</p>
                 <div class="text-center mt-8">
-                    <button id="start-quiz-btn" class="btn btn-primary px-12 py-4 text-xl">🚀 START QUIZ!</button>
+                    <button id="start-quiz-btn" class="btn btn-primary px-12 py-4 text-xl">🚀 START QUIZ! (+50 COINS)</button>
                 </div>
             </div>
         </section>
@@ -553,7 +648,13 @@
                 <div>
                     <h3 class="text-2xl font-bold mb-4 text-white">Your Conductor</h3>
                     <div class="conductor-container" id="store-conductor-preview">
+                        <div class="conductor-hair"></div>
                         <div class="conductor-base"></div>
+                        <div class="conductor-face">
+                            <div class="conductor-eye conductor-eye-left"></div>
+                            <div class="conductor-eye conductor-eye-right"></div>
+                            <div class="conductor-smile"></div>
+                        </div>
                         <div id="conductor-equipped-items"></div>
                     </div>
                 </div>
@@ -570,7 +671,13 @@
         <div class="modal-content text-center">
             <h2 class="text-4xl font-black text-red-400 mb-6">🧑‍✈️ MY CONDUCTOR</h2>
             <div class="conductor-container mx-auto mb-6" id="conductor-display">
+                <div class="conductor-hair"></div>
                 <div class="conductor-base"></div>
+                <div class="conductor-face">
+                    <div class="conductor-eye conductor-eye-left"></div>
+                    <div class="conductor-eye conductor-eye-right"></div>
+                    <div class="conductor-smile"></div>
+                </div>
                 <div id="conductor-items"></div>
             </div>
             <p class="text-gray-300 mb-4">Visit the store to customize your conductor!</p>
@@ -1433,19 +1540,19 @@
             currentCategory = null;
             categoryGrid.innerHTML = '';
             categoryGrid.classList.remove('hidden');
-            shortcutGrid.classList.add('hidden');
+            document.getElementById('shortcut-grid-wrapper').classList.add('hidden');
             backToCategoriesBtn.classList.add('hidden');
             reviewBtn.classList.remove('hidden');
 
-            const colors = ['var(--subway-yellow)', 'var(--subway-orange)', 'var(--subway-blue)', 'var(--subway-green)'];
-            const lines = ['🟨', '🟧', '🟦', '🟩'];
+            const colors = ['var(--subway-red)', 'var(--subway-orange)', 'var(--subway-blue)', 'var(--subway-green)'];
+            const lines = ['➕', '➖', '✖️', '➗'];
 
             Object.entries(allShortcuts).forEach(([key, category], index) => {
                 const card = document.createElement('div');
                 card.className = 'card p-8 cursor-pointer text-center';
                 card.dataset.category = key;
                 card.innerHTML = `
-                    <div class="subway-line mb-4" style="background-color: ${colors[index]}; color: #000; width: 48px; height: 48px; line-height: 48px; font-size: 24px; margin: 0 auto;">
+                    <div class="text-6xl mb-4">
                         ${lines[index]}
                     </div>
                     <h2 class="text-3xl font-bold text-white">${category.title}</h2>
@@ -1457,13 +1564,16 @@
 
         function renderShortcutGrid(categoryKey) {
             currentCategory = categoryKey;
+            const shortcutGrid = document.getElementById('shortcut-grid');
             shortcutGrid.innerHTML = '';
             categoryGrid.classList.add('hidden');
-            shortcutGrid.classList.remove('hidden');
+            document.getElementById('shortcut-grid-wrapper').classList.remove('hidden');
             backToCategoriesBtn.classList.remove('hidden');
             reviewBtn.classList.add('hidden');
 
             const category = allShortcuts[categoryKey];
+            document.getElementById('category-title').textContent = category.title;
+
             Object.entries(category.shortcuts).forEach(([key, shortcut]) => {
                 const progress = userProgress[categoryKey]?.[key] || { strength: 0 };
                 const strength = progress.strength || 0;
@@ -1482,6 +1592,83 @@
             });
         }
 
+        // Helper function to generate subway word problems
+        function generateSubwayWordProblem(categoryKey, shortcutKey) {
+            const problems = {
+                addition: [
+                    {question: "🚇 Train A has {n1} passengers. At the next stop, {n2} more people board. How many passengers total?", type: "add"},
+                    {question: "🎫 You bought a MetroCard with ${n1} on it. You add ${n2} more. How much is on your card now?", type: "add"},
+                    {question: "👥 There are {n1} people waiting at 42nd St and {n2} people at Times Square. How many total?", type: "add"}
+                ],
+                subtraction: [
+                    {question: "🚇 A train starts with {n1} passengers. {n2} people get off at the next stop. How many remain?", type: "sub"},
+                    {question: "🎫 You have ${n1} on your MetroCard. A ride costs ${n2}. How much is left?", type: "sub"},
+                    {question: "⏱️ The train takes {n1} minutes to reach the last stop. It's been {n2} minutes. How much longer?", type: "sub"}
+                ],
+                multiplication: [
+                    {question: "🚇 Each subway car holds {n1} people. There are {n2} cars. What's the total capacity?", type: "mult"},
+                    {question: "🎫 A MetroCard costs ${n1}. You buy {n2} of them. What's the total cost?", type: "mult"},
+                    {question: "👨‍✈️ Each conductor works {n1} hours per day for {n2} days. How many total hours?", type: "mult"}
+                ],
+                division: [
+                    {question: "🚇 {n1} passengers need to fit into {n2} subway cars equally. How many per car?", type: "div"},
+                    {question: "🎫 ${n1} is split equally among {n2} MetroCards. How much on each card?", type: "div"},
+                    {question: "⏱️ A {n1} minute journey is divided into {n2} equal stops. How long between stops?", type: "div"}
+                ]
+            };
+
+            const categoryProblems = problems[categoryKey] || problems.addition;
+            const template = categoryProblems[Math.floor(Math.random() * categoryProblems.length)];
+            const shortcut = allShortcuts[categoryKey].shortcuts[shortcutKey];
+            const ex = shortcut.generateQuestion();
+
+            // Extract numbers from the question
+            const numbers = ex.question.match(/\d+/g) || ['10', '5'];
+            const n1 = numbers[0] || '10';
+            const n2 = numbers[1] || '5';
+
+            const problemText = template.question.replace('{n1}', n1).replace('{n2}', n2);
+            return {question: problemText, answer: ex.answer};
+        }
+
+        // Helper function to generate step-by-step breakdown
+        function generateStepByStep(categoryKey, shortcutKey) {
+            const shortcut = allShortcuts[categoryKey].shortcuts[shortcutKey];
+            const ex = shortcut.generateQuestion();
+            const steps = [];
+
+            // Generate example-specific steps based on the operation
+            const numbers = ex.question.match(/\d+/g) || [];
+            if (numbers.length >= 2) {
+                const n1 = parseInt(numbers[0]);
+                const n2 = parseInt(numbers[1]);
+
+                if (categoryKey === 'addition') {
+                    steps.push(`Step 1: Start with the first number: ${n1}`);
+                    steps.push(`Step 2: Add the second number: ${n2}`);
+                    steps.push(`Step 3: Apply the technique from above`);
+                    steps.push(`Step 4: Final answer: ${ex.answer}`);
+                } else if (categoryKey === 'subtraction') {
+                    steps.push(`Step 1: Start with: ${n1}`);
+                    steps.push(`Step 2: Subtract: ${n2}`);
+                    steps.push(`Step 3: Use the shortcut method`);
+                    steps.push(`Step 4: Result: ${ex.answer}`);
+                } else if (categoryKey === 'multiplication') {
+                    steps.push(`Step 1: Identify the numbers: ${n1} × ${n2}`);
+                    steps.push(`Step 2: Apply the Vedic technique`);
+                    steps.push(`Step 3: Calculate using the pattern`);
+                    steps.push(`Step 4: Answer: ${ex.answer}`);
+                } else if (categoryKey === 'division') {
+                    steps.push(`Step 1: Set up: ${n1} ÷ ${n2}`);
+                    steps.push(`Step 2: Apply the division shortcut`);
+                    steps.push(`Step 3: Simplify`);
+                    steps.push(`Step 4: Final: ${ex.answer}`);
+                }
+            }
+
+            return steps;
+        }
+
         function showLearnView(categoryKey, shortcutKey) {
             currentCategory = categoryKey;
             currentShortcut = shortcutKey;
@@ -1489,13 +1676,48 @@
             document.getElementById('learn-title').textContent = shortcut.title;
             document.getElementById('learn-explanation').textContent = shortcut.explanation;
 
-            const examplesContainer = document.getElementById('learn-examples');
-            examplesContainer.innerHTML = ''; // Clear previous examples
+            // Generate step-by-step breakdown
+            const stepContainer = document.getElementById('step-by-step');
+            stepContainer.innerHTML = '';
+            const steps = generateStepByStep(categoryKey, shortcutKey);
+            steps.forEach((step, index) => {
+                stepContainer.innerHTML += `
+                    <div class="bg-gray-800 border-l-4 border-red-400 p-4 rounded-r-lg">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 w-8 h-8 bg-red-400 rounded-full flex items-center justify-center text-black font-bold mr-3">
+                                ${index + 1}
+                            </div>
+                            <div class="text-white text-lg">${step}</div>
+                        </div>
+                    </div>
+                `;
+            });
 
-            // Generate 5 examples
-            for (let i = 0; i < 5; i++) {
+            // Generate subway word problems
+            const wordProblemsContainer = document.getElementById('word-problems');
+            wordProblemsContainer.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                const problem = generateSubwayWordProblem(categoryKey, shortcutKey);
+                wordProblemsContainer.innerHTML += `
+                    <div class="bg-gray-800 border border-yellow-400/40 p-5 rounded-lg">
+                        <div class="flex items-start mb-3">
+                            <span class="text-3xl mr-3">🚇</span>
+                            <p class="text-white text-lg flex-1">${problem.question}</p>
+                        </div>
+                        <div class="ml-12 bg-gray-900 p-3 rounded border-l-4 border-green-400">
+                            <span class="text-gray-400">Answer:</span>
+                            <span class="text-green-400 font-bold text-xl ml-2">${problem.answer}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Generate practice examples
+            const examplesContainer = document.getElementById('learn-examples');
+            examplesContainer.innerHTML = '';
+            for (let i = 0; i < 6; i++) {
                 const ex = shortcut.generateQuestion();
-                examplesContainer.innerHTML += `<div class="bg-gray-800 border border-red-400/30 p-4 rounded-md">
+                examplesContainer.innerHTML += `<div class="bg-gray-800 border border-red-400/30 p-4 rounded-md hover:border-red-400 transition-all">
                     <span class="font-semibold text-white text-lg">${ex.question}</span> = <span class="text-red-400 font-black text-lg">${ex.answer}</span>
                 </div>`;
             }
@@ -1653,6 +1875,7 @@
         
         // --- EVENT LISTENERS ---
         backToCategoriesBtn.addEventListener('click', renderCategories);
+        document.getElementById('back-to-categories-btn-2').addEventListener('click', renderCategories);
         document.getElementById('back-to-main-btn').addEventListener('click', () => {
              switchView('main-view');
              renderShortcutGrid(currentCategory);
