@@ -489,13 +489,30 @@
                 <!-- Express Train Status -->
                 <div class="card p-4 text-center" id="express-card">
                     <div class="text-2xl font-bold">🚄 <span id="multiplier">1x</span></div>
-                    <div class="text-xs text-gray-400 mt-1" id="express-status">PLAY 3 MIN FOR EXPRESS!</div>
+                    <div class="text-xs text-gray-400 mt-1" id="express-status">PLAY 3 MIN FOR DOUBLE COINS!</div>
                 </div>
 
                 <!-- Conductor Button -->
                 <div class="card p-4 text-center cursor-pointer" onclick="toggleConductor()">
                     <div class="text-3xl font-bold">🧑‍✈️</div>
                     <div class="text-xs text-gray-400 mt-1">MY CONDUCTOR</div>
+                </div>
+            </div>
+
+            <!-- Passenger Count Display -->
+            <div class="card p-4 mb-6">
+                <div class="text-sm text-gray-400 mb-2 text-center">PASSENGERS ON BOARD</div>
+                <div class="flex items-center justify-center gap-3">
+                    <div class="text-4xl">👥</div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-white">
+                            <span id="passenger-count">12</span> / <span id="max-passengers">30</span>
+                        </div>
+                        <div class="text-xs text-gray-400 mt-1">CURRENT / MAX CAPACITY</div>
+                    </div>
+                </div>
+                <div class="mt-3 progress-bar-bg">
+                    <div class="progress-bar" id="passenger-progress" style="width: 40%"></div>
                 </div>
             </div>
 
@@ -761,13 +778,15 @@
             startTime: Date.now(),
             expressUnlocked: false,
             ownedItems: [], // Store purchases
-            equippedItems: {} // Currently equipped conductor items
+            equippedItems: {}, // Currently equipped conductor items
+            passengers: 12, // Current number of passengers
+            maxPassengers: 30 // Max capacity (increases with better cars)
         };
 
         const SUBWAY_STATIONS = [
-            '1st St', '14th St', '23rd St', '34th St', '42nd St',
-            '59th St', '72nd St', '86th St', '96th St', '125th St',
-            'Bronx', 'Queens', 'Brooklyn', 'Manhattan', 'Express Hub'
+            '14th St', '34th St', '42nd St', '72nd St', '96th St', '110th St',
+            '14th St', '34th St', '42nd St', '72nd St', '96th St', '110th St',
+            '14th St', '34th St', '42nd St'
         ];
 
         const DISTANCE_PER_LEVEL = [100, 150, 200, 300, 400, 500, 700, 900, 1200, 1500, 2000, 2500, 3000, 4000, 5000];
@@ -790,10 +809,10 @@
                 { id: 'acc_medal', name: '🥇 Gold Medal', price: 500, emoji: '🥇', slot: 'accessory' }
             ],
             subwayCar: [
-                { id: 'car_clean', name: '✨ Clean Car', price: 300, emoji: '✨', slot: 'subway' },
-                { id: 'car_modern', name: '🚄 Modern Car', price: 600, emoji: '🚄', slot: 'subway' },
-                { id: 'car_luxury', name: '💎 Luxury Car', price: 1500, emoji: '💎', slot: 'subway' },
-                { id: 'car_express', name: '⚡ Express Car', price: 3000, emoji: '⚡', slot: 'subway' }
+                { id: 'car_clean', name: '✨ Clean Car', price: 300, emoji: '✨', slot: 'subway', capacity: 40 },
+                { id: 'car_modern', name: '🚄 Modern Car', price: 600, emoji: '🚄', slot: 'subway', capacity: 60 },
+                { id: 'car_luxury', name: '💎 Luxury Car', price: 1500, emoji: '💎', slot: 'subway', capacity: 80 },
+                { id: 'car_express', name: '⚡ Express Car', price: 3000, emoji: '⚡', slot: 'subway', capacity: 100 }
             ]
         };
 
@@ -1147,6 +1166,8 @@
                     gameStats.expressUnlocked = loaded.expressUnlocked || false;
                     gameStats.ownedItems = loaded.ownedItems || [];
                     gameStats.equippedItems = loaded.equippedItems || {};
+                    gameStats.passengers = loaded.passengers || 12;
+                    gameStats.maxPassengers = loaded.maxPassengers || 30;
                     console.log("✅ Game stats loaded from localStorage");
                 } catch (e) {
                     console.error("Error loading stats:", e);
@@ -1187,7 +1208,7 @@
                 // Save user progress (mastery levels)
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(userProgress));
 
-                // Save game stats (coins, distance, level, store items)
+                // Save game stats (coins, distance, level, store items, passengers)
                 const statsToSave = {
                     coins: gameStats.coins,
                     distance: gameStats.distance,
@@ -1195,7 +1216,9 @@
                     multiplier: gameStats.multiplier,
                     expressUnlocked: gameStats.expressUnlocked,
                     ownedItems: gameStats.ownedItems,
-                    equippedItems: gameStats.equippedItems
+                    equippedItems: gameStats.equippedItems,
+                    passengers: gameStats.passengers,
+                    maxPassengers: gameStats.maxPassengers
                 };
                 localStorage.setItem(STATS_KEY, JSON.stringify(statsToSave));
 
@@ -1219,7 +1242,7 @@
         function exportProgress() {
             try {
                 const exportData = {
-                    version: 2, // Incremented for new format
+                    version: 3, // Incremented for new format with passengers
                     timestamp: new Date().toISOString(),
                     progress: userProgress,
                     stats: {
@@ -1229,7 +1252,9 @@
                         multiplier: gameStats.multiplier,
                         expressUnlocked: gameStats.expressUnlocked,
                         ownedItems: gameStats.ownedItems,
-                        equippedItems: gameStats.equippedItems
+                        equippedItems: gameStats.equippedItems,
+                        passengers: gameStats.passengers,
+                        maxPassengers: gameStats.maxPassengers
                     }
                 };
 
@@ -1362,6 +1387,15 @@
             }
 
             gameStats.equippedItems[item.slot] = itemId;
+
+            // If equipping a subway car, update max passengers and add some passengers
+            if (item.slot === 'subway' && item.capacity) {
+                gameStats.maxPassengers = item.capacity;
+                // Add some passengers when upgrading (50% of new capacity or current, whichever is higher)
+                gameStats.passengers = Math.max(gameStats.passengers, Math.floor(item.capacity * 0.5));
+                updateGameStats();
+            }
+
             saveProgress();
             renderStoreItems();
             renderConductorPreview();
@@ -1378,7 +1412,7 @@
                     const itemEl = document.createElement('div');
                     itemEl.className = `conductor-item ${slot}-slot`;
                     itemEl.style.cssText = slot === 'hat' ? 'top: -5px; left: 50%; transform: translateX(-50%);' :
-                                          slot === 'accessory' ? 'top: 40%; left: 50%; transform: translateX(-50%);' :
+                                          slot === 'accessory' ? 'top: 60px; left: 50%; transform: translateX(-50%);' :
                                           'bottom: 10px; left: 50%; transform: translateX(-50%);';
                     itemEl.textContent = item.emoji;
                     container.appendChild(itemEl);
@@ -1405,7 +1439,7 @@
                     const itemEl = document.createElement('div');
                     itemEl.className = `conductor-item ${slot}-slot`;
                     itemEl.style.cssText = slot === 'hat' ? 'top: -5px; left: 50%; transform: translateX(-50%);' :
-                                          slot === 'accessory' ? 'top: 40%; left: 50%; transform: translateX(-50%);' :
+                                          slot === 'accessory' ? 'top: 60px; left: 50%; transform: translateX(-50%);' :
                                           'bottom: 10px; left: 50%; transform: translateX(-50%);';
                     itemEl.textContent = item.emoji;
                     container.appendChild(itemEl);
@@ -1468,6 +1502,15 @@
             document.getElementById('distance-current').textContent = gameStats.distance;
             document.getElementById('distance-needed').textContent = distanceNeeded;
 
+            // Update passenger count
+            document.getElementById('passenger-count').textContent = gameStats.passengers;
+            document.getElementById('max-passengers').textContent = gameStats.maxPassengers;
+            const passengerProgress = (gameStats.passengers / gameStats.maxPassengers) * 100;
+            const passengerBar = document.getElementById('passenger-progress');
+            if (passengerBar) {
+                passengerBar.style.width = passengerProgress + '%';
+            }
+
             // Check for express train
             checkExpressTrain();
         }
@@ -1528,14 +1571,15 @@
                 gameStats.expressUnlocked = true;
                 gameStats.multiplier = 2;
                 document.getElementById('express-modal').classList.remove('hidden');
-                document.getElementById('express-status').textContent = '2x MULTIPLIER ACTIVE!';
+                document.getElementById('express-status').textContent = 'DOUBLE COINS ACTIVE!';
                 document.getElementById('express-card').classList.add('pulse-glow');
+                updateGameStats(); // Update display
                 saveProgress(); // Auto-save
             } else if (!gameStats.expressUnlocked) {
                 const remaining = Math.ceil((EXPRESS_TIME - elapsed) / 1000);
                 const minutes = Math.floor(remaining / 60);
                 const seconds = remaining % 60;
-                document.getElementById('express-status').textContent = `${minutes}:${seconds.toString().padStart(2, '0')} TO EXPRESS`;
+                document.getElementById('express-status').textContent = `${minutes}:${seconds.toString().padStart(2, '0')} TO DOUBLE COINS`;
             }
         }
 
@@ -1817,8 +1861,16 @@
                 score++;
                 const coinsEarned = awardCoins(COINS_PER_CORRECT);
                 awardDistance(DISTANCE_PER_CORRECT);
-                feedbackEl.textContent = `✅ CORRECT! +${coinsEarned} 💰 +${DISTANCE_PER_CORRECT}m`;
+
+                // Add passengers when correct (1-3 passengers if there's room)
+                const passengersToAdd = Math.floor(Math.random() * 3) + 1;
+                const newPassengers = Math.min(gameStats.passengers + passengersToAdd, gameStats.maxPassengers);
+                const actualAdded = newPassengers - gameStats.passengers;
+                gameStats.passengers = newPassengers;
+
+                feedbackEl.textContent = `✅ CORRECT! +${coinsEarned} 💰 +${DISTANCE_PER_CORRECT}m ${actualAdded > 0 ? '+' + actualAdded + '👥' : ''}`;
                 feedbackEl.className = "mt-4 h-8 text-xl font-bold text-green-400";
+                updateGameStats();
             } else {
                 feedbackEl.textContent = `❌ Wrong! Answer: ${correctAnswer}`;
                 feedbackEl.className = "mt-4 h-8 text-xl font-bold text-red-400";
