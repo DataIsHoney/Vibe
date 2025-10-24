@@ -1554,6 +1554,33 @@
         window.toggleConductor = toggleConductor;
         window.toggleSubwayCar = toggleSubwayCar;
 
+        // Word problem checker function
+        function checkWordProblem(problemId, correctAnswer, explanation) {
+            const inputEl = document.getElementById(`${problemId}-input`);
+            const feedbackEl = document.getElementById(`${problemId}-feedback`);
+            const userAnswer = parseInt(inputEl.value, 10);
+
+            if (isNaN(userAnswer)) {
+                feedbackEl.className = 'ml-12 bg-yellow-900/30 border-l-4 border-yellow-400 p-3 rounded mt-2';
+                feedbackEl.innerHTML = '<span class="text-yellow-400">⚠️ Please enter a number!</span>';
+                feedbackEl.classList.remove('hidden');
+                return;
+            }
+
+            if (userAnswer === correctAnswer) {
+                feedbackEl.className = 'ml-12 bg-green-900/30 border-l-4 border-green-400 p-3 rounded mt-2';
+                feedbackEl.innerHTML = '<span class="text-green-400 text-lg font-bold">✅ Correct! Great job!</span>';
+            } else {
+                feedbackEl.className = 'ml-12 bg-red-900/30 border-l-4 border-red-400 p-4 rounded mt-2';
+                feedbackEl.innerHTML = `
+                    <div class="text-red-400 text-lg font-bold mb-2">❌ Not quite. The correct answer is ${correctAnswer}</div>
+                    <div class="text-gray-300 text-base">${explanation}</div>
+                `;
+            }
+            feedbackEl.classList.remove('hidden');
+        }
+        window.checkWordProblem = checkWordProblem;
+
         // --- GAME MECHANICS FUNCTIONS ---
         function updateGameStats() {
             document.getElementById('coin-count').textContent = gameStats.coins;
@@ -1733,24 +1760,24 @@
         function generateSubwayWordProblem(categoryKey, shortcutKey) {
             const problems = {
                 addition: [
-                    {question: "🚇 Train A has {n1} passengers. At the next stop, {n2} more people board. How many passengers total?", type: "add"},
-                    {question: "🎫 You bought a MetroCard with ${n1} on it. You add ${n2} more. How much is on your card now?", type: "add"},
-                    {question: "👥 There are {n1} people waiting at 42nd St and {n2} people at Times Square. How many total?", type: "add"}
+                    {question: "🚇 Train A has {n1} passengers. At the next stop, {n2} more people board. How many passengers total?", type: "add", explanation: "When people board the train, we ADD them. So {n1} + {n2} = {answer}"},
+                    {question: "🎫 You bought a MetroCard with ${n1} on it. You add ${n2} more. How much is on your card now?", type: "add", explanation: "Adding money to your card means addition: ${n1} + ${n2} = ${answer}"},
+                    {question: "👥 There are {n1} people waiting at 42nd St and {n2} people at Times Square. How many total?", type: "add", explanation: "To find the total, we ADD both groups: {n1} + {n2} = {answer}"}
                 ],
                 subtraction: [
-                    {question: "🚇 A train starts with {n1} passengers. {n2} people get off at the next stop. How many remain?", type: "sub"},
-                    {question: "🎫 You have ${n1} on your MetroCard. A ride costs ${n2}. How much is left?", type: "sub"},
-                    {question: "⏱️ The train takes {n1} minutes to reach the last stop. It's been {n2} minutes. How much longer?", type: "sub"}
+                    {question: "🚇 A train starts with {n1} passengers. {n2} people get off at the next stop. How many remain?", type: "sub", explanation: "When people get off, we SUBTRACT them: {n1} - {n2} = {answer}"},
+                    {question: "🎫 You have ${n1} on your MetroCard. A ride costs ${n2}. How much is left?", type: "sub", explanation: "After spending money, SUBTRACT the cost: ${n1} - ${n2} = ${answer}"},
+                    {question: "⏱️ The train takes {n1} minutes to reach the last stop. It's been {n2} minutes. How much longer?", type: "sub", explanation: "To find remaining time, SUBTRACT what's passed: {n1} - {n2} = {answer} minutes left"}
                 ],
                 multiplication: [
-                    {question: "🚇 Each subway car holds {n1} people. There are {n2} cars. What's the total capacity?", type: "mult"},
-                    {question: "🎫 A MetroCard costs ${n1}. You buy {n2} of them. What's the total cost?", type: "mult"},
-                    {question: "👨‍✈️ Each conductor works {n1} hours per day for {n2} days. How many total hours?", type: "mult"}
+                    {question: "🚇 Each subway car holds {n1} people. There are {n2} cars. What's the total capacity?", type: "mult", explanation: "MULTIPLY the number per car by total cars: {n1} × {n2} = {answer}"},
+                    {question: "🎫 A MetroCard costs ${n1}. You buy {n2} of them. What's the total cost?", type: "mult", explanation: "MULTIPLY the cost by quantity: ${n1} × {n2} = ${answer}"},
+                    {question: "👨‍✈️ Each conductor works {n1} hours per day for {n2} days. How many total hours?", type: "mult", explanation: "MULTIPLY hours per day by number of days: {n1} × {n2} = {answer} hours"}
                 ],
                 division: [
-                    {question: "🚇 {n1} passengers need to fit into {n2} subway cars equally. How many per car?", type: "div"},
-                    {question: "🎫 ${n1} is split equally among {n2} MetroCards. How much on each card?", type: "div"},
-                    {question: "⏱️ A {n1} minute journey is divided into {n2} equal stops. How long between stops?", type: "div"}
+                    {question: "🚇 {n1} passengers need to fit into {n2} subway cars equally. How many per car?", type: "div", explanation: "DIVIDE total passengers by number of cars: {n1} ÷ {n2} = {answer} per car"},
+                    {question: "🎫 ${n1} is split equally among {n2} MetroCards. How much on each card?", type: "div", explanation: "DIVIDE the total amount by number of cards: ${n1} ÷ {n2} = ${answer} per card"},
+                    {question: "⏱️ A {n1} minute journey is divided into {n2} equal stops. How long between stops?", type: "div", explanation: "DIVIDE total time by number of stops: {n1} ÷ {n2} = {answer} minutes between stops"}
                 ]
             };
 
@@ -1765,7 +1792,12 @@
             const n2 = numbers[1] || '5';
 
             const problemText = template.question.replace('{n1}', n1).replace('{n2}', n2);
-            return {question: problemText, answer: ex.answer};
+            const explanationText = template.explanation
+                .replace(/{n1}/g, n1)
+                .replace(/{n2}/g, n2)
+                .replace(/{answer}/g, ex.answer);
+
+            return {question: problemText, answer: ex.answer, explanation: explanationText};
         }
 
         // Helper function to generate step-by-step breakdown
@@ -1781,25 +1813,40 @@
                 const n2 = parseInt(numbers[1]);
 
                 if (categoryKey === 'addition') {
-                    steps.push(`Step 1: Start with the first number: ${n1}`);
-                    steps.push(`Step 2: Add the second number: ${n2}`);
-                    steps.push(`Step 3: Apply the technique from above`);
-                    steps.push(`Step 4: Final answer: ${ex.answer}`);
+                    if (shortcutKey === 'add9') {
+                        steps.push(`Step 1: Start with ${n1}`);
+                        steps.push(`Step 2: To add 9, add 10 instead: ${n1} + 10 = ${n1 + 10}`);
+                        steps.push(`Step 3: Now subtract 1: ${n1 + 10} - 1 = ${ex.answer}`);
+                        steps.push(`Step 4: Final answer: ${ex.answer}`);
+                    } else {
+                        steps.push(`Step 1: Write down the first number: ${n1}`);
+                        steps.push(`Step 2: Add the second number: ${n1} + ${n2}`);
+                        steps.push(`Step 3: Break down if needed: ${n1} + ${n2} = ${ex.answer}`);
+                        steps.push(`Step 4: Final answer: ${ex.answer}`);
+                    }
                 } else if (categoryKey === 'subtraction') {
-                    steps.push(`Step 1: Start with: ${n1}`);
-                    steps.push(`Step 2: Subtract: ${n2}`);
-                    steps.push(`Step 3: Use the shortcut method`);
-                    steps.push(`Step 4: Result: ${ex.answer}`);
+                    if (shortcutKey === 'sub9') {
+                        steps.push(`Step 1: Start with ${n1}`);
+                        steps.push(`Step 2: To subtract 9, subtract 10 instead: ${n1} - 10 = ${n1 - 10}`);
+                        steps.push(`Step 3: Now add 1 back: ${n1 - 10} + 1 = ${ex.answer}`);
+                        steps.push(`Step 4: Final answer: ${ex.answer}`);
+                    } else {
+                        steps.push(`Step 1: Start with ${n1}`);
+                        steps.push(`Step 2: Subtract ${n2} from ${n1}`);
+                        steps.push(`Step 3: Work through: ${n1} - ${n2} = ${ex.answer}`);
+                        steps.push(`Step 4: Final answer: ${ex.answer}`);
+                    }
                 } else if (categoryKey === 'multiplication') {
-                    steps.push(`Step 1: Identify the numbers: ${n1} × ${n2}`);
-                    steps.push(`Step 2: Apply the Vedic technique`);
-                    steps.push(`Step 3: Calculate using the pattern`);
-                    steps.push(`Step 4: Answer: ${ex.answer}`);
+                    const operation = ex.question;
+                    steps.push(`Step 1: Set up the problem: ${operation}`);
+                    steps.push(`Step 2: Look for patterns or shortcuts in the numbers`);
+                    steps.push(`Step 3: Apply the Vedic multiplication technique for these specific numbers`);
+                    steps.push(`Step 4: Calculate: ${n1} × ${n2} = ${ex.answer}`);
                 } else if (categoryKey === 'division') {
-                    steps.push(`Step 1: Set up: ${n1} ÷ ${n2}`);
-                    steps.push(`Step 2: Apply the division shortcut`);
-                    steps.push(`Step 3: Simplify`);
-                    steps.push(`Step 4: Final: ${ex.answer}`);
+                    steps.push(`Step 1: Set up the division: ${n1} ÷ ${n2}`);
+                    steps.push(`Step 2: See how many times ${n2} fits into ${n1}`);
+                    steps.push(`Step 3: Perform the division: ${n1} ÷ ${n2}`);
+                    steps.push(`Step 4: Final answer: ${ex.answer}`);
                 }
             }
 
@@ -1860,21 +1907,29 @@
                 `;
             });
 
-            // Generate subway word problems
+            // Generate subway word problems with interactive answers
             const wordProblemsContainer = document.getElementById('word-problems');
             wordProblemsContainer.innerHTML = '';
             for (let i = 0; i < 3; i++) {
                 const problem = generateSubwayWordProblem(categoryKey, shortcutKey);
+                const problemId = `word-problem-${i}`;
                 wordProblemsContainer.innerHTML += `
-                    <div class="bg-gray-800 border border-yellow-400/40 p-5 rounded-lg">
+                    <div class="bg-gray-800 border border-yellow-400/40 p-5 rounded-lg" id="${problemId}">
                         <div class="flex items-start mb-3">
                             <span class="text-3xl mr-3">🚇</span>
                             <p class="text-white text-lg flex-1">${problem.question}</p>
                         </div>
-                        <div class="ml-12 bg-gray-900 p-3 rounded border-l-4 border-green-400">
-                            <span class="text-gray-400">Answer:</span>
-                            <span class="text-green-400 font-bold text-xl ml-2">${problem.answer}</span>
+                        <div class="ml-12 flex gap-3 items-center mb-3">
+                            <input type="number"
+                                   id="${problemId}-input"
+                                   class="bg-gray-900 border-2 border-gray-600 rounded px-4 py-2 text-white text-lg w-32 focus:border-yellow-400 focus:outline-none"
+                                   placeholder="Answer">
+                            <button onclick="checkWordProblem('${problemId}', ${problem.answer}, '${problem.explanation}')"
+                                    class="btn btn-primary text-sm px-4 py-2">
+                                Check Answer
+                            </button>
                         </div>
+                        <div id="${problemId}-feedback" class="ml-12 hidden"></div>
                     </div>
                 `;
             }
