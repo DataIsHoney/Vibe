@@ -1974,7 +1974,7 @@
             const topicId = `${currentCategory}_${currentShortcut}`;
             if (score === 10 && !gameStats.masteredTopics.includes(topicId)) {
                 gameStats.masteredTopics.push(topicId);
-                masteryBonus = 500 * gameStats.multiplier; // Extra 500 coins for mastery!
+                masteryBonus = 1000 * gameStats.multiplier; // Extra 1000 coins for mastery!
                 gameStats.coins += masteryBonus;
             }
 
