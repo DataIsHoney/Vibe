@@ -497,6 +497,12 @@
                     <div class="text-3xl font-bold">🧑‍✈️</div>
                     <div class="text-xs text-gray-400 mt-1">MY CONDUCTOR</div>
                 </div>
+
+                <!-- Subway Car Button -->
+                <div class="card p-4 text-center cursor-pointer" onclick="toggleSubwayCar()">
+                    <div class="text-3xl font-bold">🚇</div>
+                    <div class="text-xs text-gray-400 mt-1">MY SUBWAY CAR</div>
+                </div>
             </div>
 
             <!-- Passenger Count Display -->
@@ -719,6 +725,28 @@
         </div>
     </div>
 
+    <!-- Subway Car Modal -->
+    <div id="subwaycar-modal" class="modal-overlay hidden">
+        <div class="modal-content text-center">
+            <h2 class="text-4xl font-black text-red-400 mb-6">🚇 MY SUBWAY CAR</h2>
+            <div class="mb-6">
+                <div class="text-9xl mb-4" id="subwaycar-emoji">🚇</div>
+                <div class="text-2xl font-bold text-white mb-2" id="subwaycar-name">Basic Subway Car</div>
+                <div class="text-lg text-blue-400" id="subwaycar-capacity">Max Passengers: 30</div>
+                <div class="text-md text-purple-400 mt-2">
+                    <span class="text-xl">👥</span>
+                    <span id="subwaycar-current-passengers">12</span> /
+                    <span id="subwaycar-max-capacity">30</span>
+                </div>
+            </div>
+            <p class="text-gray-300 mb-4">Upgrade your subway car in the store to carry more passengers!</p>
+            <div class="flex justify-center gap-4">
+                <button onclick="openStore()" class="btn btn-primary">Open Store</button>
+                <button id="close-subwaycar-btn" class="btn btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Station Arrival Cutscene -->
     <div id="station-cutscene" class="station-cutscene hidden">
         <div class="subway-doors" id="subway-doors">
@@ -780,18 +808,19 @@
             ownedItems: [], // Store purchases
             equippedItems: {}, // Currently equipped conductor items
             passengers: 12, // Current number of passengers
-            maxPassengers: 30 // Max capacity (increases with better cars)
+            maxPassengers: 30, // Max capacity (increases with better cars)
+            masteredTopics: [] // Array of topic IDs that have been mastered (10/10 score)
         };
 
         const SUBWAY_STATIONS = [
-            '1st St', '14th St', '34th St', '42nd St', '72nd St', '96th St', '110th St',
+            '14th St', '14th St', '34th St', '42nd St', '72nd St', '96th St', '110th St',
             '125th St', '140th St'
         ];
 
         const DISTANCE_PER_LEVEL = [100, 150, 200, 300, 400, 500, 700, 900, 1200, 1500, 2000, 2500, 3000, 4000, 5000];
         const COINS_PER_CORRECT = 10;
         const DISTANCE_PER_CORRECT = 15; // meters traveled per correct answer
-        const EXPRESS_TIME = 180000; // 3 minutes in milliseconds
+        const EXPRESS_TIME = 0; // Auto-activate double coins immediately
 
         // STORE ITEMS
         const STORE_ITEMS = {
@@ -805,13 +834,21 @@
                 { id: 'acc_whistle', name: '🎺 Silver Whistle', price: 100, emoji: '🎺', slot: 'accessory' },
                 { id: 'acc_badge', name: '🏅 Conductor Badge', price: 200, emoji: '🏅', slot: 'accessory' },
                 { id: 'acc_sunglasses', name: '🕶️ Cool Shades', price: 250, emoji: '🕶️', slot: 'accessory' },
-                { id: 'acc_medal', name: '🥇 Gold Medal', price: 500, emoji: '🥇', slot: 'accessory' }
+                { id: 'acc_medal', name: '🥇 Gold Medal', price: 500, emoji: '🥇', slot: 'accessory' },
+                { id: 'acc_diamond', name: '💎 Diamond Ring', price: 2000, emoji: '💎', slot: 'accessory', requiresMastery: 1 },
+                { id: 'acc_star', name: '⭐ Star Badge', price: 3000, emoji: '⭐', slot: 'accessory', requiresMastery: 3 },
+                { id: 'acc_trophy', name: '🏆 Master Trophy', price: 5000, emoji: '🏆', slot: 'accessory', requiresMastery: 5 }
             ],
             subwayCar: [
                 { id: 'car_clean', name: '✨ Clean Car', price: 300, emoji: '✨', slot: 'subway', capacity: 40 },
-                { id: 'car_modern', name: '🚄 Modern Car', price: 600, emoji: '🚄', slot: 'subway', capacity: 60 },
-                { id: 'car_luxury', name: '💎 Luxury Car', price: 1500, emoji: '💎', slot: 'subway', capacity: 80 },
-                { id: 'car_express', name: '⚡ Express Car', price: 3000, emoji: '⚡', slot: 'subway', capacity: 100 }
+                { id: 'car_modern', name: '🚄 Modern Car', price: 600, emoji: '🚄', slot: 'subway', capacity: 55 },
+                { id: 'car_luxury', name: '💎 Luxury Car', price: 1500, emoji: '💎', slot: 'subway', capacity: 95 },
+                { id: 'car_express', name: '⚡ Express Car', price: 3000, emoji: '⚡', slot: 'subway', capacity: 140 },
+                { id: 'car_mega', name: '🚀 Mega Car', price: 5000, emoji: '🚀', slot: 'subway', capacity: 195 },
+                { id: 'car_ultra', name: '🌟 Ultra Car', price: 8000, emoji: '🌟', slot: 'subway', capacity: 265 },
+                { id: 'car_supreme', name: '👑 Supreme Car', price: 12000, emoji: '👑', slot: 'subway', capacity: 350 },
+                { id: 'car_elite', name: '💫 Elite Car', price: 18000, emoji: '💫', slot: 'subway', capacity: 450 },
+                { id: 'car_legendary', name: '🏆 Legendary Car', price: 30000, emoji: '🏆', slot: 'subway', capacity: 575 }
             ]
         };
 
@@ -1167,6 +1204,7 @@
                     gameStats.equippedItems = loaded.equippedItems || {};
                     gameStats.passengers = loaded.passengers || 12;
                     gameStats.maxPassengers = loaded.maxPassengers || 30;
+                    gameStats.masteredTopics = loaded.masteredTopics || [];
                     console.log("✅ Game stats loaded from localStorage");
                 } catch (e) {
                     console.error("Error loading stats:", e);
@@ -1217,7 +1255,8 @@
                     ownedItems: gameStats.ownedItems,
                     equippedItems: gameStats.equippedItems,
                     passengers: gameStats.passengers,
-                    maxPassengers: gameStats.maxPassengers
+                    maxPassengers: gameStats.maxPassengers,
+                    masteredTopics: gameStats.masteredTopics
                 };
                 localStorage.setItem(STATS_KEY, JSON.stringify(statsToSave));
 
@@ -1334,18 +1373,23 @@
                 const owned = gameStats.ownedItems.includes(item.id);
                 const equipped = gameStats.equippedItems[item.slot] === item.id;
                 const canAfford = gameStats.coins >= item.price;
+                const masteryMet = !item.requiresMastery || gameStats.masteredTopics.length >= item.requiresMastery;
 
                 const itemEl = document.createElement('div');
                 itemEl.className = `store-item ${owned ? 'owned' : ''} ${equipped ? 'equipped' : ''}`;
+                const emojiSize = item.slot === 'subway' ? 'text-5xl' : 'text-2xl';
                 itemEl.innerHTML = `
                     <div class="flex justify-between items-center">
                         <div>
-                            <div class="text-2xl mb-1">${item.emoji}</div>
+                            <div class="${emojiSize} mb-1">${item.emoji}</div>
                             <div class="text-white font-bold">${item.name}</div>
                             <div class="text-sm text-gray-400">${owned ? (equipped ? 'Equipped' : 'Owned') : `${item.price} coins`}</div>
+                            ${item.capacity ? `<div class="text-xs text-blue-400">Max Passengers: ${item.capacity}</div>` : ''}
+                            ${item.requiresMastery ? `<div class="text-xs ${masteryMet ? 'text-purple-400' : 'text-red-400'}">🏆 Requires ${item.requiresMastery} Mastered Topic${item.requiresMastery > 1 ? 's' : ''}</div>` : ''}
                         </div>
                         <div>
-                            ${!owned && canAfford ? `<button onclick="purchaseItem('${item.id}')" class="btn btn-primary text-sm px-3 py-1">Buy</button>` : ''}
+                            ${!owned && canAfford && masteryMet ? `<button onclick="purchaseItem('${item.id}')" class="btn btn-primary text-sm px-3 py-1">Buy</button>` : ''}
+                            ${!owned && (!canAfford || !masteryMet) ? `<span class="text-gray-500 text-xs">${!masteryMet ? 'Locked' : 'Need more coins'}</span>` : ''}
                             ${owned && !equipped ? `<button onclick="equipItem('${item.id}')" class="btn btn-secondary text-sm px-3 py-1">Equip</button>` : ''}
                             ${equipped ? '<span class="text-yellow-400 text-sm">✓ Equipped</span>' : ''}
                         </div>
@@ -1411,7 +1455,7 @@
                     const itemEl = document.createElement('div');
                     itemEl.className = `conductor-item ${slot}-slot`;
                     itemEl.style.cssText = slot === 'hat' ? 'top: -5px; left: 50%; transform: translateX(-50%);' :
-                                          slot === 'accessory' ? 'top: 60px; left: 50%; transform: translateX(-50%);' :
+                                          slot === 'accessory' ? 'top: 35px; left: 50%; transform: translateX(-50%);' :
                                           'bottom: 10px; left: 50%; transform: translateX(-50%);';
                     itemEl.textContent = item.emoji;
                     container.appendChild(itemEl);
@@ -1427,6 +1471,34 @@
             }
         }
 
+        function toggleSubwayCar() {
+            const modal = document.getElementById('subwaycar-modal');
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                renderSubwayCar();
+            }
+        }
+
+        function renderSubwayCar() {
+            // Find equipped subway car
+            const allItems = Object.values(STORE_ITEMS).flat();
+            const equippedCarId = gameStats.equippedItems.subway;
+            const equippedCar = allItems.find(i => i.id === equippedCarId);
+
+            if (equippedCar) {
+                document.getElementById('subwaycar-emoji').textContent = equippedCar.emoji;
+                document.getElementById('subwaycar-name').textContent = equippedCar.name;
+                document.getElementById('subwaycar-capacity').textContent = `Max Passengers: ${equippedCar.capacity}`;
+            } else {
+                document.getElementById('subwaycar-emoji').textContent = '🚇';
+                document.getElementById('subwaycar-name').textContent = 'Basic Subway Car';
+                document.getElementById('subwaycar-capacity').textContent = `Max Passengers: ${gameStats.maxPassengers}`;
+            }
+
+            document.getElementById('subwaycar-current-passengers').textContent = gameStats.passengers;
+            document.getElementById('subwaycar-max-capacity').textContent = gameStats.maxPassengers;
+        }
+
         function renderConductor() {
             const container = document.getElementById('conductor-items');
             container.innerHTML = '';
@@ -1438,7 +1510,7 @@
                     const itemEl = document.createElement('div');
                     itemEl.className = `conductor-item ${slot}-slot`;
                     itemEl.style.cssText = slot === 'hat' ? 'top: -5px; left: 50%; transform: translateX(-50%);' :
-                                          slot === 'accessory' ? 'top: 60px; left: 50%; transform: translateX(-50%);' :
+                                          slot === 'accessory' ? 'top: 35px; left: 50%; transform: translateX(-50%);' :
                                           'bottom: 10px; left: 50%; transform: translateX(-50%);';
                     itemEl.textContent = item.emoji;
                     container.appendChild(itemEl);
@@ -1480,11 +1552,12 @@
         window.purchaseItem = purchaseItem;
         window.equipItem = equipItem;
         window.toggleConductor = toggleConductor;
+        window.toggleSubwayCar = toggleSubwayCar;
 
         // --- GAME MECHANICS FUNCTIONS ---
         function updateGameStats() {
             document.getElementById('coin-count').textContent = gameStats.coins;
-            document.getElementById('level-badge').textContent = gameStats.level;
+            document.getElementById('level-badge').textContent = '2'; // Always show 2 train (red line)
             document.getElementById('station-name').textContent = SUBWAY_STATIONS[gameStats.level - 1] || 'Final Stop';
             document.getElementById('multiplier').textContent = gameStats.multiplier + 'x';
 
@@ -1553,11 +1626,18 @@
             gameStats.coins += bonus;
             const newStation = SUBWAY_STATIONS[gameStats.level - 1] || 'Final Stop';
 
+            // Random passengers leave at each station (10-30% of current passengers)
+            if (gameStats.passengers > 0) {
+                const leavePercentage = 0.10 + (Math.random() * 0.20); // 10-30%
+                const passengersLeaving = Math.floor(gameStats.passengers * leavePercentage);
+                gameStats.passengers = Math.max(0, gameStats.passengers - passengersLeaving);
+            }
+
             // Play station cutscene animation
             await playStationCutscene(newStation);
 
             // Show level up modal
-            document.getElementById('new-level-badge').textContent = gameStats.level;
+            document.getElementById('new-level-badge').textContent = '2'; // Always show 2 train (red line)
             document.getElementById('new-station-name').textContent = newStation;
             document.getElementById('levelup-bonus').textContent = bonus;
             document.getElementById('levelup-modal').classList.remove('hidden');
@@ -1889,6 +1969,15 @@
             }
             progress.lastReviewed = new Date().toISOString();
 
+            // Check for mastery (perfect score of 10/10)
+            let masteryBonus = 0;
+            const topicId = `${currentCategory}_${currentShortcut}`;
+            if (score === 10 && !gameStats.masteredTopics.includes(topicId)) {
+                gameStats.masteredTopics.push(topicId);
+                masteryBonus = 1000 * gameStats.multiplier; // Extra 1000 coins for mastery!
+                gameStats.coins += masteryBonus;
+            }
+
             // Calculate bonuses
             const bonusCoins = score * 5 * gameStats.multiplier;
             const bonusDistance = score * 10;
@@ -1903,7 +1992,7 @@
             }
 
             saveProgress();
-            showResultsModal(bonusCoins, bonusDistance);
+            showResultsModal(bonusCoins, bonusDistance, masteryBonus);
         }
 
         // --- SPACED REPETITION ---
@@ -1943,7 +2032,7 @@
         }
         
         // --- MODAL & UI ---
-        function showResultsModal(bonusCoins, bonusDistance) {
+        function showResultsModal(bonusCoins, bonusDistance, masteryBonus = 0) {
             const modal = document.getElementById('results-modal');
             document.getElementById('results-score').textContent = `${score} / 10`;
             document.getElementById('coins-earned').textContent = bonusCoins;
@@ -1951,7 +2040,8 @@
 
             let message = "Keep pushing! 🚇";
             if (score >= 8) message = "Great work! You're on track! 🔥";
-            if (score === 10) message = "PERFECT! You're a math legend! 🏆";
+            if (score === 10 && masteryBonus > 0) message = `MASTERY ACHIEVED! 🏆 +${masteryBonus} BONUS COINS! (Total Mastered: ${gameStats.masteredTopics.length})`;
+            else if (score === 10) message = "PERFECT! You're a math legend! 🏆";
             document.getElementById('results-message').textContent = message;
             modal.classList.remove('hidden');
             updateGameStats();
@@ -1993,6 +2083,9 @@
         });
         document.getElementById('close-conductor-btn').addEventListener('click', () => {
             document.getElementById('conductor-modal').classList.add('hidden');
+        });
+        document.getElementById('close-subwaycar-btn').addEventListener('click', () => {
+            document.getElementById('subwaycar-modal').classList.add('hidden');
         });
         reviewBtn.addEventListener('click', startReviewSession);
 
