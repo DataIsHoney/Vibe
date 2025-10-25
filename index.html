@@ -164,6 +164,37 @@
             margin-right: 8px;
         }
 
+        /* Hamburger Menu Styles */
+        .menu-btn {
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .menu-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-item {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(238, 53, 46, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .menu-item:hover {
+            background: rgba(238, 53, 46, 0.1);
+            border-left: 4px solid var(--subway-red);
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+
         .express-train {
             animation: expressTrain 0.5s ease-in-out;
             background: linear-gradient(45deg, var(--subway-red), var(--subway-orange));
@@ -462,76 +493,55 @@
 
         <!-- Game Stats Header -->
         <header class="mb-8">
-            <div class="text-center mb-6 relative overflow-hidden">
-                <h1 class="text-5xl font-black sm:text-6xl bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
-                    Subway Math <span class="subway-icon">🚇</span>
-                </h1>
-                <p class="mt-3 text-xl text-gray-300">Master Vedic Math • Earn Coins • Level Up!</p>
+            <!-- Top Bar with Title and Menu -->
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex-1">
+                    <h1 class="text-3xl sm:text-4xl md:text-5xl font-black bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
+                        🚇 Subway Math
+                    </h1>
+                    <p class="mt-1 text-sm sm:text-base text-gray-300">Master Vedic Math!</p>
+                </div>
+                <div class="menu-btn text-4xl" onclick="toggleMenu()">
+                    ☰
+                </div>
             </div>
 
-            <!-- Stats Bar -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <!-- Compact Stats Bar -->
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
                 <!-- Coins -->
-                <div class="card p-4 text-center cursor-pointer" onclick="openStore()">
-                    <div class="text-3xl font-black coin-icon">💰 <span id="coin-count">0</span></div>
-                    <div class="text-xs text-gray-400 mt-1">COINS - CLICK FOR STORE</div>
+                <div class="card p-3 text-center">
+                    <div class="text-2xl sm:text-3xl font-black coin-icon">💰 <span id="coin-count">0</span></div>
+                    <div class="text-xs text-gray-400 mt-1">COINS</div>
                 </div>
 
                 <!-- Level & Station -->
-                <div class="card p-4 text-center">
-                    <div class="text-2xl font-bold">
-                        <span class="subway-line" style="background-color: var(--subway-red); color: #fff;" id="level-badge">1</span>
-                        <span id="station-name" class="text-white">1st St</span>
+                <div class="card p-3 text-center">
+                    <div class="text-xl sm:text-2xl font-bold">
+                        <span class="subway-line" style="background-color: var(--subway-red); color: #fff;" id="level-badge">2</span>
+                        <span id="station-name" class="text-white text-sm sm:text-base">Wall Street</span>
                     </div>
-                    <div class="text-xs text-gray-400 mt-1">CURRENT STATION</div>
+                    <div class="text-xs text-gray-400 mt-1">STATION</div>
                 </div>
 
-                <!-- Express Train Status -->
-                <div class="card p-4 text-center" id="express-card">
-                    <div class="text-2xl font-bold">🚄 <span id="multiplier">1x</span></div>
-                    <div class="text-xs text-gray-400 mt-1" id="express-status">PLAY 3 MIN FOR DOUBLE COINS!</div>
-                </div>
-
-                <!-- Conductor Button -->
-                <div class="card p-4 text-center cursor-pointer" onclick="toggleConductor()">
-                    <div class="text-3xl font-bold">🧑‍✈️</div>
-                    <div class="text-xs text-gray-400 mt-1">MY CONDUCTOR</div>
-                </div>
-
-                <!-- Subway Car Button -->
-                <div class="card p-4 text-center cursor-pointer" onclick="toggleSubwayCar()">
-                    <div class="text-3xl font-bold">🚇</div>
-                    <div class="text-xs text-gray-400 mt-1">MY SUBWAY CAR</div>
+                <!-- Passengers -->
+                <div class="card p-3 text-center col-span-2 md:col-span-1">
+                    <div class="text-xl sm:text-2xl font-bold">
+                        👥 <span id="passenger-count">0</span>/<span id="max-passengers">30</span>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-1">PASSENGERS</div>
                 </div>
             </div>
 
-            <!-- Passenger Count Display -->
-            <div class="card p-4 mb-6">
-                <div class="text-sm text-gray-400 mb-2 text-center">PASSENGERS ON BOARD</div>
-                <div class="flex items-center justify-center gap-3">
-                    <div class="text-4xl">👥</div>
-                    <div class="text-center">
-                        <div class="text-3xl font-bold text-white">
-                            <span id="passenger-count">12</span> / <span id="max-passengers">30</span>
-                        </div>
-                        <div class="text-xs text-gray-400 mt-1">CURRENT / MAX CAPACITY</div>
+            <!-- Progress to Next Station (Compact) -->
+            <div class="card p-3 mb-4">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="text-xs text-gray-400">NEXT STATION</div>
+                    <div class="text-xs text-gray-300">
+                        <span id="distance-current">0</span>m / <span id="distance-needed">100</span>m
                     </div>
                 </div>
-                <div class="mt-3 progress-bar-bg">
-                    <div class="progress-bar" id="passenger-progress" style="width: 40%"></div>
-                </div>
-            </div>
-
-            <!-- Subway Progress to Next Station -->
-            <div class="card p-4 mb-6">
-                <div class="text-sm text-gray-400 mb-2 text-center">PROGRESS TO NEXT STATION</div>
-                <div class="subway-progress-track">
-                    <div class="subway-track"></div>
-                    <div class="train-car" id="train-position">🚇</div>
-                    <div id="station-markers"></div>
-                </div>
-                <div class="text-xs text-gray-300 mt-2 text-center">
-                    <span id="distance-current">0</span>m / <span id="distance-needed">100</span>m
+                <div class="progress-bar-bg">
+                    <div class="progress-bar" id="distance-progress" style="width: 0%"></div>
                 </div>
             </div>
 
@@ -540,9 +550,11 @@
 
         <!-- Main View: Category/Shortcut Selection -->
         <main id="main-view">
-            <div id="main-view-controls" class="flex justify-center mb-6 space-x-4">
-                 <button id="review-btn" class="btn btn-primary text-lg px-8 py-3">Start Review Session</button>
-                 <button id="back-to-categories-btn" class="btn btn-secondary text-lg px-8 py-3 hidden">⬅️ Back to Categories</button>
+            <div id="main-view-controls" class="flex flex-col items-center mb-8 space-y-4">
+                 <button id="review-btn" class="btn btn-primary text-2xl sm:text-3xl px-12 py-6 w-full max-w-md pulse-glow">
+                    🚀 START LEARNING
+                 </button>
+                 <button id="back-to-categories-btn" class="btn btn-secondary text-base px-6 py-3 hidden">⬅️ Back to Categories</button>
             </div>
 
             <div id="category-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -747,6 +759,60 @@
         </div>
     </div>
 
+    <!-- Menu Modal -->
+    <div id="menu-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 400px; width: 95%;">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-black text-red-400">MENU</h2>
+                <button onclick="toggleMenu()" class="text-3xl text-gray-400 hover:text-white">✕</button>
+            </div>
+
+            <div class="space-y-2">
+                <div class="menu-item" onclick="openStore(); toggleMenu();">
+                    <div class="text-3xl">🏪</div>
+                    <div>
+                        <div class="text-lg font-bold text-white">Store</div>
+                        <div class="text-xs text-gray-400">Buy items & upgrade your subway car</div>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="toggleConductor(); toggleMenu();">
+                    <div class="text-3xl">🧑‍✈️</div>
+                    <div>
+                        <div class="text-lg font-bold text-white">My Conductor</div>
+                        <div class="text-xs text-gray-400">Customize your conductor</div>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="toggleSubwayCar(); toggleMenu();">
+                    <div class="text-3xl">🚇</div>
+                    <div>
+                        <div class="text-lg font-bold text-white">My Subway Car</div>
+                        <div class="text-xs text-gray-400">View your current car</div>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="showStats(); toggleMenu();">
+                    <div class="text-3xl">📊</div>
+                    <div>
+                        <div class="text-lg font-bold text-white">Stats & Progress</div>
+                        <div class="text-xs text-gray-400">View your achievements</div>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="toggleMenu();">
+                    <div class="text-3xl">🚄</div>
+                    <div>
+                        <div class="text-lg font-bold text-white">Express Mode</div>
+                        <div class="text-xs text-gray-400">
+                            <span id="multiplier-text">2x Coins Active!</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Station Arrival Cutscene -->
     <div id="station-cutscene" class="station-cutscene hidden">
         <div class="subway-doors" id="subway-doors">
@@ -813,7 +879,7 @@
         };
 
         const SUBWAY_STATIONS = [
-            '1st St', '14th St', '34th St', '42nd St', '72nd St', '96th St', '110th St',
+            'Wall Street', '14th St', '34th St', '42nd St', '72nd St', '96th St', '110th St',
             '125th St', '140th St'
         ];
 
@@ -1479,6 +1545,20 @@
             }
         }
 
+        function toggleMenu() {
+            const modal = document.getElementById('menu-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        function showStats() {
+            const masteredCount = gameStats.masteredTopics.length;
+            const totalCoins = gameStats.coins;
+            const currentLevel = gameStats.level;
+            const stationName = SUBWAY_STATIONS[gameStats.level - 1] || 'Final Stop';
+
+            alert(`📊 YOUR STATS\n\n💰 Total Coins: ${totalCoins}\n🚇 Current Station: ${stationName}\n🏆 Mastered Topics: ${masteredCount}\n👥 Passengers: ${gameStats.passengers}/${gameStats.maxPassengers}`);
+        }
+
         function renderSubwayCar() {
             // Find equipped subway car
             const allItems = Object.values(STORE_ITEMS).flat();
@@ -1627,6 +1707,12 @@
 
             document.getElementById('distance-current').textContent = gameStats.distance;
             document.getElementById('distance-needed').textContent = distanceNeeded;
+
+            // Update distance progress bar
+            const distanceBar = document.getElementById('distance-progress');
+            if (distanceBar) {
+                distanceBar.style.width = Math.min(distanceProgress, 100) + '%';
+            }
 
             // Update passenger count
             document.getElementById('passenger-count').textContent = gameStats.passengers;
