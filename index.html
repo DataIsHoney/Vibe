@@ -807,13 +807,13 @@
             expressUnlocked: false,
             ownedItems: [], // Store purchases
             equippedItems: {}, // Currently equipped conductor items
-            passengers: 12, // Current number of passengers
+            passengers: 0, // Start with no passengers
             maxPassengers: 30, // Max capacity (increases with better cars)
             masteredTopics: [] // Array of topic IDs that have been mastered (10/10 score)
         };
 
         const SUBWAY_STATIONS = [
-            '14th St', '14th St', '34th St', '42nd St', '72nd St', '96th St', '110th St',
+            '1st St', '14th St', '34th St', '42nd St', '72nd St', '96th St', '110th St',
             '125th St', '140th St'
         ];
 
@@ -1202,7 +1202,7 @@
                     gameStats.expressUnlocked = loaded.expressUnlocked || false;
                     gameStats.ownedItems = loaded.ownedItems || [];
                     gameStats.equippedItems = loaded.equippedItems || {};
-                    gameStats.passengers = loaded.passengers || 12;
+                    gameStats.passengers = loaded.passengers !== undefined ? loaded.passengers : 0;
                     gameStats.maxPassengers = loaded.maxPassengers || 30;
                     gameStats.masteredTopics = loaded.masteredTopics || [];
                     console.log("✅ Game stats loaded from localStorage");
@@ -1581,6 +1581,33 @@
         }
         window.checkWordProblem = checkWordProblem;
 
+        // Practice problem checker function
+        function checkPractice(practiceId, correctAnswer) {
+            const inputEl = document.getElementById(`${practiceId}-input`);
+            const feedbackEl = document.getElementById(`${practiceId}-feedback`);
+            const userAnswer = parseInt(inputEl.value, 10);
+
+            if (isNaN(userAnswer)) {
+                feedbackEl.className = 'bg-yellow-900/30 border-l-4 border-yellow-400 p-3 rounded mt-2';
+                feedbackEl.innerHTML = '<span class="text-yellow-400">⚠️ Please enter a number!</span>';
+                feedbackEl.classList.remove('hidden');
+                return;
+            }
+
+            if (userAnswer === correctAnswer) {
+                feedbackEl.className = 'bg-green-900/30 border-l-4 border-green-400 p-3 rounded mt-2';
+                feedbackEl.innerHTML = '<span class="text-green-400 text-lg font-bold">✅ Correct! Well done!</span>';
+            } else {
+                feedbackEl.className = 'bg-blue-900/30 border-l-4 border-blue-400 p-4 rounded mt-2';
+                feedbackEl.innerHTML = `
+                    <div class="text-blue-400 text-lg font-bold mb-2">📝 The answer is ${correctAnswer}</div>
+                    <div class="text-gray-300 text-base">Try solving it again using the technique explained above!</div>
+                `;
+            }
+            feedbackEl.classList.remove('hidden');
+        }
+        window.checkPractice = checkPractice;
+
         // --- GAME MECHANICS FUNCTIONS ---
         function updateGameStats() {
             document.getElementById('coin-count').textContent = gameStats.coins;
@@ -1934,19 +1961,92 @@
                 `;
             }
 
-            // Generate practice examples
+            // Generate practice examples (interactive)
             const examplesContainer = document.getElementById('learn-examples');
             examplesContainer.innerHTML = '';
-            for (let i = 0; i < 6; i++) {
+            for (let i = 0; i < 3; i++) {
                 const ex = shortcut.generateQuestion();
-                examplesContainer.innerHTML += `<div class="bg-gray-800 border border-red-400/30 p-4 rounded-md hover:border-red-400 transition-all">
-                    <span class="font-semibold text-white text-lg">${ex.question}</span> = <span class="text-red-400 font-black text-lg">${ex.answer}</span>
-                </div>`;
+                const practiceId = `practice-${i}`;
+                examplesContainer.innerHTML += `
+                    <div class="bg-gray-800 border border-red-400/30 p-5 rounded-lg" id="${practiceId}">
+                        <div class="flex items-start mb-3">
+                            <span class="font-semibold text-white text-xl flex-1">${ex.question} = ?</span>
+                        </div>
+                        <div class="flex gap-3 items-center mb-3">
+                            <input type="number"
+                                   id="${practiceId}-input"
+                                   class="bg-gray-900 border-2 border-gray-600 rounded px-4 py-2 text-white text-lg w-32 focus:border-red-400 focus:outline-none"
+                                   placeholder="Answer">
+                            <button onclick="checkPractice('${practiceId}', ${ex.answer})"
+                                    class="btn btn-primary text-sm px-4 py-2">
+                                Show Answer
+                            </button>
+                        </div>
+                        <div id="${practiceId}-feedback" class="hidden"></div>
+                    </div>
+                `;
             }
 
             switchView('learn-view');
         }
 
+
+        // Generate varied subway-themed word problems for quiz
+        function generateQuizWordProblem(categoryKey) {
+            const wordProblems = {
+                addition: [
+                    {desc: "At 42nd St, {n1} passengers get on. At Times Square, {n2} more board. Total passengers?", calc: (n1, n2) => n1 + n2},
+                    {desc: "There are {n1} subway trains on the 2 line and {n2} on the 1 line. Total trains?", calc: (n1, n2) => n1 + n2},
+                    {desc: "A MetroCard has ${n1}. You add ${n2}. New balance?", calc: (n1, n2) => n1 + n2},
+                    {desc: "The train has {n1} passengers. At the next stop, {n2} people board. How many now?", calc: (n1, n2) => n1 + n2},
+                    {desc: "One subway car has {n1} seats and another has {n2} seats. Total seats?", calc: (n1, n2) => n1 + n2}
+                ],
+                subtraction: [
+                    {desc: "The train starts with {n1} passengers. {n2} get off at 14th St. How many remain?", calc: (n1, n2) => n1 - n2},
+                    {desc: "You have ${n1} on your MetroCard. A ride costs ${n2}. How much left?", calc: (n1, n2) => n1 - n2},
+                    {desc: "It takes {n1} minutes to reach 110th St. After {n2} minutes, how much longer?", calc: (n1, n2) => n1 - n2},
+                    {desc: "There were {n1} people waiting. {n2} got on the train. How many still waiting?", calc: (n1, n2) => n1 - n2},
+                    {desc: "A subway car has {n1} wheels. {n2} need replacement. How many are good?", calc: (n1, n2) => n1 - n2}
+                ],
+                multiplication: [
+                    {desc: "Each subway car holds {n1} passengers. There are {n2} cars. Total capacity?", calc: (n1, n2) => n1 * n2},
+                    {desc: "A MetroCard costs ${n1}. You buy {n2} cards. Total cost?", calc: (n1, n2) => n1 * n2},
+                    {desc: "Each train has {n1} wheels. With {n2} trains, how many wheels total?", calc: (n1, n2) => n1 * n2},
+                    {desc: "The conductor works {n1} hours per day for {n2} days. Total hours?", calc: (n1, n2) => n1 * n2},
+                    {desc: "{n1} passengers per station across {n2} stations. How many passengers?", calc: (n1, n2) => n1 * n2}
+                ],
+                division: [
+                    {desc: "{n1} passengers split equally into {n2} subway cars. How many per car?", calc: (n1, n2) => n1 / n2},
+                    {desc: "${n1} split among {n2} MetroCards equally. How much per card?", calc: (n1, n2) => n1 / n2},
+                    {desc: "{n1} total stations divided into {n2} equal sections. Stations per section?", calc: (n1, n2) => n1 / n2},
+                    {desc: "A {n1}-minute journey with {n2} equal stops. Minutes between stops?", calc: (n1, n2) => n1 / n2},
+                    {desc: "{n1} subway tokens shared by {n2} people equally. Tokens per person?", calc: (n1, n2) => n1 / n2}
+                ]
+            };
+
+            const problems = wordProblems[categoryKey] || wordProblems.addition;
+            const problem = problems[Math.floor(Math.random() * problems.length)];
+
+            let n1, n2;
+            if (categoryKey === 'division') {
+                n2 = Math.floor(Math.random() * 8) + 2;
+                n1 = n2 * (Math.floor(Math.random() * 12) + 2);
+            } else if (categoryKey === 'multiplication') {
+                n1 = Math.floor(Math.random() * 12) + 2;
+                n2 = Math.floor(Math.random() * 8) + 2;
+            } else if (categoryKey === 'subtraction') {
+                n1 = Math.floor(Math.random() * 50) + 20;
+                n2 = Math.floor(Math.random() * n1);
+            } else {
+                n1 = Math.floor(Math.random() * 30) + 5;
+                n2 = Math.floor(Math.random() * 25) + 5;
+            }
+
+            const question = problem.desc.replace('{n1}', n1).replace('{n2}', n2);
+            const answer = problem.calc(n1, n2);
+
+            return {question, answer};
+        }
 
         // --- QUIZ LOGIC ---
         function startQuiz(categoryKey, shortcutKey) {
@@ -1956,9 +2056,17 @@
             score = 0;
             quizQuestions = [];
             const shortcut = allShortcuts[categoryKey].shortcuts[shortcutKey];
-            for (let i = 0; i < 10; i++) {
+
+            // Add 5 regular questions
+            for (let i = 0; i < 5; i++) {
                 quizQuestions.push(shortcut.generateQuestion());
             }
+
+            // Add 5 varied subway word problems
+            for (let i = 0; i < 5; i++) {
+                quizQuestions.push(generateQuizWordProblem(categoryKey));
+            }
+
             document.getElementById('quiz-title').textContent = `${shortcut.title} Quiz`;
             switchView('quiz-view');
             displayNextQuestion();
