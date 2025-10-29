@@ -768,7 +768,7 @@
             </div>
 
             <div class="space-y-2">
-                <div class="menu-item" onclick="openStore(); toggleMenu();">
+                <div class="menu-item" onclick="toggleMenu(); setTimeout(openStore, 100);">
                     <div class="text-3xl">🏪</div>
                     <div>
                         <div class="text-lg font-bold text-white">Store</div>
@@ -776,7 +776,7 @@
                     </div>
                 </div>
 
-                <div class="menu-item" onclick="toggleConductor(); toggleMenu();">
+                <div class="menu-item" onclick="toggleMenu(); setTimeout(toggleConductor, 100);">
                     <div class="text-3xl">🧑‍✈️</div>
                     <div>
                         <div class="text-lg font-bold text-white">My Conductor</div>
@@ -784,7 +784,7 @@
                     </div>
                 </div>
 
-                <div class="menu-item" onclick="toggleSubwayCar(); toggleMenu();">
+                <div class="menu-item" onclick="toggleMenu(); setTimeout(toggleSubwayCar, 100);">
                     <div class="text-3xl">🚇</div>
                     <div>
                         <div class="text-lg font-bold text-white">My Subway Car</div>
@@ -792,7 +792,7 @@
                     </div>
                 </div>
 
-                <div class="menu-item" onclick="showStats(); toggleMenu();">
+                <div class="menu-item" onclick="toggleMenu(); setTimeout(showStats, 100);">
                     <div class="text-3xl">📊</div>
                     <div>
                         <div class="text-lg font-bold text-white">Stats & Progress</div>
@@ -1292,6 +1292,18 @@
                 <button onclick="importProgress()" class="ml-3 text-green-400 hover:text-green-300 underline">📥 Import</button>
                 <button onclick="resetProgress()" class="ml-3 text-red-400 hover:text-red-300 underline">🗑️ Reset</button>
             `;
+
+            // Apply equipped subway car capacity if one is equipped
+            const equippedCarId = gameStats.equippedItems['subway'];
+            if (equippedCarId) {
+                const allItems = Object.values(STORE_ITEMS).flat();
+                const equippedCar = allItems.find(i => i.id === equippedCarId);
+                if (equippedCar && equippedCar.capacity) {
+                    gameStats.maxPassengers = equippedCar.capacity;
+                    console.log(`✅ Equipped subway car capacity applied: ${equippedCar.capacity}`);
+                }
+            }
+
             renderCategories();
             updateGameStats();
         }
