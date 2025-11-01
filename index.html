@@ -2179,16 +2179,31 @@
             const q = quizQuestions[currentQuestionIndex];
             document.getElementById('quiz-progress').textContent = `Question ${currentQuestionIndex + 1}/10`;
             document.getElementById('quiz-question').textContent = q.question;
+
             const answerInput = document.getElementById('quiz-answer');
+            const submitBtn = document.getElementById('submit-answer-btn');
+
+            // Re-enable input and button for next question
             answerInput.value = '';
+            answerInput.disabled = false;
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             answerInput.focus();
+
             document.getElementById('feedback').textContent = '';
         }
         
         function handleSubmitAnswer() {
-            if (currentQuestionIndex >= quizQuestions.length) return; // FIX: Prevent running after quiz ends
+            if (currentQuestionIndex >= quizQuestions.length) return; // Prevent running after quiz ends
+
+            const answerInput = document.getElementById('quiz-answer');
+            const submitBtn = document.getElementById('submit-answer-btn');
             const feedbackEl = document.getElementById('feedback');
-            const userAnswer = parseInt(document.getElementById('quiz-answer').value, 10);
+
+            // Prevent double-submission
+            if (submitBtn.disabled) return;
+
+            const userAnswer = parseInt(answerInput.value, 10);
             const correctAnswer = quizQuestions[currentQuestionIndex].answer;
 
             if (isNaN(userAnswer)) {
@@ -2196,6 +2211,11 @@
                 feedbackEl.className = "mt-4 h-8 text-xl font-bold text-yellow-400";
                 return;
             }
+
+            // Disable input and button during feedback period
+            submitBtn.disabled = true;
+            answerInput.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
 
             if (userAnswer === correctAnswer) {
                 score++;
