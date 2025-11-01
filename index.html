@@ -2141,7 +2141,7 @@
             }
 
             const question = problem.desc.replace('{n1}', n1).replace('{n2}', n2);
-            const answer = problem.calc(n1, n2);
+            const answer = Math.round(problem.calc(n1, n2)); // Ensure integer answer
 
             return {question, answer};
         }
@@ -2194,19 +2194,41 @@
         }
         
         function handleSubmitAnswer() {
-            if (currentQuestionIndex >= quizQuestions.length) return; // Prevent running after quiz ends
+            if (currentQuestionIndex >= quizQuestions.length) {
+                console.log('Quiz already ended, ignoring submission');
+                return;
+            }
 
             const answerInput = document.getElementById('quiz-answer');
             const submitBtn = document.getElementById('submit-answer-btn');
             const feedbackEl = document.getElementById('feedback');
 
+            if (!answerInput || !submitBtn || !feedbackEl) {
+                console.error('Required elements not found:', {answerInput, submitBtn, feedbackEl});
+                return;
+            }
+
             // Prevent double-submission
-            if (submitBtn.disabled) return;
+            if (submitBtn.disabled) {
+                console.log('Button already disabled, preventing double submission');
+                return;
+            }
 
-            const userAnswer = parseInt(answerInput.value, 10);
-            const correctAnswer = quizQuestions[currentQuestionIndex].answer;
+            const inputValue = answerInput.value.trim();
+            const userAnswer = parseInt(inputValue, 10);
+            // Ensure correctAnswer is a number (handle both integer and float cases)
+            const correctAnswer = Math.round(quizQuestions[currentQuestionIndex].answer);
 
-            if (isNaN(userAnswer)) {
+            console.log('Quiz Submission:', {
+                questionIndex: currentQuestionIndex,
+                question: quizQuestions[currentQuestionIndex].question,
+                inputValue: inputValue,
+                userAnswer: userAnswer,
+                correctAnswer: correctAnswer,
+                match: userAnswer === correctAnswer
+            });
+
+            if (inputValue === '' || isNaN(userAnswer)) {
                 feedbackEl.textContent = "⚠️ Please enter a number.";
                 feedbackEl.className = "mt-4 h-8 text-xl font-bold text-yellow-400";
                 return;
@@ -2347,10 +2369,22 @@
              renderShortcutGrid(currentCategory);
         });
         document.getElementById('start-quiz-btn').addEventListener('click', () => startQuiz(currentCategory, currentShortcut));
-        document.getElementById('submit-answer-btn').addEventListener('click', handleSubmitAnswer);
-        document.getElementById('quiz-answer').addEventListener('keyup', (e) => {
-            if (e.key === 'Enter') handleSubmitAnswer();
-        });
+        const submitAnswerBtn = document.getElementById('submit-answer-btn');
+        const quizAnswerInput = document.getElementById('quiz-answer');
+
+        if (submitAnswerBtn) {
+            submitAnswerBtn.addEventListener('click', handleSubmitAnswer);
+        } else {
+            console.error('Submit answer button not found!');
+        }
+
+        if (quizAnswerInput) {
+            quizAnswerInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') handleSubmitAnswer();
+            });
+        } else {
+            console.error('Quiz answer input not found!');
+        }
         document.getElementById('close-results-btn').addEventListener('click', closeResultsModal);
         document.getElementById('close-express-btn').addEventListener('click', () => {
             document.getElementById('express-modal').classList.add('hidden');
