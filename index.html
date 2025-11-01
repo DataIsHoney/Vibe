@@ -518,7 +518,7 @@
                 <div class="card p-3 text-center">
                     <div class="text-xl sm:text-2xl font-bold">
                         <span class="subway-line" style="background-color: var(--subway-red); color: #fff;" id="level-badge">2</span>
-                        <span id="station-name" class="text-white text-sm sm:text-base">Wall Street</span>
+                        <span id="station-name" class="text-white text-sm sm:text-base">96th St</span>
                     </div>
                     <div class="text-xs text-gray-400 mt-1">STATION</div>
                 </div>
@@ -865,16 +865,16 @@
 
         // GAME MECHANICS
         let gameStats = {
-            coins: 0,
+            coins: 2890,
             distance: 0, // Changed from XP to distance (meters to next station)
-            level: 1,
+            level: 6, // Start at 96th St
             multiplier: 1,
             startTime: Date.now(),
             expressUnlocked: false,
-            ownedItems: [], // Store purchases
-            equippedItems: {}, // Currently equipped conductor items
+            ownedItems: ['car_express'], // Start with Express Car
+            equippedItems: { subway: 'car_express' }, // Express Car equipped
             passengers: 0, // Start with no passengers
-            maxPassengers: 30, // Max capacity (increases with better cars)
+            maxPassengers: 140, // Express Car capacity
             masteredTopics: [] // Array of topic IDs that have been mastered (10/10 score)
         };
 
@@ -1261,16 +1261,16 @@
                 // Load existing game stats
                 try {
                     const loaded = JSON.parse(savedStats);
-                    gameStats.coins = loaded.coins || 0;
-                    gameStats.distance = loaded.distance || loaded.xp || 0; // Support old XP or new distance
-                    gameStats.level = loaded.level || 1;
-                    gameStats.multiplier = loaded.multiplier || 1;
-                    gameStats.expressUnlocked = loaded.expressUnlocked || false;
-                    gameStats.ownedItems = loaded.ownedItems || [];
-                    gameStats.equippedItems = loaded.equippedItems || {};
-                    gameStats.passengers = loaded.passengers !== undefined ? loaded.passengers : 0;
-                    gameStats.maxPassengers = loaded.maxPassengers || 30;
-                    gameStats.masteredTopics = loaded.masteredTopics || [];
+                    gameStats.coins = loaded.coins !== undefined ? loaded.coins : gameStats.coins;
+                    gameStats.distance = loaded.distance !== undefined ? loaded.distance : (loaded.xp || gameStats.distance); // Support old XP or new distance
+                    gameStats.level = loaded.level !== undefined ? loaded.level : gameStats.level;
+                    gameStats.multiplier = loaded.multiplier !== undefined ? loaded.multiplier : gameStats.multiplier;
+                    gameStats.expressUnlocked = loaded.expressUnlocked !== undefined ? loaded.expressUnlocked : gameStats.expressUnlocked;
+                    gameStats.ownedItems = loaded.ownedItems !== undefined ? loaded.ownedItems : gameStats.ownedItems;
+                    gameStats.equippedItems = loaded.equippedItems !== undefined ? loaded.equippedItems : gameStats.equippedItems;
+                    gameStats.passengers = loaded.passengers !== undefined ? loaded.passengers : gameStats.passengers;
+                    gameStats.maxPassengers = loaded.maxPassengers !== undefined ? loaded.maxPassengers : gameStats.maxPassengers;
+                    gameStats.masteredTopics = loaded.masteredTopics !== undefined ? loaded.masteredTopics : gameStats.masteredTopics;
                     console.log("✅ Game stats loaded from localStorage");
                 } catch (e) {
                     console.error("Error loading stats:", e);
