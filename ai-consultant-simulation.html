@@ -689,7 +689,7 @@ When answering questions, provide detailed deployment strategies with concrete e
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    model: "local-model", // LM Studio uses whatever model is loaded
+                    model: "microsoft/phi-4-mini-reasoning",
                     messages: [
                         { role: 'system', content: systemPrompt },
                         ...messages
