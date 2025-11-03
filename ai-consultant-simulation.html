@@ -70,35 +70,27 @@
             border-bottom-left-radius: 4px;
         }
 
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 16px 0;
-            font-size: 0.875rem;
+        .chat-bubble.system {
+            background: rgba(124, 58, 237, 0.2);
+            border: 1px solid var(--accent-purple);
+            text-align: center;
+            margin: 16px auto;
+            max-width: 90%;
         }
-
-        .data-table th {
-            background: rgba(37, 99, 235, 0.2);
-            padding: 8px;
-            text-align: left;
-            border: 1px solid rgba(148, 163, 184, 0.3);
-        }
-
-        .data-table td {
-            padding: 8px;
-            border: 1px solid rgba(148, 163, 184, 0.2);
-        }
-
-        .data-table tr:hover {
-            background: rgba(148, 163, 184, 0.1);
-        }
-
-        .highlight-red { color: #ef4444; font-weight: bold; }
-        .highlight-green { color: #10b981; font-weight: bold; }
 
         @keyframes slideIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .typing-indicator {
+            display: inline-block;
+            animation: pulse 1.5s ease-in-out infinite;
         }
 
         .btn-primary {
@@ -112,9 +104,14 @@
             font-weight: 600;
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             transform: scale(1.05);
             box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .btn-secondary {
@@ -131,27 +128,10 @@
             background: rgba(148, 163, 184, 0.3);
         }
 
-        .topic-btn {
-            background: rgba(124, 58, 237, 0.2);
-            border: 1px solid var(--accent-purple);
-            color: var(--text-light);
-            padding: 12px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: left;
-        }
-
-        .topic-btn:hover {
-            background: rgba(124, 58, 237, 0.3);
-            border-color: var(--accent-purple);
-            transform: translateX(5px);
-        }
-
         .hidden { display: none !important; }
 
         .chat-container {
-            max-height: 600px;
+            max-height: 500px;
             overflow-y: auto;
             padding: 20px;
         }
@@ -169,13 +149,44 @@
             display: inline-block;
             margin: 2px;
         }
+
+        .chat-input {
+            width: 100%;
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-light);
+            font-size: 1rem;
+            resize: none;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+
+        .suggested-question {
+            background: rgba(124, 58, 237, 0.15);
+            border: 1px solid rgba(124, 58, 237, 0.3);
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+
+        .suggested-question:hover {
+            background: rgba(124, 58, 237, 0.25);
+            border-color: var(--accent-purple);
+        }
     </style>
 </head>
 <body class="p-4">
     <header class="mb-8">
         <div class="max-w-7xl mx-auto">
             <h1 class="text-4xl font-bold mb-2">🎯 AI Consultant Simulation</h1>
-            <p class="text-lg" style="color: var(--text-muted)">RetailCo Customer Churn Prediction Project</p>
+            <p class="text-lg" style="color: var(--text-muted)">RetailCo Customer Churn Prediction Project - Powered by LLM Studio</p>
         </div>
     </header>
 
@@ -191,20 +202,27 @@
                 <h3 class="text-xl font-semibold mb-2">📉 The Challenge:</h3>
                 <p style="color: var(--text-muted)">
                     Customer acquisition costs $150 per customer, but retention interventions cost only $20.
-                    Predicting churn could save millions. You'll consult with 5 experts to design and deploy this AI solution.
+                    Predicting churn could save millions. You'll consult with 5 AI experts who can answer ANY question about:
+                    ML strategy, data analysis, model evaluation, prompt engineering, and production deployment.
                 </p>
             </div>
             <div class="bg-purple-900 bg-opacity-30 p-4 rounded-lg mb-6">
-                <h3 class="text-lg font-semibold mb-2">✨ AI Concepts You'll Learn:</h3>
+                <h3 class="text-lg font-semibold mb-2">✨ AI Concepts Available:</h3>
                 <div class="flex flex-wrap gap-2">
-                    <span class="concept-tag">ML Types</span>
-                    <span class="concept-tag">Data Analysis</span>
-                    <span class="concept-tag">Feature Engineering</span>
-                    <span class="concept-tag">Model Evaluation</span>
+                    <span class="concept-tag">Supervised/Unsupervised/Reinforcement ML</span>
+                    <span class="concept-tag">Data Analysis & Feature Engineering</span>
+                    <span class="concept-tag">Precision, Recall, F1-Score</span>
                     <span class="concept-tag">Prompt Engineering</span>
-                    <span class="concept-tag">Agentic Patterns</span>
-                    <span class="concept-tag">Deployment</span>
+                    <span class="concept-tag">Agentic Design Patterns</span>
+                    <span class="concept-tag">Context Engineering</span>
+                    <span class="concept-tag">A/B Testing & Deployment</span>
                 </div>
+            </div>
+            <div class="bg-blue-900 bg-opacity-30 p-4 rounded-lg mb-6">
+                <p class="text-sm" style="color: var(--text-muted)">
+                    💡 <strong>New:</strong> Powered by your local LLM! Ask any question in natural language.
+                    The experts will provide detailed, contextual answers about AI concepts.
+                </p>
             </div>
             <button class="btn-primary text-lg" onclick="showCharacters()">Start Consulting 🚀</button>
         </div>
@@ -213,12 +231,9 @@
         <div id="character-selection" class="hidden">
             <div class="mb-6">
                 <h2 class="text-2xl font-bold mb-2">Choose an Expert to Consult</h2>
-                <p style="color: var(--text-muted)">Talk to any expert in any order. Each brings unique insights to the project.</p>
+                <p style="color: var(--text-muted)">Talk to any expert in any order. Ask them anything!</p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="character-grid"></div>
-            <div class="mt-6">
-                <button class="btn-secondary" onclick="showDashboard()">📊 View Learning Dashboard</button>
-            </div>
         </div>
 
         <!-- Chat Interface -->
@@ -237,48 +252,79 @@
 
                 <div class="chat-container glass-card mb-4" id="chat-messages"></div>
 
-                <div id="topic-selection" class="mb-4">
-                    <p class="text-sm font-semibold mb-3">💬 What would you like to discuss?</p>
-                    <div id="topics-container" class="space-y-2"></div>
+                <div class="mb-4">
+                    <p class="text-sm font-semibold mb-2">💡 Suggested Questions:</p>
+                    <div class="flex flex-wrap gap-2" id="suggested-questions"></div>
                 </div>
 
-                <div class="mt-4 p-4 glass-card">
-                    <p class="text-sm font-semibold mb-2">💡 Concepts Learned:</p>
-                    <div id="learned-concepts" class="flex flex-wrap gap-2"></div>
+                <div class="mb-4">
+                    <label class="text-sm font-semibold mb-2 block">Ask anything:</label>
+                    <textarea
+                        id="user-input"
+                        class="chat-input"
+                        rows="3"
+                        placeholder="Type your question here..."
+                        onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }"
+                    ></textarea>
                 </div>
-            </div>
-        </div>
 
-        <!-- Dashboard -->
-        <div id="dashboard" class="hidden glass-card p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold">📊 Learning Dashboard</h2>
-                <button class="btn-secondary" onclick="backToCharacters()">← Back</button>
-            </div>
-            <div class="glass-card p-4 mb-4">
-                <h3 class="text-xl font-semibold mb-3">AI Concepts Mastered</h3>
-                <div id="concepts-list" class="flex flex-wrap gap-2"></div>
-            </div>
-            <div class="glass-card p-4">
-                <h3 class="text-xl font-semibold mb-3">Experts Consulted</h3>
-                <div id="experts-list"></div>
+                <div class="flex gap-2">
+                    <button class="btn-primary flex-1" onclick="sendMessage()" id="send-btn">
+                        Send Question →
+                    </button>
+                    <button class="btn-secondary" onclick="clearChat()">
+                        Clear Chat
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ===== DATA =====
+        // ===== CONFIG =====
+        const LLM_API_URL = 'http://127.0.0.1:1234/v1/chat/completions';
+
+        // ===== CHARACTER DATA =====
         const characters = {
             sarah: {
                 id: 'sarah',
                 name: 'Sarah Chen',
                 role: 'CEO & Strategy Lead',
                 emoji: '👩‍💼',
-                description: 'Defines business value and AI strategy',
-                topics: [
-                    { id: 'ml_types', title: 'What types of machine learning exist?', concepts: ['Supervised Learning', 'Unsupervised Learning', 'Reinforcement Learning'] },
-                    { id: 'business_value', title: 'How do we prove ROI for AI projects?', concepts: ['Business Value', 'ROI Analysis'] },
-                    { id: 'framing', title: 'How do we frame this as an ML problem?', concepts: ['Problem Framing', 'Classification'] }
+                description: 'AI strategy, business value, and ML problem framing',
+                systemPrompt: `You are Sarah Chen, CEO of RetailCo, a mid-sized retail company facing a 23% customer churn rate.
+
+YOUR EXPERTISE:
+- Business strategy and AI ROI analysis
+- Understanding different types of ML (supervised, unsupervised, reinforcement learning)
+- Framing business problems as ML problems
+- Change management and stakeholder buy-in
+- Strategic planning for AI adoption
+
+THE BUSINESS CONTEXT:
+- RetailCo has 8,500 active customers
+- Customer acquisition costs $150, retention interventions cost $20
+- Lost customer lifetime value: $450
+- We're exploring AI to predict and prevent customer churn
+
+YOUR PERSONALITY:
+- Strategic thinker focused on business impact and ROI
+- Non-technical but eager to understand AI concepts
+- Asks practical questions about implementation
+- Values clear explanations without jargon
+
+TEACHING STYLE:
+- Explain AI concepts in business terms
+- Use concrete examples from retail/customer scenarios
+- Always tie back to business value and ROI
+- Be enthusiastic but realistic about AI capabilities
+
+When answering questions, provide detailed, educational responses that teach AI concepts in non-technical language. Use examples from the RetailCo churn prediction project.`,
+                suggestedQuestions: [
+                    "What's the difference between supervised and unsupervised learning?",
+                    "How do I calculate ROI for an AI project?",
+                    "What makes a good ML problem?",
+                    "Should we use AI or traditional analytics?"
                 ]
             },
             david: {
@@ -286,11 +332,44 @@
                 name: 'David Kim',
                 role: 'Data Scientist',
                 emoji: '👨‍💻',
-                description: 'Analyzes data and builds features',
-                topics: [
-                    { id: 'data_analysis', title: 'Show me the customer data', concepts: ['Data Analysis', 'Pattern Recognition'] },
-                    { id: 'features', title: 'What is feature engineering?', concepts: ['Feature Engineering', 'RFM Analysis'] },
-                    { id: 'data_quality', title: 'How do we handle messy data?', concepts: ['Data Quality', 'Data Cleaning'] }
+                description: 'Data analysis, feature engineering, and pattern recognition',
+                systemPrompt: `You are David Kim, Data Scientist at RetailCo working on the customer churn prediction project.
+
+YOUR EXPERTISE:
+- Exploratory data analysis and pattern recognition
+- Feature engineering (creating predictive variables)
+- Data quality, cleaning, and preparation
+- Statistical analysis and correlation
+- RFM analysis (Recency, Frequency, Monetary value)
+
+THE DATA CONTEXT:
+- 10,000 historical customers (23% churned, 77% active)
+- Features: tenure, purchase frequency, order value, support tickets, days since last purchase
+- Common issues: missing values, duplicates, inconsistent formats
+- Key patterns: Churners have shorter tenure, fewer purchases, more support tickets
+
+SAMPLE DATA INSIGHTS:
+Churned customers (avg): 4.2 months tenure, 1.1 monthly purchases, 4.8 support tickets, 83 days since purchase
+Active customers (avg): 28.5 months tenure, 5.2 monthly purchases, 1.3 support tickets, 11 days since purchase
+
+YOUR PERSONALITY:
+- Detail-oriented and analytical
+- Passionate about data quality
+- Loves finding patterns in data
+- Patient teacher who uses concrete examples
+
+TEACHING STYLE:
+- Show actual data examples and statistics
+- Explain why data quality matters
+- Demonstrate feature engineering with real examples
+- Use tables and numbers to illustrate concepts
+
+When answering questions, provide detailed technical insights while keeping explanations accessible. Use specific examples from the RetailCo dataset.`,
+                suggestedQuestions: [
+                    "What patterns indicate churn risk?",
+                    "How do you engineer features from raw data?",
+                    "What is RFM analysis?",
+                    "How do you handle missing data?"
                 ]
             },
             marcus: {
@@ -298,11 +377,50 @@
                 name: 'Marcus Johnson',
                 role: 'ML Engineer',
                 emoji: '👨‍🔧',
-                description: 'Trains and evaluates models',
-                topics: [
-                    { id: 'training', title: 'How do we train a churn model?', concepts: ['Model Training', 'Train/Test Split'] },
-                    { id: 'evaluation', title: 'How do we measure model performance?', concepts: ['Precision', 'Recall', 'Confusion Matrix', 'F1-Score'] },
-                    { id: 'tradeoffs', title: 'Precision vs Recall - which matters more?', concepts: ['Evaluation Metrics', 'Business Tradeoffs'] }
+                description: 'Model training, evaluation, and performance metrics',
+                systemPrompt: `You are Marcus Johnson, ML Engineer at RetailCo building the churn prediction model.
+
+YOUR EXPERTISE:
+- Model training and hyperparameter tuning
+- Evaluation metrics: accuracy, precision, recall, F1-score
+- Confusion matrix interpretation
+- Train/validation/test split methodology
+- Algorithm selection (logistic regression, random forest, neural networks)
+- Model optimization and business tradeoffs
+
+THE MODEL CONTEXT:
+- Training on 10,000 customers (70% train, 15% validation, 15% test)
+- Binary classification: Will customer churn in next 90 days?
+- Imbalanced dataset: 23% churn, 77% active
+- Best model: Random Forest (83.2% F1-score, 84.9% recall, 81.6% precision)
+
+CONFUSION MATRIX RESULTS:
+True Positives: 293 | False Positives: 66
+False Negatives: 52 | True Negatives: 1,089
+
+COST ANALYSIS:
+- False negative (missed churner): $450 lost lifetime value
+- False positive (unnecessary offer): $20 wasted
+- High recall is more important than high precision
+
+YOUR PERSONALITY:
+- Practical engineer focused on what works
+- Balances technical excellence with business needs
+- Emphasizes measurement and metrics
+- Clear communicator about tradeoffs
+
+TEACHING STYLE:
+- Explain metrics with concrete examples
+- Show actual numbers and calculations
+- Discuss business implications of model decisions
+- Compare different approaches (simple vs complex models)
+
+When answering questions, provide detailed technical explanations with real metrics. Always connect model performance to business outcomes.`,
+                suggestedQuestions: [
+                    "How do you train a classification model?",
+                    "What's the difference between precision and recall?",
+                    "Why can't we just use accuracy?",
+                    "How do you choose the right algorithm?"
                 ]
             },
             elena: {
@@ -310,11 +428,53 @@
                 name: 'Elena Rodriguez',
                 role: 'AI Architect',
                 emoji: '👩‍💻',
-                description: 'Designs AI agents and prompts',
-                topics: [
-                    { id: 'prompts', title: 'What is prompt engineering?', concepts: ['Prompt Engineering', 'Context Design'] },
-                    { id: 'agents', title: 'How do AI agents work?', concepts: ['Agentic Patterns', 'ReAct Pattern'] },
-                    { id: 'context', title: 'What context does an AI agent need?', concepts: ['Context Engineering', 'Agent Design'] }
+                description: 'Prompt engineering, AI agents, and agentic patterns',
+                systemPrompt: `You are Elena Rodriguez, AI Architect at RetailCo designing the AI agent system for customer retention.
+
+YOUR EXPERTISE:
+- Prompt engineering (crafting effective AI instructions)
+- Context engineering (providing right information to AI)
+- Agentic design patterns (autonomous multi-step workflows)
+- ReAct pattern (Reasoning + Acting)
+- Chain-of-thought prompting
+- AI agent architectures and tool use
+
+THE AGENT CONTEXT:
+- Building an AI agent to reach out to at-risk customers
+- Agent needs to personalize retention offers based on customer profile
+- Uses ReAct pattern: Observe → Reason → Act → Observe → Repeat
+- Handles escalation to human agents for complex cases
+
+PROMPT ENGINEERING EXAMPLES:
+Bad prompt: "Write a retention email"
+Good prompt: "You are a customer success specialist. Write personalized retention email for customer with 87% churn risk, 5 support tickets, prefers eco-friendly products. Tone: empathetic. Offer: 20% discount. Goal: identify pain points."
+
+AGENTIC WORKFLOW:
+1. Observe customer data (churn risk, behavior, preferences)
+2. Reason about likely causes (support issues? price sensitivity?)
+3. Act by sending personalized outreach
+4. Observe customer response (opened? clicked? purchased?)
+5. Reason about next steps (follow up? escalate? different offer?)
+6. Repeat until resolution or escalation
+
+YOUR PERSONALITY:
+- Creative problem solver who thinks in systems
+- Excited about emergent AI capabilities
+- Balances automation with human oversight
+- Clear teacher who uses before/after examples
+
+TEACHING STYLE:
+- Show bad vs good examples
+- Explain the "why" behind prompt engineering
+- Demonstrate multi-step agent workflows
+- Discuss when to use humans vs AI
+
+When answering questions, provide detailed examples of prompts and agent workflows. Make advanced concepts accessible through concrete scenarios.`,
+                suggestedQuestions: [
+                    "What makes a good prompt?",
+                    "How do AI agents work?",
+                    "What is the ReAct pattern?",
+                    "What context does an AI need?"
                 ]
             },
             jasmine: {
@@ -322,423 +482,64 @@
                 name: 'Jasmine Patel',
                 role: 'Product Manager',
                 emoji: '👩‍💼',
-                description: 'Manages deployment and monitoring',
-                topics: [
-                    { id: 'deployment', title: 'How do we deploy this safely?', concepts: ['Model Deployment', 'Staged Rollout'] },
-                    { id: 'testing', title: 'What is A/B testing?', concepts: ['A/B Testing', 'Experimentation'] },
-                    { id: 'monitoring', title: 'How do we monitor AI in production?', concepts: ['Model Monitoring', 'Data Drift', 'Human-AI Collaboration'] }
+                description: 'Deployment, A/B testing, and production monitoring',
+                systemPrompt: `You are Jasmine Patel, Product Manager at RetailCo responsible for deploying the AI churn prediction system.
+
+YOUR EXPERTISE:
+- Production deployment strategies (staged rollouts, canary deployments)
+- A/B testing and experimentation
+- Model monitoring and alerting
+- Data drift detection
+- Human-AI collaboration models
+- Success metrics and KPIs
+
+THE DEPLOYMENT CONTEXT:
+- Staged rollout: 500 customers (pilot) → 6,000 (A/B test) → full production
+- Three groups: Control (no AI), AI-only, Human+AI hybrid
+- Monitoring: precision/recall trends, data drift, business metrics
+- Retraining schedule: weekly minor updates, monthly major retraining
+
+A/B TEST SETUP:
+Group A (Control): No intervention, baseline churn rate
+Group B (AI Agent): Fully automated retention outreach
+Group C (Human+AI): AI recommends, humans approve and execute
+
+MONITORING DASHBOARDS:
+- Model metrics: precision, recall, prediction distribution
+- Agent performance: email open rates, conversion rates
+- Business metrics: actual churn vs predicted, ROI tracking
+- Data drift: feature distribution changes over time
+
+HUMAN OVERSIGHT MODEL:
+60% fully automated (low-risk cases)
+30% human-in-loop (high-value customers)
+10% human-only (VIPs, sensitive situations)
+
+YOUR PERSONALITY:
+- Pragmatic and risk-aware
+- Focused on reliable, scalable systems
+- Values measurement and continuous improvement
+- Strong communicator about tradeoffs
+
+TEACHING STYLE:
+- Explain deployment risks and mitigation strategies
+- Show real A/B test designs
+- Discuss monitoring and alert systems
+- Balance automation with human judgment
+
+When answering questions, provide detailed deployment strategies with concrete examples. Emphasize production reliability and business impact.`,
+                suggestedQuestions: [
+                    "How do you deploy AI safely?",
+                    "What is A/B testing?",
+                    "How do you monitor AI in production?",
+                    "When should humans review AI decisions?"
                 ]
             }
         };
 
-        const responses = {
-            // Sarah's responses
-            ml_types: `Great question! There are three main types of machine learning:
-
-**🎯 Supervised Learning** - Learning from labeled examples
-• Like teaching with flashcards: "This customer churned" vs "This customer stayed"
-• The AI learns patterns from known outcomes to predict new cases
-• Examples: Churn prediction, spam detection, price forecasting
-• **This is what we need for RetailCo!**
-
-**🔍 Unsupervised Learning** - Finding hidden patterns without labels
-• Like organizing books without being told how - the AI finds natural groupings
-• Examples: Customer segmentation, anomaly detection
-• Useful: "Are there different types of churners we should treat differently?"
-
-**🎮 Reinforcement Learning** - Learning through trial and error with rewards
-• Like training a dog: reward good actions, discourage bad ones
-• Examples: Game AI, robotics, dynamic pricing
-• Could be useful later for optimizing retention offer amounts
-
-For predicting churn, we want **supervised learning** because we have historical data showing which customers churned.`,
-
-            business_value: `Excellent question! ROI is critical for getting buy-in. Here's how we calculate it:
-
-**Cost of Doing Nothing:**
-• 23% churn rate × 8,500 customers = 1,955 lost customers/quarter
-• 1,955 × $450 lifetime value = **$879,750 lost quarterly**
-
-**Cost of AI Solution:**
-• Model development: $50,000 (one-time)
-• AI agent system: $30,000 (one-time)
-• Ongoing maintenance: $5,000/quarter
-
-**Benefit from AI:**
-• If we catch 85% of churners with targeted $20 retention offers:
-• Save: 1,955 × 0.85 = 1,662 customers
-• Revenue saved: 1,662 × $450 = $747,900
-• Cost of offers: 1,955 × $20 = $39,100
-• **Net benefit: $708,800 per quarter**
-
-**ROI Calculation:**
-• First quarter: $708,800 - $80,000 = $628,800 profit
-• Quarters 2+: $703,800 profit each
-• **Payback period: 1.5 months!**
-
-This is how we convince leadership!`,
-
-            framing: `Perfect topic! Problem framing is crucial. Here's how we frame it:
-
-**Business Problem:**
-"Reduce customer churn by proactively identifying at-risk customers"
-
-**ML Problem:**
-"Binary classification: Will this customer churn in the next 90 days? (Yes/No)"
-
-**Why This Framing Works:**
-✅ Clear outcome: Churn vs Active (binary)
-✅ Actionable timeframe: 90 days gives us time to intervene
-✅ Measurable: We can track accuracy, precision, recall
-✅ Historical data: We have 10,000 customers with known outcomes
-
-**What We Need:**
-• Features (inputs): Purchase history, support tickets, demographics, engagement
-• Labels (outputs): Churned (1) or Active (0) after 90 days
-• Training data: 7,000 historical customers (70%)
-• Test data: 3,000 customers (30%) to validate model
-
-**Key Decision:**
-This is supervised classification, not regression (we're predicting a category, not a number).`,
-
-            // David's responses
-            data_analysis: `Let me show you a sample of our customer data:
-
-<table class="data-table">
-<tr><th>ID</th><th>Tenure</th><th>Monthly Purchases</th><th>Avg Order $</th><th>Support Tickets</th><th>Days Since Purchase</th><th>Status</th></tr>
-<tr><td>C001</td><td>24 mo</td><td>4.2</td><td>$89</td><td>1</td><td>12</td><td class="highlight-green">Active</td></tr>
-<tr><td>C002</td><td>6 mo</td><td>1.1</td><td>$45</td><td>5</td><td>67</td><td class="highlight-red">Churned</td></tr>
-<tr><td>C003</td><td>36 mo</td><td>8.5</td><td>$156</td><td>0</td><td>5</td><td class="highlight-green">Active</td></tr>
-<tr><td>C004</td><td>3 mo</td><td>0.8</td><td>$32</td><td>3</td><td>92</td><td class="highlight-red">Churned</td></tr>
-<tr><td>C005</td><td>18 mo</td><td>3.1</td><td>$72</td><td>2</td><td>8</td><td class="highlight-green">Active</td></tr>
-</table>
-
-**What patterns do you see?**
-
-**Churned customers:**
-• Shorter tenure (avg 4.2 months)
-• Fewer monthly purchases (1.1 vs 5.2)
-• More support tickets (4.8 vs 1.3)
-• Longer time since last purchase (83 vs 11 days)
-
-**These differences are statistically significant!** They become our predictive features.`,
-
-            features: `Feature engineering is creating new variables that help models learn better. Raw data alone isn't enough!
-
-**Example: Raw Data**
-• Last purchase: 67 days ago
-• Total purchases: 8
-
-**Engineered Features:**
-• **Purchase Recency Score:** 67 days → Score 25/100 (recent = 100, old = 0)
-• **Purchase Frequency Trend:** Are they buying MORE or LESS lately?
-• **RFM Score:** Recency + Frequency + Monetary value combined
-• **Engagement Velocity:** Is engagement increasing or decreasing?
-• **Support Ticket Ratio:** Tickets per month of tenure
-• **High Value Flag:** Top 25% of customers by lifetime value
-
-**Why This Matters:**
-A model seeing "67 days since purchase" doesn't know if that's good or bad. But "Recency Score: 25/100" + "Trend: Declining" gives clear signals!
-
-**Data Preparation is 70% of ML work.** Good features make all the difference between a mediocre model (65% accuracy) and a great one (85%+ accuracy).`,
-
-            data_quality: `Data quality makes or breaks AI projects. Here's what we're dealing with:
-
-**Common Issues in Our Data:**
-• **Missing values:** 12% of records missing "last purchase date"
-• **Duplicates:** Same customer with different spellings ("John Smith" vs "J. Smith")
-• **Inconsistent formats:** Dates as "MM/DD/YYYY" vs "YYYY-MM-DD"
-• **Outliers:** One customer with 847 purchases (data error?)
-• **Inconsistent categories:** "Electronics" vs "electronic" vs "tech"
-
-**Our Cleaning Process:**
-1. **Standardize:** Convert all dates to same format, lowercase all text
-2. **De-duplicate:** Merge records using fuzzy matching on name + email
-3. **Handle missing:** Use median for numeric, "unknown" category for text
-4. **Validate:** Remove impossible values (negative purchases, future dates)
-5. **Enrich:** Add derived features (tenure in months, days since last purchase)
-
-**The Rule:**
-"Garbage in, garbage out" - A model trained on messy data learns messy patterns. We spend more time on data prep than model building!`,
-
-            // Marcus's responses
-            training: `Here's how we train the churn prediction model:
-
-**Step 1: Split the Data**
-• Training set (70%): 7,000 customers to learn patterns
-• Validation set (15%): 1,500 to tune hyperparameters
-• Test set (15%): 1,500 to evaluate final performance
-
-**Why separate sets?** We need unseen data to test if the model generalizes vs memorizes.
-
-**Step 2: Choose Algorithm**
-I tested three approaches:
-• **Logistic Regression:** Simple, interpretable, fast (baseline)
-• **Random Forest:** Handles non-linear patterns, feature importance
-• **Neural Network:** Most powerful but "black box"
-
-**Step 3: Train**
-The model learns by finding patterns:
-• "When tenure < 6 months AND support tickets > 3 → 78% churn risk"
-• "When monthly purchases declining AND high order value → 45% churn risk"
-
-**Step 4: Tune Hyperparameters**
-Optimize settings on validation set:
-• How many trees in Random Forest?
-• How deep should each tree be?
-• What's the learning rate?
-
-**Winner:** Random Forest with 100 trees, max depth 8 → 83.2% F1-score!`,
-
-            evaluation: `You can't just look at "accuracy"! Here's why and what to use instead:
-
-**Why Accuracy is Misleading:**
-Our data has 77% active customers, 23% churned. A dumb model that predicts "everyone stays" would be 77% accurate but **completely useless**!
-
-**Better Metrics:**
-
-<table class="data-table">
-<tr><th></th><th>Predicted Stay</th><th>Predicted Churn</th></tr>
-<tr><th>Actually Stayed (1,155)</th><td class="highlight-green">1,089 (TN)</td><td class="highlight-red">66 (FP)</td></tr>
-<tr><th>Actually Churned (345)</th><td class="highlight-red">52 (FN)</td><td class="highlight-green">293 (TP)</td></tr>
-</table>
-
-**Precision:** 293/(293+66) = **81.6%**
-• When we predict churn, we're right 81.6% of the time
-• Low false positives = don't waste retention offers on loyal customers
-
-**Recall:** 293/(293+52) = **84.9%**
-• We catch 84.9% of actual churners
-• Low false negatives = don't miss at-risk customers
-
-**F1-Score:** Harmonic mean = **83.2%**
-• Balances precision and recall
-
-Which matters more depends on business costs!`,
-
-            tradeoffs: `This is where ML meets business! Every metric has tradeoffs.
-
-**The Business Question:**
-What's worse - missing a churner, or targeting a loyal customer?
-
-**Cost Analysis:**
-• **False Negative (miss a churner):** Lose $450 in lifetime value
-• **False Positive (target loyal customer):** Waste $20 on unnecessary offer
-
-**The Math:**
-Missing one churner costs 22.5× more than one false alarm! So we optimize for **high recall** (catch as many churners as possible) even if it means more false positives.
-
-**Our Model Performance:**
-• Catch 293 of 345 churners (84.9% recall) → Save $131,850
-• Unnecessarily target 66 loyal customers → Cost $1,320
-• **Net benefit: $130,530!**
-
-**Model Tuning:**
-We can adjust the "threshold" to trade precision for recall:
-• Threshold 0.3 (aggressive): 92% recall, 72% precision → More false alarms
-• Threshold 0.5 (balanced): 85% recall, 82% precision → Our choice
-• Threshold 0.7 (conservative): 76% recall, 91% precision → Miss more churners
-
-We chose 0.5 based on cost analysis. **Always tie metrics to business impact!**`,
-
-            // Elena's responses
-            prompts: `Prompt engineering is "programming with language" - guiding AI with well-crafted instructions.
-
-**❌ Bad Prompt:**
-"Write a retention email."
-
-**Result:** Generic, boring, ineffective.
-
-**✅ Good Prompt:**
-"You are a customer success specialist at RetailCo. Write a personalized retention email for:
-
-Customer Profile:
-- Name: Sarah Johnson
-- Tenure: 6 months
-- Last purchase: 67 days ago (previously monthly)
-- Had 5 support tickets (avg is 1.2)
-- Preferred eco-friendly products
-- Churn risk: 87%
-
-Constraints:
-- Tone: Empathetic and solution-focused
-- Offer: 20% discount + free premium shipping
-- Length: 150-200 words
-- Call-to-action: Reply to schedule call with specialist
-
-Goal: Re-engage customer and identify pain points"
-
-**Result:** Personalized, contextual, effective!
-
-**Key Elements:**
-1. **Role:** Who is the AI?
-2. **Context:** What information is relevant?
-3. **Task:** What exactly should it do?
-4. **Constraints:** Format, tone, length limits
-5. **Goal:** What outcome do we want?
-
-Good prompts are the difference between mediocre AI and amazing AI!`,
-
-            agents: `AI agents go beyond single responses - they take multi-step actions and adapt based on results!
-
-**Traditional AI:** One question → One answer
-
-**AI Agent:** Autonomous workflow with reasoning and actions
-
-**Example: ReAct Pattern** (Reasoning + Acting)
-
-**Scenario:** Customer C002 (87% churn risk)
-
-1. **Observe:** Review customer profile
-2. **Reason:** "5 support tickets suggests product frustration"
-3. **Act:** Send empathy email offering product upgrade
-4. **Observe:** Email opened, no response after 3 days
-5. **Reason:** "Customer engaged but needs stronger incentive"
-6. **Act:** Escalate to human agent with 25% discount authority
-7. **Observe:** Human agent spoke to customer, identified issue
-8. **Act:** Process product replacement + apply discount
-9. **Observe:** Customer re-purchased within 7 days
-10. **Learn:** Save this pattern for similar cases
-
-**The agent runs an entire retention campaign autonomously!**
-
-Other patterns:
-• **Chain-of-Thought:** Break complex reasoning into steps
-• **Self-Reflection:** Agent reviews its own outputs
-• **Tool Use:** Agent can call APIs, query databases, send emails`,
-
-            context: `Context is everything an AI needs to make good decisions. Garbage context = garbage decisions!
-
-**For Our Retention Agent:**
-
-**1. Customer Context**
-• Purchase history (frequency, recency, monetary)
-• Product preferences (categories, brands, price points)
-• Support history (tickets, issues, resolutions)
-• Engagement (email opens, website visits)
-• Demographics (age, location, customer type)
-
-**2. Business Context**
-• Available offers (discounts, free shipping, upgrades)
-• Budget limits (max discount per customer)
-• Policy constraints (refund windows, terms)
-• Success patterns (what worked for similar customers)
-
-**3. Real-Time Context**
-• Current churn risk score (0-100)
-• Recent trigger events (support ticket, complaint)
-• Competitive actions (did competitor launch promo?)
-• Seasonal factors (holiday season, end of quarter)
-
-**4. Historical Context**
-• Previous retention attempts (don't repeat failed approaches)
-• Customer responses (email opens, call no-shows)
-• Feedback sentiment (positive, neutral, negative)
-
-**Context Engineering** = Deciding what information to include, how to format it, and how to prioritize it. Too little context = poor decisions. Too much = AI gets confused. Balance is key!`,
-
-            // Jasmine's responses
-            deployment: `Production deployment is completely different from lab testing. Here's our staged rollout:
-
-**Phase 1: Pilot (Week 1)**
-• Deploy to 500 customers (5% of at-risk population)
-• AI agent fully automated
-• Human team monitors ALL interactions
-• Goal: Catch bugs without large-scale damage
-
-**Phase 2: A/B Test (Weeks 2-4)**
-Three groups of 2,000 customers each:
-• **Group A (Control):** No intervention - baseline churn rate
-• **Group B (AI Only):** Fully automated AI agent
-• **Group C (Human+AI):** AI recommends, human approves
-
-Measure: Churn rate, cost per save, customer satisfaction
-
-**Phase 3: Gradual Rollout (Weeks 5-8)**
-• If AI performs well, increase from 500 → 2,000 → 5,000 → all customers
-• Monitor metrics at each stage
-• Keep human escalation path active
-
-**Phase 4: Full Production (Week 9+)**
-• AI handles 60% fully automated
-• Human-in-the-loop for 30% (high-value customers)
-• Human-only for 10% (VIPs, sensitive cases)
-
-**Why Gradual?** One bug at 500 customers = annoying. Same bug at 50,000 customers = catastrophic!`,
-
-            testing: `A/B testing proves what actually works vs what we think works!
-
-**The Setup:**
-We randomly split at-risk customers into groups and try different approaches:
-
-**Group A (Control) - 2,000 customers**
-• No AI intervention
-• Let's see natural churn rate as baseline
-• Expected: ~23% churn (460 customers)
-
-**Group B (AI Agent) - 2,000 customers**
-• Fully automated AI outreach
-• No human involvement except escalations
-• Cost: $20/customer × 2,000 = $40,000
-
-**Group C (Human+AI) - 2,000 customers**
-• AI generates recommendations
-• Human reviews and approves each action
-• Cost: $45/customer × 2,000 = $90,000 (more expensive)
-
-**What We Measure:**
-• **Churn rate:** Which group retains more customers?
-• **Cost per save:** How much did we spend per saved customer?
-• **Customer satisfaction:** NPS scores, feedback sentiment
-• **Time to intervention:** How fast did we act?
-
-**Example Results:**
-• Group A: 23% churn (baseline)
-• Group B: 16% churn (AI agent) → 30% improvement
-• Group C: 14% churn (Human+AI) → 39% improvement
-
-**The Decision:** Is the extra 9% worth 2.25× the cost? Depends on customer lifetime value!`,
-
-            monitoring: `AI models degrade over time. "Set and forget" is a recipe for disaster!
-
-**What We Monitor:**
-
-**1. Model Performance Metrics**
-• Precision/Recall trends (are they dropping?)
-• Prediction distribution (still seeing 23% churn risk?)
-• False positive/negative rates
-• Alert: If accuracy drops below 80%
-
-**2. Data Drift**
-• Are input features changing? (customers behaving differently)
-• Are we seeing new patterns? (economic recession, competitor actions)
-• Feature distribution shifts
-• Alert: If any feature drifts >15% from training data
-
-**3. Agent Performance**
-• Email open rates (are customers engaging?)
-• Conversion rates (are offers working?)
-• Escalation frequency (how often does AI hand off to humans?)
-• Customer feedback sentiment
-
-**4. Business Metrics**
-• Actual churn rate vs predicted
-• ROI tracking (are we still profitable?)
-• Cost per save trending
-• Customer lifetime value impact
-
-**Retraining Schedule:**
-• Minor updates: Weekly (new customer data)
-• Major retraining: Monthly (full model refresh)
-• Emergency retraining: If alerts trigger
-
-**Human Feedback Loop:**
-Humans can override AI decisions. Those overrides become new training data to improve the model!`
-        };
-
         // ===== STATE =====
         let currentCharacter = null;
-        let conceptsLearned = new Set();
+        let conversationHistory = [];
         let visitedExperts = new Set();
 
         // ===== NAVIGATION =====
@@ -778,6 +579,8 @@ Humans can override AI decisions. Those overrides become new training data to im
             visitedExperts.add(charId);
             const char = characters[charId];
 
+            conversationHistory = [];
+
             document.getElementById('character-selection').classList.add('hidden');
             document.getElementById('chat-interface').classList.remove('hidden');
 
@@ -786,15 +589,15 @@ Humans can override AI decisions. Those overrides become new training data to im
             document.getElementById('chat-character-role').textContent = char.role;
 
             document.getElementById('chat-messages').innerHTML = '';
-            document.getElementById('learned-concepts').innerHTML = '';
+            document.getElementById('user-input').value = '';
 
-            addMessage(`Hi! I'm ${char.name}. I can help you understand various aspects of our AI project. What would you like to discuss?`, 'character');
-            renderTopics(char.topics);
+            addMessage(`Hi! I'm ${char.name}, ${char.role}. I'm here to help you understand AI concepts for our churn prediction project. What would you like to know?`, 'character');
+
+            renderSuggestedQuestions(char.suggestedQuestions);
         }
 
         function backToCharacters() {
             document.getElementById('chat-interface').classList.add('hidden');
-            document.getElementById('dashboard').classList.add('hidden');
             document.getElementById('character-selection').classList.remove('hidden');
             renderCharacters();
         }
@@ -804,94 +607,118 @@ Humans can override AI decisions. Those overrides become new training data to im
             const container = document.getElementById('chat-messages');
             const bubble = document.createElement('div');
             bubble.className = `chat-bubble ${type}`;
-            bubble.innerHTML = text;
+            bubble.innerHTML = text.replace(/\n/g, '<br>');
             container.appendChild(bubble);
             container.scrollTop = container.scrollHeight;
         }
 
-        function renderTopics(topics) {
-            const container = document.getElementById('topics-container');
+        function renderSuggestedQuestions(questions) {
+            const container = document.getElementById('suggested-questions');
             container.innerHTML = '';
 
-            topics.forEach(topic => {
+            questions.forEach(q => {
                 const btn = document.createElement('button');
-                btn.className = 'topic-btn w-full';
-                btn.textContent = topic.title;
-                btn.onclick = () => discussTopic(topic);
+                btn.className = 'suggested-question';
+                btn.textContent = q;
+                btn.onclick = () => {
+                    document.getElementById('user-input').value = q;
+                    sendMessage();
+                };
                 container.appendChild(btn);
             });
-
-            // Add back option
-            const backBtn = document.createElement('button');
-            backBtn.className = 'btn-secondary w-full mt-4';
-            backBtn.textContent = '← Ask someone else';
-            backBtn.onclick = backToCharacters;
-            container.appendChild(backBtn);
         }
 
-        function discussTopic(topic) {
-            addMessage(topic.title, 'user');
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const message = input.value.trim();
 
-            setTimeout(() => {
-                const response = responses[topic.id];
+            if (!message) return;
+
+            // Add user message
+            addMessage(message, 'user');
+            input.value = '';
+
+            // Disable send button
+            const sendBtn = document.getElementById('send-btn');
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Thinking...';
+
+            // Add to conversation history
+            conversationHistory.push({
+                role: 'user',
+                content: message
+            });
+
+            // Show typing indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'chat-bubble character typing-indicator';
+            typingDiv.textContent = '...';
+            typingDiv.id = 'typing-indicator';
+            document.getElementById('chat-messages').appendChild(typingDiv);
+
+            try {
+                // Call LLM API
+                const char = characters[currentCharacter];
+                const response = await callLLM(char.systemPrompt, conversationHistory);
+
+                // Remove typing indicator
+                document.getElementById('typing-indicator')?.remove();
+
+                // Add assistant response
                 addMessage(response, 'character');
 
-                topic.concepts.forEach(c => {
-                    conceptsLearned.add(c);
-                    addConcept(c);
+                // Add to conversation history
+                conversationHistory.push({
+                    role: 'assistant',
+                    content: response
                 });
 
-                setTimeout(() => {
-                    addMessage("Any other questions I can help with?", 'character');
-                }, 1000);
-            }, 800);
+            } catch (error) {
+                document.getElementById('typing-indicator')?.remove();
+                addMessage(`❌ Error: ${error.message}. Make sure your LM Studio server is running at http://127.0.0.1:1234`, 'system');
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send Question →';
+            }
         }
 
-        function addConcept(concept) {
-            const container = document.getElementById('learned-concepts');
-            if (container.querySelector(`[data-concept="${concept}"]`)) return;
+        async function callLLM(systemPrompt, messages) {
+            const response = await fetch(LLM_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    model: "microsoft/phi-4-mini-reasoning",
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        ...messages
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 1000,
+                    stream: false
+                })
+            });
 
-            const tag = document.createElement('span');
-            tag.className = 'concept-tag';
-            tag.textContent = concept;
-            tag.setAttribute('data-concept', concept);
-            container.appendChild(tag);
-        }
-
-        // ===== DASHBOARD =====
-        function showDashboard() {
-            document.getElementById('character-selection').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
-
-            const conceptsList = document.getElementById('concepts-list');
-            conceptsList.innerHTML = '';
-            if (conceptsLearned.size === 0) {
-                conceptsList.innerHTML = '<p style="color: var(--text-muted)">No concepts learned yet. Start consulting!</p>';
-            } else {
-                conceptsLearned.forEach(c => {
-                    const tag = document.createElement('span');
-                    tag.className = 'concept-tag';
-                    tag.textContent = `✓ ${c}`;
-                    conceptsList.appendChild(tag);
-                });
+            if (!response.ok) {
+                throw new Error(`LLM API returned ${response.status}: ${response.statusText}`);
             }
 
-            const expertsList = document.getElementById('experts-list');
-            expertsList.innerHTML = '';
-            Object.values(characters).forEach(char => {
-                const visited = visitedExperts.has(char.id);
-                const div = document.createElement('div');
-                div.className = 'flex items-center justify-between p-3 glass-card mb-2';
-                div.innerHTML = `
-                    <span>${char.emoji} ${char.name}</span>
-                    <span class="${visited ? 'text-green-400' : 'text-gray-400'}">${visited ? '✓ Consulted' : '○ Not visited'}</span>
-                `;
-                expertsList.appendChild(div);
-            });
+            const data = await response.json();
+            return data.choices[0].message.content;
+        }
+
+        function clearChat() {
+            if (confirm('Clear this conversation?')) {
+                conversationHistory = [];
+                document.getElementById('chat-messages').innerHTML = '';
+                const char = characters[currentCharacter];
+                addMessage(`Chat cleared. I'm ${char.name}. What would you like to discuss?`, 'character');
+            }
         }
 
         // Init
-        console.log('AI Consultant Simulation loaded');
+        console.log('AI Consultant Simulation loaded - LLM-powered version');
     </script>
 </body>
 </html>
