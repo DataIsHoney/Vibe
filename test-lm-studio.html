@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LM Studio Connection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .test-box {
+            background: #2a2a2a;
+            border: 2px solid #444;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .success { border-color: #4CAF50; background: #1b5e20; }
+        .error { border-color: #f44336; background: #5e1b1b; }
+        .warning { border-color: #ff9800; background: #5e3a1b; }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover { background: #1e40af; }
+        pre {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .status { font-size: 18px; margin: 10px 0; }
+        input {
+            background: #1a1a1a;
+            border: 1px solid #444;
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 LM Studio Connection Test</h1>
+
+    <div class="test-box">
+        <h2>Step 1: Server Configuration</h2>
+        <p>LM Studio Server URL:</p>
+        <input type="text" id="server-url" value="http://127.0.0.1:1234" />
+        <p style="margin-top: 10px;">Model Identifier:</p>
+        <input type="text" id="model-name" value="microsoft/phi-4-mini-reasoning" />
+    </div>
+
+    <div class="test-box">
+        <h2>Step 2: Test Connection</h2>
+        <button onclick="testConnection()">🔌 Test Server Connection</button>
+        <button onclick="testModel()">🤖 Test Model Response</button>
+        <div id="test-results"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>Step 3: LM Studio Setup Instructions</h2>
+        <ol>
+            <li><strong>Open LM Studio</strong></li>
+            <li>Go to the <strong>"Local Server"</strong> tab (left sidebar)</li>
+            <li>Click <strong>"Start Server"</strong> if not already running</li>
+            <li>Check that the port is <strong>1234</strong></li>
+            <li>Make sure <strong>CORS is enabled</strong> (should be by default)</li>
+            <li>Load your model: <code>microsoft/phi-4-mini-reasoning</code></li>
+            <li>Verify the model shows as "Loaded" in the UI</li>
+        </ol>
+    </div>
+
+    <div class="test-box warning">
+        <h2>⚠️ Common Issues & Fixes</h2>
+        <h3>1. CORS Error (Cross-Origin)</h3>
+        <p>If you see: <code>Access-Control-Allow-Origin</code> error</p>
+        <p><strong>Fix:</strong> LM Studio should have CORS enabled by default. Check server settings.</p>
+
+        <h3>2. Connection Refused</h3>
+        <p>If you see: <code>Failed to fetch</code> or <code>Connection refused</code></p>
+        <p><strong>Fix:</strong> Make sure LM Studio server is running on port 1234</p>
+
+        <h3>3. Model Not Found</h3>
+        <p>If you see: <code>Model not found</code></p>
+        <p><strong>Fix:</strong> Load the model in LM Studio before testing</p>
+
+        <h3>4. Slow Response</h3>
+        <p>If the model takes too long to respond</p>
+        <p><strong>Fix:</strong> This is normal for first request. Subsequent requests are faster.</p>
+    </div>
+
+    <script>
+        async function testConnection() {
+            const resultsDiv = document.getElementById('test-results');
+            const serverUrl = document.getElementById('server-url').value;
+
+            resultsDiv.innerHTML = '<p class="status">⏳ Testing connection to LM Studio...</p>';
+
+            try {
+                // Test basic connectivity
+                const response = await fetch(`${serverUrl}/v1/models`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    resultsDiv.innerHTML = `
+                        <p class="status" style="color: #4CAF50;">✅ Connection Successful!</p>
+                        <p>Server is running and responding.</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <p class="status" style="color: #ff9800;">⚠️ Server responded with error</p>
+                        <p>Status: ${response.status} ${response.statusText}</p>
+                        <p>Make sure LM Studio server is running properly.</p>
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <p class="status" style="color: #f44336;">❌ Connection Failed</p>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <h3>Troubleshooting:</h3>
+                    <ul>
+                        <li>Is LM Studio running?</li>
+                        <li>Is the server started in LM Studio?</li>
+                        <li>Is it running on port 1234?</li>
+                        <li>Try accessing <a href="${serverUrl}/v1/models" target="_blank" style="color: #64b5f6;">${serverUrl}/v1/models</a> directly</li>
+                    </ul>
+                `;
+            }
+        }
+
+        async function testModel() {
+            const resultsDiv = document.getElementById('test-results');
+            const serverUrl = document.getElementById('server-url').value;
+            const modelName = document.getElementById('model-name').value;
+
+            resultsDiv.innerHTML = '<p class="status">⏳ Sending test message to model... (this may take 10-30 seconds)</p>';
+
+            try {
+                const startTime = Date.now();
+
+                const response = await fetch(`${serverUrl}/v1/chat/completions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: [
+                            { role: 'system', content: 'You are a helpful AI assistant.' },
+                            { role: 'user', content: 'Say "Hello! I am working correctly!" in exactly those words.' }
+                        ],
+                        temperature: 0.7,
+                        max_tokens: 50,
+                        stream: false
+                    })
+                });
+
+                const endTime = Date.now();
+                const responseTime = ((endTime - startTime) / 1000).toFixed(2);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const modelResponse = data.choices[0].message.content;
+
+                    resultsDiv.innerHTML = `
+                        <p class="status" style="color: #4CAF50;">✅ Model Working Perfectly!</p>
+                        <p><strong>Response time:</strong> ${responseTime} seconds</p>
+                        <p><strong>Model said:</strong></p>
+                        <pre>${modelResponse}</pre>
+                        <p style="color: #4CAF50; font-weight: bold;">🎉 Your setup is ready! You can now use the AI Consultant Simulation.</p>
+                    `;
+                } else {
+                    const errorText = await response.text();
+                    resultsDiv.innerHTML = `
+                        <p class="status" style="color: #f44336;">❌ Model Request Failed</p>
+                        <p><strong>Status:</strong> ${response.status} ${response.statusText}</p>
+                        <p><strong>Response:</strong></p>
+                        <pre>${errorText}</pre>
+                        <h3>Possible Issues:</h3>
+                        <ul>
+                            <li>Is the model "${modelName}" loaded in LM Studio?</li>
+                            <li>Check the model name matches exactly in LM Studio</li>
+                            <li>Try loading a different model</li>
+                        </ul>
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <p class="status" style="color: #f44336;">❌ Request Failed</p>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <h3>Common Causes:</h3>
+                    <ul>
+                        <li><strong>CORS Error:</strong> Browser blocking the request (check browser console)</li>
+                        <li><strong>Network Error:</strong> Server not reachable</li>
+                        <li><strong>Timeout:</strong> Model taking too long to respond</li>
+                    </ul>
+                    <p>Check the browser console (F12) for detailed error messages.</p>
+                `;
+            }
+        }
+
+        // Auto-test on load
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('LM Studio Test Page Loaded');
+            console.log('Ready to test connection!');
+        });
+    </script>
+</body>
+</html>
