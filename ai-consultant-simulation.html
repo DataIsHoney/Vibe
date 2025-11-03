@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Consultant Simulation - RetailCo Digital Transformation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-blue: #2563eb;
+            --primary-dark: #1e40af;
+            --accent-purple: #7c3aed;
+            --success-green: #10b981;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-light: #f1f5f9;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1f3a 100%);
+            color: var(--text-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(148, 163, 184, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .character-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            border: 3px solid var(--primary-blue);
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-purple));
+        }
+
+        .chat-bubble {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            margin-bottom: 12px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .chat-bubble.user {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-dark));
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-bubble.character {
+            background: var(--bg-card);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-bottom-left-radius: 4px;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .typing-indicator {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .progress-badge {
+            background: linear-gradient(135deg, var(--success-green), #059669);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .concept-tag {
+            background: rgba(124, 58, 237, 0.2);
+            border: 1px solid var(--accent-purple);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            display: inline-block;
+            margin: 2px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-dark));
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(148, 163, 184, 0.2);
+            color: var(--text-light);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(148, 163, 184, 0.3);
+            border-color: rgba(148, 163, 184, 0.5);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .chat-container {
+            height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-container::-webkit-scrollbar-track {
+            background: rgba(148, 163, 184, 0.1);
+            border-radius: 4px;
+        }
+
+        .chat-container::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.3);
+            border-radius: 4px;
+        }
+
+        .chat-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.5);
+        }
+    </style>
+</head>
+<body class="p-4">
+    <!-- Header -->
+    <header class="mb-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-4xl font-bold mb-2">🎯 AI Consultant Simulation</h1>
+                    <p class="text-lg" style="color: var(--text-muted)">RetailCo Digital Transformation Project</p>
+                </div>
+                <div class="text-right">
+                    <div class="progress-badge" id="progress-badge">0/5 Characters Consulted</div>
+                    <button class="btn-secondary mt-2" onclick="toggleDashboard()">📊 Dashboard</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="max-w-7xl mx-auto">
+
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="glass-card p-8 mb-6">
+            <h2 class="text-3xl font-bold mb-4">Welcome, Consultant! 👋</h2>
+            <p class="text-lg mb-4" style="color: var(--text-muted)">
+                You've been hired by <strong>RetailCo</strong>, a mid-sized retail company looking to explore AI solutions
+                to improve their business operations, customer experience, and decision-making.
+            </p>
+            <p class="text-lg mb-4" style="color: var(--text-muted)">
+                Your mission: <strong>Interview 5 key stakeholders</strong> to understand their challenges,
+                educate them about AI concepts (in simple terms!), and help them identify opportunities for AI implementation.
+            </p>
+            <div class="bg-blue-900 bg-opacity-30 p-4 rounded-lg mb-6">
+                <h3 class="text-xl font-semibold mb-2">🎓 Learning Objectives:</h3>
+                <ul class="list-disc list-inside space-y-1" style="color: var(--text-muted)">
+                    <li>Understand AI and Machine Learning in business contexts</li>
+                    <li>Identify opportunities for automation and augmentation</li>
+                    <li>Learn about data quality and pattern recognition</li>
+                    <li>Explore personalization and customer insights</li>
+                    <li>Understand AI ethics and human-AI collaboration</li>
+                </ul>
+            </div>
+            <button class="btn-primary text-lg" onclick="startSimulation()">Start Consulting 🚀</button>
+        </div>
+
+        <!-- Character Selection Screen -->
+        <div id="character-selection" class="hidden">
+            <h2 class="text-2xl font-bold mb-6">Select a Character to Consult</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="character-grid">
+                <!-- Characters will be rendered here -->
+            </div>
+        </div>
+
+        <!-- Chat Interface -->
+        <div id="chat-interface" class="hidden">
+            <div class="glass-card p-6">
+                <!-- Character Header -->
+                <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-600">
+                    <div class="flex items-center gap-4">
+                        <div class="character-avatar" id="chat-avatar"></div>
+                        <div>
+                            <h3 class="text-2xl font-bold" id="chat-character-name"></h3>
+                            <p style="color: var(--text-muted)" id="chat-character-role"></p>
+                        </div>
+                    </div>
+                    <button class="btn-secondary" onclick="exitChat()">← Back to Characters</button>
+                </div>
+
+                <!-- Chat Messages -->
+                <div class="chat-container glass-card mb-4" id="chat-messages">
+                    <!-- Messages will appear here -->
+                </div>
+
+                <!-- Response Options -->
+                <div id="response-options" class="space-y-2">
+                    <!-- Response buttons will be rendered here -->
+                </div>
+
+                <!-- Learned Concepts -->
+                <div class="mt-4 p-4 glass-card" id="learned-concepts-container">
+                    <p class="text-sm font-semibold mb-2">💡 Concepts Learned:</p>
+                    <div id="learned-concepts" class="flex flex-wrap gap-2">
+                        <!-- Concept tags will appear here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="hidden glass-card p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">📊 Learning Dashboard</h2>
+                <button class="btn-secondary" onclick="toggleDashboard()">Close</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-card p-4">
+                    <h3 class="text-xl font-semibold mb-4">Characters Consulted</h3>
+                    <div id="characters-progress" class="space-y-2">
+                        <!-- Progress will be shown here -->
+                    </div>
+                </div>
+
+                <div class="glass-card p-4">
+                    <h3 class="text-xl font-semibold mb-4">AI Concepts Mastered</h3>
+                    <div id="concepts-mastered" class="space-y-2">
+                        <!-- Concepts will be shown here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 glass-card p-4">
+                <h3 class="text-xl font-semibold mb-4">📝 Key Takeaways</h3>
+                <div id="key-takeaways" class="space-y-3" style="color: var(--text-muted)">
+                    <!-- Key insights will appear here as user learns -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========================================
+        // GAME STATE & DATA
+        // ========================================
+
+        const STORAGE_KEY = 'ai_consultant_simulation_progress';
+
+        // Character definitions
+        const characters = {
+            sarah: {
+                id: 'sarah',
+                name: 'Sarah Chen',
+                role: 'CEO',
+                emoji: '👩‍💼',
+                description: 'Strategic thinker focused on business value and ROI',
+                focus: 'AI Strategy & Business Impact',
+                completed: false,
+                concepts: ['AI Business Value', 'Strategic Planning', 'ROI Thinking', 'Change Management']
+            },
+            marcus: {
+                id: 'marcus',
+                name: 'Marcus Johnson',
+                role: 'Operations Manager',
+                emoji: '👨‍🏭',
+                description: 'Practical process optimizer looking for efficiency gains',
+                focus: 'Process Automation & Efficiency',
+                completed: false,
+                concepts: ['Automation', 'Process Optimization', 'Data Collection', 'Workflow Design']
+            },
+            elena: {
+                id: 'elena',
+                name: 'Elena Rodriguez',
+                role: 'Marketing Director',
+                emoji: '👩‍💻',
+                description: 'Creative marketer wanting to understand customer insights',
+                focus: 'Customer Personalization & Insights',
+                completed: false,
+                concepts: ['Personalization', 'Predictive Analytics', 'Customer Segmentation', 'Recommendations']
+            },
+            david: {
+                id: 'david',
+                name: 'David Kim',
+                role: 'Data Analyst',
+                emoji: '👨‍💻',
+                description: 'Detail-oriented analyst interested in data quality and patterns',
+                focus: 'Data Quality & Pattern Recognition',
+                completed: false,
+                concepts: ['Data Quality', 'Pattern Recognition', 'Model Training', 'Feature Selection']
+            },
+            jasmine: {
+                id: 'jasmine',
+                name: 'Jasmine Patel',
+                role: 'Customer Service Lead',
+                emoji: '👩‍💼',
+                description: 'People-focused leader exploring AI-human collaboration',
+                focus: 'AI Assistance & Human Collaboration',
+                completed: false,
+                concepts: ['AI Assistance', 'Chatbots', 'Human-AI Collaboration', 'Ethics & Bias']
+            }
+        };
+
+        // Conversation trees for each character
+        const conversations = {
+            sarah: [
+                {
+                    id: 'sarah_intro',
+                    speaker: 'character',
+                    message: "Hello! I'm Sarah Chen, CEO of RetailCo. Thanks for coming. I've been hearing a lot about AI, but I'm honestly not sure where to start. Everyone says it's transformative, but what does that actually mean for a company like ours?",
+                    options: [
+                        { text: "Let's start with the basics - what business challenges are you facing?", next: 'sarah_challenges' },
+                        { text: "Tell me about your current decision-making process.", next: 'sarah_decisions' }
+                    ]
+                },
+                {
+                    id: 'sarah_challenges',
+                    speaker: 'character',
+                    message: "Good question! Our biggest challenges are: 1) We can't predict demand accurately, leading to stockouts or excess inventory. 2) We're losing customers to competitors who seem to 'know' them better. 3) Decision-making is slow because we're drowning in data but starved for insights. Can AI help with these?",
+                    concepts: ['AI Business Value'],
+                    options: [
+                        { text: "Absolutely! Let me explain how AI learns from patterns...", next: 'sarah_patterns' }
+                    ]
+                },
+                {
+                    id: 'sarah_decisions',
+                    speaker: 'character',
+                    message: "Currently, we have monthly meetings where we review reports, analyze spreadsheets, and make decisions based on past trends and gut feelings. It takes days to prepare the data, and by the time we decide, the market has already shifted. It's frustrating.",
+                    concepts: ['Strategic Planning'],
+                    options: [
+                        { text: "This is exactly where AI can help. Let me explain...", next: 'sarah_patterns' }
+                    ]
+                },
+                {
+                    id: 'sarah_patterns',
+                    speaker: 'character',
+                    message: "I'm listening. But how is AI different from just running reports in Excel?",
+                    options: [
+                        { text: "Great question! Think of AI as a system that learns from experience, like your best employee...", next: 'sarah_learning' }
+                    ]
+                },
+                {
+                    id: 'sarah_learning',
+                    speaker: 'character',
+                    message: "Okay, so it's like having an employee who never forgets and can spot patterns I might miss? That's interesting. But here's my concern: what's the ROI? How do I know it's worth the investment?",
+                    concepts: ['Pattern Recognition', 'ROI Thinking'],
+                    options: [
+                        { text: "Let's break down the ROI in concrete terms...", next: 'sarah_roi' }
+                    ]
+                },
+                {
+                    id: 'sarah_roi',
+                    speaker: 'character',
+                    message: "This is helpful. So we could measure: inventory cost reduction, customer retention improvement, and time saved in decision-making. But implementing AI sounds like a huge change. How do I get my team on board?",
+                    concepts: ['Strategic Planning'],
+                    options: [
+                        { text: "Change management is crucial. Start small with pilot projects...", next: 'sarah_change' }
+                    ]
+                },
+                {
+                    id: 'sarah_change',
+                    speaker: 'character',
+                    message: "I like the idea of starting small. A pilot project in demand forecasting could show quick wins. Thank you - you've given me a clear framework to think about AI strategically, not just as a buzzword. I feel much more confident about our next steps.",
+                    concepts: ['Change Management'],
+                    options: [
+                        { text: "I'm glad I could help! Best of luck with your AI journey.", next: 'sarah_complete' }
+                    ]
+                },
+                {
+                    id: 'sarah_complete',
+                    speaker: 'system',
+                    message: '✅ Consultation Complete! Sarah now understands AI strategy and business value.',
+                    complete: true
+                }
+            ],
+            marcus: [
+                {
+                    id: 'marcus_intro',
+                    speaker: 'character',
+                    message: "Hi, I'm Marcus Johnson, Operations Manager. I run a tight ship here, but we're drowning in manual processes. My team spends hours each day on repetitive tasks - data entry, inventory checks, scheduling. I've heard AI can automate things, but I don't want to replace my people. What can you tell me?",
+                    options: [
+                        { text: "Automation doesn't mean replacement - it means augmentation. Let's explore...", next: 'marcus_augmentation' },
+                        { text: "Tell me about your most time-consuming processes.", next: 'marcus_processes' }
+                    ]
+                },
+                {
+                    id: 'marcus_augmentation',
+                    speaker: 'character',
+                    message: "Augmentation? What's the difference?",
+                    options: [
+                        { text: "Automation handles repetitive tasks, freeing your team for higher-value work...", next: 'marcus_processes' }
+                    ]
+                },
+                {
+                    id: 'marcus_processes',
+                    speaker: 'character',
+                    message: "Our biggest time sinks are: 1) Manual inventory tracking - staff physically count items and enter data into spreadsheets. 2) Order processing - reviewing and approving orders one by one. 3) Staff scheduling - trying to predict busy times and assign shifts. These take 20+ hours per week combined.",
+                    concepts: ['Process Optimization'],
+                    options: [
+                        { text: "All of these are perfect candidates for AI automation. Here's how...", next: 'marcus_automation' }
+                    ]
+                },
+                {
+                    id: 'marcus_automation',
+                    speaker: 'character',
+                    message: "So AI could automatically track inventory using cameras, process routine orders, and predict busy times for scheduling? That sounds amazing! But here's my question: where does the AI get the information it needs to make these decisions?",
+                    concepts: ['Automation'],
+                    options: [
+                        { text: "Excellent question! AI learns from data - let me explain data collection...", next: 'marcus_data' }
+                    ]
+                },
+                {
+                    id: 'marcus_data',
+                    speaker: 'character',
+                    message: "So it needs historical data - like past inventory levels, order patterns, and foot traffic. We have that! We've been tracking this manually for years. But the data is messy - different formats, missing entries, inconsistencies. Will that be a problem?",
+                    concepts: ['Data Collection'],
+                    options: [
+                        { text: "Data quality is crucial. Let's talk about cleaning and preparing your data...", next: 'marcus_quality' }
+                    ]
+                },
+                {
+                    id: 'marcus_quality',
+                    speaker: 'character',
+                    message: "Got it - 'garbage in, garbage out.' So we need to invest time upfront cleaning our data, but then the AI can work with it. And once it's running, it can actually help keep data quality high by flagging anomalies. That's a good long-term investment.",
+                    concepts: ['Workflow Design'],
+                    options: [
+                        { text: "Exactly! You're thinking like an AI-enabled operations leader now.", next: 'marcus_complete' }
+                    ]
+                },
+                {
+                    id: 'marcus_complete',
+                    speaker: 'system',
+                    message: '✅ Consultation Complete! Marcus now understands automation and process optimization.',
+                    complete: true
+                }
+            ],
+            elena: [
+                {
+                    id: 'elena_intro',
+                    speaker: 'character',
+                    message: "Hey! Elena Rodriguez, Marketing Director. I need your help understanding something. Our competitors are sending emails that feel eerily personal - like they know exactly what each customer wants. We're still sending the same generic promotions to everyone. How do they do it, and can we do it too without being creepy?",
+                    options: [
+                        { text: "This is called personalization, and it's powered by AI. Let's discuss...", next: 'elena_personalization' },
+                        { text: "Tell me about your current marketing approach.", next: 'elena_current' }
+                    ]
+                },
+                {
+                    id: 'elena_current',
+                    speaker: 'character',
+                    message: "Right now, we segment customers into broad categories: 'frequent buyers,' 'seasonal shoppers,' 'deal seekers.' Then we send each group the same email campaign. Open rates are declining, and customers tell us our emails aren't relevant to them. We have the data - purchase history, browsing behavior, demographics - but we don't know how to use it effectively.",
+                    concepts: ['Customer Segmentation'],
+                    options: [
+                        { text: "You're already halfway there! Let me explain how AI can transform segmentation...", next: 'elena_personalization' }
+                    ]
+                },
+                {
+                    id: 'elena_personalization',
+                    speaker: 'character',
+                    message: "So instead of 3 broad segments, AI can create individual profiles for each customer? How does it know what each person wants?",
+                    options: [
+                        { text: "AI looks for patterns in behavior - what they buy, browse, click, and when...", next: 'elena_patterns' }
+                    ]
+                },
+                {
+                    id: 'elena_patterns',
+                    speaker: 'character',
+                    message: "So it's constantly learning - 'this customer always buys running shoes in spring,' 'this one browses but only buys during sales,' 'this one loves eco-friendly products.' That's powerful! But here's my concern: can it predict what customers might want next, not just what they've wanted before?",
+                    concepts: ['Personalization', 'Pattern Recognition'],
+                    options: [
+                        { text: "That's called predictive analytics - let me explain...", next: 'elena_predictive' }
+                    ]
+                },
+                {
+                    id: 'elena_predictive',
+                    speaker: 'character',
+                    message: "Wow! So it can suggest 'Customers like you also enjoyed...' or 'Based on your running shoe purchase, you might need...' That's exactly what I see on the big e-commerce sites. How does the recommendation engine work?",
+                    concepts: ['Predictive Analytics'],
+                    options: [
+                        { text: "Recommendation systems use collaborative filtering and content-based approaches...", next: 'elena_recommendations' }
+                    ]
+                },
+                {
+                    id: 'elena_recommendations',
+                    speaker: 'character',
+                    message: "This makes so much sense! So it's not magic - it's just smart pattern matching at scale. One last question: how do we balance personalization with privacy? I don't want customers to feel like we're stalking them.",
+                    concepts: ['Recommendations'],
+                    options: [
+                        { text: "Great question! Transparency and control are key to ethical personalization...", next: 'elena_ethics' }
+                    ]
+                },
+                {
+                    id: 'elena_ethics',
+                    speaker: 'character',
+                    message: "Perfect! So we can be personal without being creepy by: being transparent about what data we collect, giving customers control, and using data to help them, not manipulate them. Thank you - I'm excited to implement this the right way!",
+                    concepts: ['Ethics & Bias'],
+                    options: [
+                        { text: "You've got it! Good luck with your personalization journey.", next: 'elena_complete' }
+                    ]
+                },
+                {
+                    id: 'elena_complete',
+                    speaker: 'system',
+                    message: '✅ Consultation Complete! Elena now understands personalization and predictive analytics.',
+                    complete: true
+                }
+            ],
+            david: [
+                {
+                    id: 'david_intro',
+                    speaker: 'character',
+                    message: "Hi, David Kim here - I'm the Data Analyst. Everyone's excited about AI, but I'm the one who has to make it work with our data, and frankly, our data is a mess. Duplicate entries, missing values, inconsistent formats... How can AI possibly learn from this chaos?",
+                    options: [
+                        { text: "You're absolutely right - data quality is the foundation of AI. Let's tackle this...", next: 'david_quality' },
+                        { text: "Tell me more about the data quality issues you're seeing.", next: 'david_issues' }
+                    ]
+                },
+                {
+                    id: 'david_issues',
+                    speaker: 'character',
+                    message: "Here are examples: Customer names spelled differently in different systems. Purchase dates sometimes missing. Product categories inconsistent ('Electronics' vs 'electronic' vs 'tech'). Some records have detailed info, others are bare minimum. And we have data scattered across 5 different systems that don't talk to each other.",
+                    concepts: ['Data Quality'],
+                    options: [
+                        { text: "These are common challenges. Let's talk about data cleaning and integration...", next: 'david_quality' }
+                    ]
+                },
+                {
+                    id: 'david_quality',
+                    speaker: 'character',
+                    message: "So we need to: standardize formats, handle missing data, de-duplicate records, and create a unified data warehouse. That's a lot of work! Is it worth it?",
+                    options: [
+                        { text: "Absolutely! Quality data is the fuel for AI. Let me explain why...", next: 'david_importance' }
+                    ]
+                },
+                {
+                    id: 'david_importance',
+                    speaker: 'character',
+                    message: "That makes sense - 'garbage in, garbage out.' But once we have clean data, how does AI actually 'learn' patterns from it? I need to understand this to explain it to my team.",
+                    concepts: ['Data Quality'],
+                    options: [
+                        { text: "Great question! Let me explain pattern recognition in simple terms...", next: 'david_patterns' }
+                    ]
+                },
+                {
+                    id: 'david_patterns',
+                    speaker: 'character',
+                    message: "Okay, so it's like the AI is looking at thousands of examples and finding common threads - 'when X happens, Y usually follows.' The more quality data, the better it gets at spotting these patterns. But how do I know which data fields are actually important for the AI to look at?",
+                    concepts: ['Pattern Recognition'],
+                    options: [
+                        { text: "That's called feature selection - identifying the most predictive variables...", next: 'david_features' }
+                    ]
+                },
+                {
+                    id: 'david_features',
+                    speaker: 'character',
+                    message: "So not all data is equally valuable! Some features are strongly predictive, others are noise. And the AI can actually help identify which is which through feature importance analysis. That's really helpful - I was worried we'd need to collect everything!",
+                    concepts: ['Feature Selection'],
+                    options: [
+                        { text: "Exactly! Start with what you have, then iterate based on model performance...", next: 'david_training' }
+                    ]
+                },
+                {
+                    id: 'david_training',
+                    speaker: 'character',
+                    message: "This is making sense now. So the process is: clean and prepare data → select relevant features → train the model → evaluate performance → refine and repeat. It's iterative, not a one-time thing. And I'll need to monitor data quality ongoing to keep the AI performing well.",
+                    concepts: ['Model Training'],
+                    options: [
+                        { text: "You've got it! You're thinking like a machine learning engineer now.", next: 'david_complete' }
+                    ]
+                },
+                {
+                    id: 'david_complete',
+                    speaker: 'system',
+                    message: '✅ Consultation Complete! David now understands data quality and pattern recognition.',
+                    complete: true
+                }
+            ],
+            jasmine: [
+                {
+                    id: 'jasmine_intro',
+                    speaker: 'character',
+                    message: "Hello! I'm Jasmine Patel, Customer Service Lead. I've been hearing talk about AI chatbots replacing customer service reps, and honestly, it worries me. My team is the heart of our customer relationships. How do we use AI without losing that human touch?",
+                    options: [
+                        { text: "AI should enhance your team, not replace them. Let's explore collaboration...", next: 'jasmine_collaboration' },
+                        { text: "Tell me about your current customer service challenges.", next: 'jasmine_challenges' }
+                    ]
+                },
+                {
+                    id: 'jasmine_challenges',
+                    speaker: 'character',
+                    message: "My team handles 200+ inquiries daily. Many are simple - 'Where's my order?' 'What are your hours?' 'How do I return this?' But these take time away from complex issues that really need human empathy and problem-solving. We're overwhelmed, response times are slow, and my team is burned out.",
+                    concepts: ['AI Assistance'],
+                    options: [
+                        { text: "This is a perfect use case for AI assistance. Here's how it can help...", next: 'jasmine_collaboration' }
+                    ]
+                },
+                {
+                    id: 'jasmine_collaboration',
+                    speaker: 'character',
+                    message: "So the AI handles simple, repetitive questions instantly, and escalates complex or emotional issues to my human team? That actually sounds helpful, not threatening. But how do customers feel about talking to a bot?",
+                    options: [
+                        { text: "Great question! Let's talk about effective chatbot design and transparency...", next: 'jasmine_chatbots' }
+                    ]
+                },
+                {
+                    id: 'jasmine_chatbots',
+                    speaker: 'character',
+                    message: "I like that approach - be upfront that it's a bot, make it easy to reach a human, and keep the tone helpful and friendly. But how does the chatbot know what to say? Does someone have to program every possible question?",
+                    concepts: ['Chatbots'],
+                    options: [
+                        { text: "Modern chatbots use AI to understand intent and generate responses...", next: 'jasmine_intent' }
+                    ]
+                },
+                {
+                    id: 'jasmine_intent',
+                    speaker: 'character',
+                    message: "So it's trained on past conversations to understand patterns in how customers ask questions? And it learns that 'Where's my package?' and 'Track my order' and 'Shipping status?' all mean the same thing? That's smart! But here's my concern: what if it makes a mistake or says something wrong?",
+                    concepts: ['Pattern Recognition'],
+                    options: [
+                        { text: "That's why human oversight is crucial. Let me explain the collaboration model...", next: 'jasmine_oversight' }
+                    ]
+                },
+                {
+                    id: 'jasmine_oversight',
+                    speaker: 'character',
+                    message: "I love this! So my team becomes AI supervisors - they monitor conversations, step in when needed, and help train the AI to get better. That actually sounds more interesting than answering 'What are your hours?' for the 50th time today. But what about bias? I've heard AI can be unfair.",
+                    concepts: ['Human-AI Collaboration'],
+                    options: [
+                        { text: "You're right to be concerned. Let's discuss AI ethics and bias...", next: 'jasmine_ethics' }
+                    ]
+                },
+                {
+                    id: 'jasmine_ethics',
+                    speaker: 'character',
+                    message: "This is so important! So we need to: regularly audit for bias in responses, ensure diverse training data, have humans review edge cases, and always allow escalation to a person. AI is a tool to help us serve customers better, not replace human judgment and empathy. Thank you - I feel much better about this now!",
+                    concepts: ['Ethics & Bias'],
+                    options: [
+                        { text: "I'm glad I could help! Your team will be great AI collaborators.", next: 'jasmine_complete' }
+                    ]
+                },
+                {
+                    id: 'jasmine_complete',
+                    speaker: 'system',
+                    message: '✅ Consultation Complete! Jasmine now understands AI assistance and human-AI collaboration.',
+                    complete: true
+                }
+            ]
+        };
+
+        // Game state
+        let gameState = {
+            charactersCompleted: [],
+            conceptsLearned: new Set(),
+            currentCharacter: null,
+            currentConversationIndex: 0,
+            conversationHistory: []
+        };
+
+        // ========================================
+        // INITIALIZATION
+        // ========================================
+
+        function initializeGame() {
+            loadProgress();
+            updateProgressBadge();
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const data = JSON.parse(saved);
+                gameState.charactersCompleted = data.charactersCompleted || [];
+                gameState.conceptsLearned = new Set(data.conceptsLearned || []);
+
+                // Update character completion status
+                gameState.charactersCompleted.forEach(charId => {
+                    if (characters[charId]) {
+                        characters[charId].completed = true;
+                    }
+                });
+            }
+        }
+
+        function saveProgress() {
+            const data = {
+                charactersCompleted: gameState.charactersCompleted,
+                conceptsLearned: Array.from(gameState.conceptsLearned)
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        // ========================================
+        // NAVIGATION
+        // ========================================
+
+        function startSimulation() {
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('character-selection').classList.remove('hidden');
+            renderCharacters();
+        }
+
+        function renderCharacters() {
+            const grid = document.getElementById('character-grid');
+            grid.innerHTML = '';
+
+            Object.values(characters).forEach(char => {
+                const card = document.createElement('div');
+                card.className = 'glass-card p-6 cursor-pointer';
+                card.onclick = () => startConversation(char.id);
+
+                const completedBadge = char.completed
+                    ? '<span class="progress-badge ml-2">✓ Completed</span>'
+                    : '';
+
+                card.innerHTML = `
+                    <div class="flex items-start gap-4">
+                        <div class="character-avatar text-5xl">
+                            ${char.emoji}
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold mb-1">${char.name} ${completedBadge}</h3>
+                            <p class="text-sm" style="color: var(--primary-blue)">${char.role}</p>
+                            <p class="mt-2 text-sm" style="color: var(--text-muted)">${char.description}</p>
+                            <div class="mt-3">
+                                <p class="text-xs font-semibold mb-1">Focus Areas:</p>
+                                <p class="text-xs" style="color: var(--text-muted)">${char.focus}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        function startConversation(characterId) {
+            gameState.currentCharacter = characterId;
+            gameState.currentConversationIndex = 0;
+            gameState.conversationHistory = [];
+
+            const char = characters[characterId];
+
+            // Update UI
+            document.getElementById('character-selection').classList.add('hidden');
+            document.getElementById('chat-interface').classList.remove('hidden');
+            document.getElementById('chat-avatar').textContent = char.emoji;
+            document.getElementById('chat-character-name').textContent = char.name;
+            document.getElementById('chat-character-role').textContent = char.role;
+
+            // Clear previous chat
+            document.getElementById('chat-messages').innerHTML = '';
+            document.getElementById('learned-concepts').innerHTML = '';
+
+            // Start conversation
+            displayNextMessage('character_intro');
+        }
+
+        function exitChat() {
+            document.getElementById('chat-interface').classList.add('hidden');
+            document.getElementById('character-selection').classList.remove('hidden');
+            renderCharacters();
+        }
+
+        // ========================================
+        // CONVERSATION SYSTEM
+        // ========================================
+
+        function displayNextMessage(nodeId) {
+            const conversation = conversations[gameState.currentCharacter];
+            const node = conversation.find(n => n.id === nodeId);
+
+            if (!node) {
+                console.error('Conversation node not found:', nodeId);
+                return;
+            }
+
+            // Add concepts learned
+            if (node.concepts) {
+                node.concepts.forEach(concept => {
+                    gameState.conceptsLearned.add(concept);
+                    addConceptTag(concept);
+                });
+            }
+
+            // Display message
+            if (node.speaker === 'character' || node.speaker === 'system') {
+                addChatMessage(node.message, node.speaker);
+            }
+
+            // Check if conversation is complete
+            if (node.complete) {
+                completeCharacter();
+                return;
+            }
+
+            // Display response options
+            if (node.options && node.options.length > 0) {
+                displayResponseOptions(node.options);
+            }
+        }
+
+        function addChatMessage(message, speaker) {
+            const container = document.getElementById('chat-messages');
+            const bubble = document.createElement('div');
+
+            if (speaker === 'system') {
+                bubble.className = 'text-center p-4 my-4';
+                bubble.innerHTML = `<div class="progress-badge inline-block text-lg">${message}</div>`;
+            } else {
+                bubble.className = `chat-bubble ${speaker}`;
+                bubble.textContent = message;
+            }
+
+            container.appendChild(bubble);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function displayResponseOptions(options) {
+            const container = document.getElementById('response-options');
+            container.innerHTML = '';
+
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'btn-secondary w-full text-left p-4';
+                button.textContent = option.text;
+                button.onclick = () => handleResponse(option);
+                container.appendChild(button);
+            });
+        }
+
+        function handleResponse(option) {
+            // Add user's response to chat
+            addChatMessage(option.text, 'user');
+
+            // Clear options
+            document.getElementById('response-options').innerHTML = '';
+
+            // Show typing indicator briefly
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'chat-bubble character typing-indicator';
+            typingIndicator.textContent = '...';
+            typingIndicator.id = 'typing';
+            document.getElementById('chat-messages').appendChild(typingIndicator);
+
+            // Display next message after brief delay
+            setTimeout(() => {
+                document.getElementById('typing')?.remove();
+                displayNextMessage(option.next);
+            }, 1000);
+        }
+
+        function addConceptTag(concept) {
+            const container = document.getElementById('learned-concepts');
+
+            // Check if already displayed
+            if (container.querySelector(`[data-concept="${concept}"]`)) {
+                return;
+            }
+
+            const tag = document.createElement('span');
+            tag.className = 'concept-tag';
+            tag.textContent = concept;
+            tag.setAttribute('data-concept', concept);
+            container.appendChild(tag);
+        }
+
+        function completeCharacter() {
+            const charId = gameState.currentCharacter;
+
+            if (!gameState.charactersCompleted.includes(charId)) {
+                gameState.charactersCompleted.push(charId);
+                characters[charId].completed = true;
+            }
+
+            saveProgress();
+            updateProgressBadge();
+
+            // Show completion button
+            setTimeout(() => {
+                const container = document.getElementById('response-options');
+                container.innerHTML = `
+                    <button class="btn-primary w-full text-lg" onclick="exitChat()">
+                        ← Back to Character Selection
+                    </button>
+                    <button class="btn-secondary w-full" onclick="toggleDashboard()">
+                        📊 View Dashboard
+                    </button>
+                `;
+            }, 2000);
+        }
+
+        // ========================================
+        // DASHBOARD
+        // ========================================
+
+        function toggleDashboard() {
+            const dashboard = document.getElementById('dashboard');
+            const isDashboardVisible = !dashboard.classList.contains('hidden');
+
+            // Hide all screens
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('character-selection').classList.add('hidden');
+            document.getElementById('chat-interface').classList.add('hidden');
+            dashboard.classList.add('hidden');
+
+            if (!isDashboardVisible) {
+                // Show dashboard
+                dashboard.classList.remove('hidden');
+                renderDashboard();
+            } else {
+                // Return to character selection
+                document.getElementById('character-selection').classList.remove('hidden');
+                renderCharacters();
+            }
+        }
+
+        function renderDashboard() {
+            // Character progress
+            const charProgress = document.getElementById('characters-progress');
+            charProgress.innerHTML = '';
+
+            Object.values(characters).forEach(char => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-3 glass-card';
+                const status = char.completed
+                    ? '<span class="progress-badge">✓ Completed</span>'
+                    : '<span class="text-yellow-400">⏳ Pending</span>';
+                item.innerHTML = `
+                    <span>${char.emoji} ${char.name}</span>
+                    ${status}
+                `;
+                charProgress.appendChild(item);
+            });
+
+            // Concepts mastered
+            const conceptsList = document.getElementById('concepts-mastered');
+            conceptsList.innerHTML = '';
+
+            if (gameState.conceptsLearned.size === 0) {
+                conceptsList.innerHTML = '<p style="color: var(--text-muted)">No concepts learned yet. Start consulting!</p>';
+            } else {
+                gameState.conceptsLearned.forEach(concept => {
+                    const item = document.createElement('div');
+                    item.className = 'concept-tag';
+                    item.textContent = `✓ ${concept}`;
+                    conceptsList.appendChild(item);
+                });
+            }
+
+            // Key takeaways
+            const takeaways = document.getElementById('key-takeaways');
+            takeaways.innerHTML = `
+                <p>💡 <strong>AI is not magic</strong> - it's pattern recognition at scale, learning from data like humans learn from experience.</p>
+                <p>🎯 <strong>Start with business problems</strong> - identify specific challenges before jumping to AI solutions.</p>
+                <p>📊 <strong>Data quality matters</strong> - clean, relevant data is the foundation of effective AI.</p>
+                <p>🤝 <strong>AI augments, not replaces</strong> - the best results come from human-AI collaboration.</p>
+                <p>⚖️ <strong>Ethics and transparency</strong> - always consider bias, privacy, and the human impact of AI decisions.</p>
+            `;
+        }
+
+        function updateProgressBadge() {
+            const total = Object.keys(characters).length;
+            const completed = gameState.charactersCompleted.length;
+            document.getElementById('progress-badge').textContent =
+                `${completed}/${total} Characters Consulted`;
+        }
+
+        // ========================================
+        // INITIALIZE ON LOAD
+        // ========================================
+
+        window.addEventListener('DOMContentLoaded', initializeGame);
+    </script>
+</body>
+</html>
