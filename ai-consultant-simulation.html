@@ -693,7 +693,7 @@ When users discuss content generation, guide them to understand context engineer
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    model: "microsoft/phi-4-mini-reasoning",
+                    model: "local-model", // Uses whatever model is loaded in LM Studio
                     messages: [
                         { role: 'system', content: systemPrompt },
                         ...messages
