@@ -184,9 +184,12 @@
 </head>
 <body class="p-4">
     <header class="mb-8">
-        <div class="max-w-7xl mx-auto">
-            <h1 class="text-4xl font-bold mb-2">🎯 AI Consultant Simulation</h1>
-            <p class="text-lg" style="color: var(--text-muted)">TrendForward AI Strategy Development - Powered by LLM</p>
+        <div class="max-w-7xl mx-auto flex items-start justify-between">
+            <div>
+                <h1 class="text-4xl font-bold mb-2">🎯 AI Consultant Simulation</h1>
+                <p class="text-lg" style="color: var(--text-muted)">TrendForward AI Strategy Development - Powered by LLM</p>
+            </div>
+            <button class="btn-secondary" onclick="showSettings()">⚙️ Settings</button>
         </div>
     </header>
 
@@ -282,11 +285,47 @@
                 </div>
             </div>
         </div>
+
+        <!-- Settings Screen -->
+        <div id="settings-screen" class="hidden">
+            <div class="glass-card p-8">
+                <h2 class="text-3xl font-bold mb-6">⚙️ Settings</h2>
+
+                <div class="mb-6">
+                    <label class="block text-lg font-semibold mb-2">LLM API Endpoint URL:</label>
+                    <input
+                        type="text"
+                        id="api-url-input"
+                        class="chat-input mb-2"
+                        placeholder="http://127.0.0.1:1234/v1/chat/completions"
+                    />
+                    <p class="text-sm" style="color: var(--text-muted)">
+                        Enter the URL of your LM Studio or OpenAI-compatible API endpoint.
+                        This is saved in your browser's local storage.
+                    </p>
+                </div>
+
+                <div class="mb-6">
+                    <p class="text-sm p-4 rounded-lg" style="background: rgba(124, 58, 237, 0.2); border: 1px solid var(--accent-purple);">
+                        💡 <strong>For public access via Cloudflare Tunnel:</strong><br>
+                        1. Set up a tunnel to your LM Studio port (1234)<br>
+                        2. Update this URL to your public tunnel URL<br>
+                        3. Example: https://your-tunnel.trycloudflare.com/v1/chat/completions
+                    </p>
+                </div>
+
+                <div class="flex gap-2">
+                    <button class="btn-primary" onclick="saveSettings()">💾 Save Settings</button>
+                    <button class="btn-secondary" onclick="hideSettings()">Cancel</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
         // ===== CONFIG =====
-        const LLM_API_URL = 'http://127.0.0.1:1234/v1/chat/completions';
+        // Allow users to configure their LLM API endpoint
+        let LLM_API_URL = localStorage.getItem('llm_api_url') || 'http://127.0.0.1:1234/v1/chat/completions';
 
         // ===== CHARACTER DATA =====
         const characters = {
@@ -721,8 +760,52 @@ When users discuss content generation, guide them to understand context engineer
             }
         }
 
+        // ===== SETTINGS =====
+        function showSettings() {
+            // Hide all other screens
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('character-selection').classList.add('hidden');
+            document.getElementById('chat-interface').classList.add('hidden');
+
+            // Show settings screen
+            document.getElementById('settings-screen').classList.remove('hidden');
+
+            // Load current API URL into input
+            document.getElementById('api-url-input').value = LLM_API_URL;
+        }
+
+        function hideSettings() {
+            document.getElementById('settings-screen').classList.add('hidden');
+
+            // Return to appropriate screen
+            if (currentCharacter) {
+                document.getElementById('chat-interface').classList.remove('hidden');
+            } else if (visitedExperts.size > 0) {
+                document.getElementById('character-selection').classList.remove('hidden');
+            } else {
+                document.getElementById('welcome-screen').classList.remove('hidden');
+            }
+        }
+
+        function saveSettings() {
+            const newUrl = document.getElementById('api-url-input').value.trim();
+
+            if (!newUrl) {
+                alert('Please enter a valid URL');
+                return;
+            }
+
+            // Save to localStorage
+            localStorage.setItem('llm_api_url', newUrl);
+            LLM_API_URL = newUrl;
+
+            alert('Settings saved! The new API URL will be used for all conversations.');
+            hideSettings();
+        }
+
         // Init
         console.log('TrendForward AI Consultant Simulation loaded - LLM-powered');
+        console.log('Current LLM API URL:', LLM_API_URL);
     </script>
 </body>
 </html>
