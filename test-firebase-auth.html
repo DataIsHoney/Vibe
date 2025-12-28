@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Auth Test - Subway Math</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .status-box {
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #ccc;
+        }
+        .success { background: #d4edda; border-color: #28a745; }
+        .error { background: #f8d7da; border-color: #dc3545; }
+        .info { background: #d1ecf1; border-color: #17a2b8; }
+        .warning { background: #fff3cd; border-color: #ffc107; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        h1 { color: #333; }
+        h2 { color: #666; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <h1>🚇 Subway Math - Firebase Test</h1>
+    <p>This page tests your Firebase Authentication and Firestore configuration.</p>
+
+    <div id="auth-status" class="status-box info">
+        <strong>🔄 Checking Authentication...</strong>
+        <p>Attempting to sign in anonymously...</p>
+    </div>
+
+    <div id="db-status" class="status-box info" style="display: none;">
+        <strong>📊 Database Status</strong>
+        <p id="db-message">Waiting for authentication...</p>
+    </div>
+
+    <div id="user-info" style="display: none;">
+        <h2>👤 User Information</h2>
+        <pre id="user-data"></pre>
+    </div>
+
+    <div id="test-controls" style="display: none;">
+        <h2>🧪 Test Operations</h2>
+        <button onclick="testWrite()">Test Write to Firestore</button>
+        <button onclick="testRead()">Test Read from Firestore</button>
+        <button onclick="signOut()">Sign Out</button>
+    </div>
+
+    <div id="test-results"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signOut as fbSignOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDeMYLh286CwDaWlhAfRODJVkOVv92dbhw",
+            authDomain: "subwaymath-77158.firebaseapp.com",
+            projectId: "subwaymath-77158",
+            storageBucket: "subwaymath-77158.firebasestorage.app",
+            messagingSenderId: "633935427234",
+            appId: "1:633935427234:web:46147770022f43ce2309fb",
+            measurementId: "G-PSHM8ZWL1K"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+
+        // Status display functions
+        function showStatus(elementId, type, title, message) {
+            const el = document.getElementById(elementId);
+            el.className = `status-box ${type}`;
+            el.innerHTML = `<strong>${title}</strong><p>${message}</p>`;
+            el.style.display = 'block';
+        }
+
+        function addTestResult(type, title, message, details = null) {
+            const resultsDiv = document.getElementById('test-results');
+            const resultEl = document.createElement('div');
+            resultEl.className = `status-box ${type}`;
+            resultEl.innerHTML = `
+                <strong>${title}</strong>
+                <p>${message}</p>
+                ${details ? `<pre>${JSON.stringify(details, null, 2)}</pre>` : ''}
+            `;
+            resultsDiv.appendChild(resultEl);
+        }
+
+        // Authentication state observer
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+
+                // Show success
+                showStatus('auth-status', 'success', '✅ Authentication Successful!',
+                    `You are signed in anonymously with User ID: <code>${user.uid}</code>`);
+
+                // Display user info
+                document.getElementById('user-info').style.display = 'block';
+                document.getElementById('user-data').textContent = JSON.stringify({
+                    uid: user.uid,
+                    isAnonymous: user.isAnonymous,
+                    metadata: {
+                        creationTime: user.metadata.creationTime,
+                        lastSignInTime: user.metadata.lastSignInTime
+                    }
+                }, null, 2);
+
+                // Show test controls
+                document.getElementById('test-controls').style.display = 'block';
+
+                // Auto-test database connection
+                await testDatabaseConnection();
+            } else {
+                showStatus('auth-status', 'warning', '⚠️ Not Authenticated',
+                    'Attempting to sign in...');
+                authenticateUser();
+            }
+        });
+
+        // Authenticate user
+        async function authenticateUser() {
+            try {
+                await signInAnonymously(auth);
+                console.log('✅ Signed in anonymously');
+            } catch (error) {
+                showStatus('auth-status', 'error', '❌ Authentication Failed',
+                    `Error: ${error.message}<br><br>
+                    <strong>Common fixes:</strong><br>
+                    1. Enable Anonymous sign-in in Firebase Console<br>
+                    2. Check API key is correct<br>
+                    3. Verify project ID matches`);
+                console.error('Authentication error:', error);
+            }
+        }
+
+        // Test database connection
+        async function testDatabaseConnection() {
+            if (!currentUser) {
+                showStatus('db-status', 'error', '❌ Database Test Failed',
+                    'No authenticated user');
+                return;
+            }
+
+            try {
+                const testDocRef = doc(db, `artifacts/subway-math-app/users/${currentUser.uid}/mathShortcutsProgress/data`);
+
+                // Try to read
+                const docSnap = await getDoc(testDocRef);
+
+                if (docSnap.exists()) {
+                    showStatus('db-status', 'success', '✅ Database Connected!',
+                        'Successfully connected to Firestore. Existing data found.');
+                } else {
+                    showStatus('db-status', 'success', '✅ Database Connected!',
+                        'Successfully connected to Firestore. No existing data (this is normal for new users).');
+                }
+            } catch (error) {
+                showStatus('db-status', 'error', '❌ Database Connection Failed',
+                    `Error: ${error.message}<br><br>
+                    <strong>Common fixes:</strong><br>
+                    1. Create Firestore database in Firebase Console<br>
+                    2. Update security rules (see firestore.rules file)<br>
+                    3. Make sure rules allow authenticated users to read/write their own data`);
+                console.error('Database error:', error);
+            }
+        }
+
+        // Test write operation
+        window.testWrite = async function() {
+            if (!currentUser) {
+                addTestResult('error', '❌ Write Test Failed', 'No authenticated user');
+                return;
+            }
+
+            try {
+                const testData = {
+                    testTimestamp: new Date().toISOString(),
+                    testValue: Math.random(),
+                    message: 'This is a test write from the Firebase test page'
+                };
+
+                const docRef = doc(db, `artifacts/subway-math-app/users/${currentUser.uid}/mathShortcutsProgress/data`);
+                await setDoc(docRef, testData);
+
+                addTestResult('success', '✅ Write Test Passed',
+                    'Successfully wrote data to Firestore!', testData);
+            } catch (error) {
+                addTestResult('error', '❌ Write Test Failed', error.message, error);
+                console.error('Write error:', error);
+            }
+        };
+
+        // Test read operation
+        window.testRead = async function() {
+            if (!currentUser) {
+                addTestResult('error', '❌ Read Test Failed', 'No authenticated user');
+                return;
+            }
+
+            try {
+                const docRef = doc(db, `artifacts/subway-math-app/users/${currentUser.uid}/mathShortcutsProgress/data`);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    addTestResult('success', '✅ Read Test Passed',
+                        'Successfully read data from Firestore!', docSnap.data());
+                } else {
+                    addTestResult('info', 'ℹ️ Read Test Result',
+                        'No data found (this is normal if you haven\'t written anything yet)');
+                }
+            } catch (error) {
+                addTestResult('error', '❌ Read Test Failed', error.message, error);
+                console.error('Read error:', error);
+            }
+        };
+
+        // Sign out
+        window.signOut = async function() {
+            try {
+                await fbSignOut(auth);
+                location.reload();
+            } catch (error) {
+                addTestResult('error', '❌ Sign Out Failed', error.message);
+            }
+        };
+
+        // Start authentication
+        console.log('🚀 Starting Firebase test...');
+    </script>
+</body>
+</html>
