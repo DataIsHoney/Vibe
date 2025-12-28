@@ -2356,8 +2356,31 @@
         reviewBtn.addEventListener('click', startReviewSession);
 
         // --- APP INITIALIZATION ---
-        authenticateUser(); // Firebase authentication enabled
-        // initializeLocalProgress(); // Local progress disabled - using Firebase instead
+        console.log('🚀 Starting Subway Math...');
+
+        // Show loading indicator
+        if (userInfo) {
+            userInfo.innerHTML = '<span class="text-blue-600 font-semibold">🔄 Connecting to Firebase...</span>';
+        }
+
+        // Start authentication with timeout
+        const authTimeout = setTimeout(() => {
+            console.warn('⚠️ Firebase authentication taking too long, falling back...');
+            if (userInfo) {
+                userInfo.innerHTML = '<span class="text-yellow-600 font-semibold">⚠️ Using local storage</span>';
+            }
+            initializeLocalProgress();
+            renderCategories();
+        }, 5000); // 5 second timeout
+
+        authenticateUser().then(() => {
+            clearTimeout(authTimeout);
+            console.log('✅ Authentication complete');
+        }).catch((error) => {
+            clearTimeout(authTimeout);
+            console.error('❌ Authentication error:', error);
+        });
+
         updateGameStats(); // Initialize game stats display
 
     </script>
