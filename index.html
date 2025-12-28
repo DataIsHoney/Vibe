@@ -834,28 +834,30 @@
 
 
     <script type="module">
-        // Firebase Imports (Commented Out)
-        // import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        // import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        // import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-        // --- FIREBASE CONFIG (Commented Out) ---
-        /*
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { 
-            apiKey: "YOUR_API_KEY", 
-            authDomain: "YOUR_AUTH_DOMAIN", 
-            projectId: "YOUR_PROJECT_ID" 
+        // --- FIREBASE CONFIG ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyDeMYLh286CwDaWlhAfRODJVkOVv92dbhw",
+            authDomain: "subwaymath-77158.firebaseapp.com",
+            projectId: "subwaymath-77158",
+            storageBucket: "subwaymath-77158.firebasestorage.app",
+            messagingSenderId: "633935427234",
+            appId: "1:633935427234:web:46147770022f43ce2309fb",
+            measurementId: "G-PSHM8ZWL1K"
         };
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'subway-math-app';
 
-        // --- FIREBASE INITIALIZATION (Commented Out) ---
+        // --- FIREBASE INITIALIZATION ---
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        */
 
         // --- GLOBAL STATE & DOM ELEMENTS ---
-        // let userId = null;
+        let userId = null;
         let userProgress = {};
         let currentCategory = null;
         let currentShortcut = null;
@@ -1181,8 +1183,7 @@
             }
         };
         
-        // --- FIREBASE AUTHENTICATION & DATA HANDLING (Commented Out) ---
-        /*
+        // --- FIREBASE AUTHENTICATION & DATA HANDLING ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 userId = user.uid;
@@ -1190,7 +1191,7 @@
                 await setupUserListener();
             }
         });
-        
+
         async function authenticateUser() {
             try {
                 // Defaulting to Anonymous Sign-in as requested.
@@ -1200,7 +1201,7 @@
                 userInfo.innerHTML = `<span class="text-red-600 font-semibold">Could not save progress.</span> Please ensure Anonymous Sign-in is enabled in your Firebase project's settings.`;
             }
         }
-        
+
         async function setupUserListener() {
             if (!userId) return;
             const docRef = doc(db, `artifacts/${appId}/users/${userId}/mathShortcutsProgress/data`);
@@ -1223,7 +1224,7 @@
                 console.error("Error listening to progress:", error);
             });
         }
-        
+
         async function saveProgress() {
             if (!userId) return;
             const docRef = doc(db, `artifacts/${appId}/users/${userId}/mathShortcutsProgress/data`);
@@ -1233,7 +1234,6 @@
                 console.error("Error saving progress: ", error);
             }
         }
-        */
 
         // --- LOCAL STORAGE HANDLING ---
         const STORAGE_KEY = 'subwayMathExpress_progress';
@@ -2351,8 +2351,8 @@
         reviewBtn.addEventListener('click', startReviewSession);
 
         // --- APP INITIALIZATION ---
-        // authenticateUser(); // Firebase call commented out
-        initializeLocalProgress(); // Use local progress instead
+        authenticateUser(); // Firebase authentication enabled
+        // initializeLocalProgress(); // Local progress disabled - using Firebase instead
         updateGameStats(); // Initialize game stats display
 
     </script>

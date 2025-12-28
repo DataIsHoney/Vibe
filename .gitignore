@@ -1,0 +1,17 @@
+# Firebase Service Account (NEVER COMMIT THIS!)
+firebase-service-account.json
+
+# Environment variables
+.env
+.env.local
+
+# Node modules (if added later)
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
