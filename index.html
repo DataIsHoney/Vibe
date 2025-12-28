@@ -1198,7 +1198,12 @@
                 await signInAnonymously(auth);
             } catch (error) {
                 console.error("Authentication failed:", error);
-                userInfo.innerHTML = `<span class="text-red-600 font-semibold">Could not save progress.</span> Please ensure Anonymous Sign-in is enabled in your Firebase project's settings.`;
+                console.warn("Falling back to localStorage");
+                userInfo.innerHTML = `<span class="text-yellow-600 font-semibold">⚠️ Using local storage.</span> Enable Anonymous sign-in in Firebase to sync progress.`;
+
+                // Fallback to local storage if Firebase auth fails
+                initializeLocalProgress();
+                renderCategories();
             }
         }
 
