@@ -2356,8 +2356,8 @@
         reviewBtn.addEventListener('click', startReviewSession);
 
         // --- APP INITIALIZATION ---
-        authenticateUser(); // Firebase authentication enabled
-        // initializeLocalProgress(); // Local progress disabled - using Firebase instead
+        // authenticateUser(); // Firebase call commented out
+        initializeLocalProgress(); // Use local progress instead
         updateGameStats(); // Initialize game stats display
 
     </script>
