@@ -834,27 +834,25 @@
 
 
     <script type="module">
-        // Firebase Imports
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+        // FIREBASE DISABLED - Using localStorage instead
+        // Firebase Imports - REMOVED FOR SECURITY
+        // import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+        // import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+        // import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-        // --- FIREBASE CONFIG ---
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "AIzaSyDeMYLh286CwDaWlhAfRODJVkOVv92dbhw",
-            authDomain: "subwaymath-77158.firebaseapp.com",
-            projectId: "subwaymath-77158",
-            storageBucket: "subwaymath-77158.firebasestorage.app",
-            messagingSenderId: "633935427234",
-            appId: "1:633935427234:web:46147770022f43ce2309fb",
-            measurementId: "G-PSHM8ZWL1K"
-        };
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'subway-math-app';
+        // --- FIREBASE CONFIG - REMOVED FOR SECURITY ---
+        // API keys and credentials have been removed
+        // Using localStorage for all data persistence
+        const appId = 'subway-math-app';
 
-        // --- FIREBASE INITIALIZATION ---
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+        // --- FIREBASE INITIALIZATION - DISABLED ---
+        // const app = initializeApp(firebaseConfig);
+        // const db = getFirestore(app);
+        // const auth = getAuth(app);
+
+        // Dummy variables to prevent reference errors
+        const db = null;
+        const auth = null;
 
         // --- GLOBAL STATE & DOM ELEMENTS ---
         let userId = null;
@@ -1182,53 +1180,52 @@
                 }
             }
         };
-        
-        // --- FIREBASE AUTHENTICATION & DATA HANDLING ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                userId = user.uid;
-                userInfo.textContent = `User ID: ${userId}`;
-                await setupUserListener();
-            }
-        });
 
-        async function authenticateUser() {
-            try {
-                // Defaulting to Anonymous Sign-in as requested.
-                await signInAnonymously(auth);
-            } catch (error) {
-                console.error("Authentication failed:", error);
-                console.warn("Falling back to localStorage");
-                userInfo.innerHTML = `<span class="text-yellow-600 font-semibold">⚠️ Using local storage.</span> Enable Anonymous sign-in in Firebase to sync progress.`;
+        // --- FIREBASE AUTHENTICATION & DATA HANDLING - ALL DISABLED ---
+        // Firebase authentication completely removed for security
+        // Using localStorage for all data persistence
 
-                // Fallback to local storage if Firebase auth fails
-                initializeLocalProgress();
-                renderCategories();
-            }
-        }
+        // onAuthStateChanged(auth, async (user) => {
+        //     if (user) {
+        //         userId = user.uid;
+        //         userInfo.textContent = `User ID: ${userId}`;
+        //         await setupUserListener();
+        //     }
+        // });
 
-        async function setupUserListener() {
-            if (!userId) return;
-            const docRef = doc(db, `artifacts/${appId}/users/${userId}/mathShortcutsProgress/data`);
-            onSnapshot(docRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    userProgress = docSnap.data();
-                } else {
-                    // Initialize progress for new nested structure
-                    userProgress = {};
-                    for (const catKey in allShortcuts) {
-                        userProgress[catKey] = {};
-                        for (const shortKey in allShortcuts[catKey].shortcuts) {
-                            userProgress[catKey][shortKey] = { strength: 0, lastReviewed: null };
-                        }
-                    }
-                    saveProgress();
-                }
-                renderCategories();
-            }, (error) => {
-                console.error("Error listening to progress:", error);
-            });
-        }
+        // async function authenticateUser() {
+        //     try {
+        //         await signInAnonymously(auth);
+        //     } catch (error) {
+        //         console.error("Authentication failed:", error);
+        //         console.warn("Falling back to localStorage");
+        //         userInfo.innerHTML = `<span class="text-yellow-600 font-semibold">⚠️ Using local storage.</span>`;
+        //         initializeLocalProgress();
+        //         renderCategories();
+        //     }
+        // }
+
+        // async function setupUserListener() {
+        //     if (!userId) return;
+        //     const docRef = doc(db, `artifacts/${appId}/users/${userId}/mathShortcutsProgress/data`);
+        //     onSnapshot(docRef, (docSnap) => {
+        //         if (docSnap.exists()) {
+        //             userProgress = docSnap.data();
+        //         } else {
+        //             userProgress = {};
+        //             for (const catKey in allShortcuts) {
+        //                 userProgress[catKey] = {};
+        //                 for (const shortKey in allShortcuts[catKey].shortcuts) {
+        //                     userProgress[catKey][shortKey] = { strength: 0, lastReviewed: null };
+        //                 }
+        //             }
+        //             saveProgress();
+        //         }
+        //         renderCategories();
+        //     }, (error) => {
+        //         console.error("Error listening to progress:", error);
+        //     });
+        // }
 
         // Firebase saveProgress - DISABLED (using localStorage version instead)
         // async function saveProgress() {
@@ -1447,10 +1444,19 @@
 
         // --- STORE FUNCTIONS ---
         function openStore() {
-            document.getElementById('store-modal').classList.remove('hidden');
-            document.getElementById('store-coin-count').textContent = gameStats.coins;
-            renderStoreItems();
-            renderConductorPreview();
+            console.log("🏪 Opening store...");
+            console.log("Game stats:", gameStats);
+            try {
+                document.getElementById('store-modal').classList.remove('hidden');
+                document.getElementById('store-coin-count').textContent = gameStats.coins;
+                console.log("Rendering store items...");
+                renderStoreItems();
+                console.log("Rendering conductor preview...");
+                renderConductorPreview();
+                console.log("✅ Store opened successfully");
+            } catch (error) {
+                console.error("❌ Error opening store:", error);
+            }
         }
 
         function renderStoreItems() {
