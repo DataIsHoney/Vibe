@@ -1245,6 +1245,7 @@
         const STATS_KEY = 'subwayMathExpress_stats';
 
         function initializeLocalProgress() {
+            console.log("🔧 Initializing local progress...");
             // Try to load from localStorage first
             const savedProgress = localStorage.getItem(STORAGE_KEY);
             const savedStats = localStorage.getItem(STATS_KEY);
@@ -1253,12 +1254,13 @@
                 // Load existing progress
                 try {
                     userProgress = JSON.parse(savedProgress);
-                    console.log("✅ Progress loaded from localStorage");
+                    console.log("✅ Progress loaded from localStorage:", userProgress);
                 } catch (e) {
                     console.error("Error loading progress:", e);
                     createEmptyProgress();
                 }
             } else {
+                console.log("No saved progress found, creating empty progress...");
                 createEmptyProgress();
             }
 
@@ -1314,6 +1316,7 @@
         }
 
         function createEmptyProgress() {
+            console.log("📝 Creating empty progress for", Object.keys(allShortcuts).length, "categories");
             userProgress = {};
             for (const catKey in allShortcuts) {
                 userProgress[catKey] = {};
@@ -1321,6 +1324,7 @@
                     userProgress[catKey][shortKey] = { strength: 0, lastReviewed: null };
                 }
             }
+            console.log("✅ Empty progress created:", userProgress);
         }
 
         function saveProgress() {
@@ -1824,10 +1828,12 @@
         
         // --- VIEW RENDERING & SWITCHING ---
         function switchView(view) {
+            console.log("🔄 Switching to view:", view);
             mainView.classList.add('hidden');
             learnView.classList.add('hidden');
             quizView.classList.add('hidden');
             document.getElementById(view).classList.remove('hidden');
+            console.log("✅ View switched to:", view);
         }
 
         function renderCategories() {
@@ -1984,9 +1990,11 @@
         }
 
         function showLearnView(categoryKey, shortcutKey) {
+            console.log("📚 showLearnView called with:", categoryKey, shortcutKey);
             currentCategory = categoryKey;
             currentShortcut = shortcutKey;
             const shortcut = allShortcuts[categoryKey].shortcuts[shortcutKey];
+            console.log("Shortcut data:", shortcut);
             document.getElementById('learn-title').textContent = shortcut.title;
             document.getElementById('learn-explanation').textContent = shortcut.explanation;
 
@@ -2263,6 +2271,10 @@
 
         // --- SPACED REPETITION ---
         function startReviewSession() {
+            console.log("🚀 Start Learning clicked!");
+            console.log("User progress:", userProgress);
+            console.log("All shortcuts:", Object.keys(allShortcuts));
+
             let nextShortcut = null;
             let minStrength = 6;
             let oldestDate = new Date().toISOString();
@@ -2285,15 +2297,20 @@
                     }
                 }
             }
-            
+
+            console.log("Next shortcut found:", nextShortcut);
+
             if (!nextShortcut) { // If all are mastered, pick a random one
+                console.log("All mastered! Picking random shortcut...");
                 const categories = Object.keys(allShortcuts);
                 const randomCategory = categories[Math.floor(Math.random() * categories.length)];
                 const shortcuts = Object.keys(allShortcuts[randomCategory].shortcuts);
                 const randomShortcut = shortcuts[Math.floor(Math.random() * shortcuts.length)];
                 nextShortcut = { category: randomCategory, shortcut: randomShortcut };
+                console.log("Random shortcut selected:", nextShortcut);
             }
 
+            console.log("Calling showLearnView with:", nextShortcut);
             showLearnView(nextShortcut.category, nextShortcut.shortcut);
         }
         
