@@ -1230,15 +1230,16 @@
             });
         }
 
-        async function saveProgress() {
-            if (!userId) return;
-            const docRef = doc(db, `artifacts/${appId}/users/${userId}/mathShortcutsProgress/data`);
-            try {
-                await setDoc(docRef, userProgress);
-            } catch (error) {
-                console.error("Error saving progress: ", error);
-            }
-        }
+        // Firebase saveProgress - DISABLED (using localStorage version instead)
+        // async function saveProgress() {
+        //     if (!userId) return;
+        //     const docRef = doc(db, `artifacts/${appId}/users/${userId}/mathShortcutsProgress/data`);
+        //     try {
+        //         await setDoc(docRef, userProgress);
+        //     } catch (error) {
+        //         console.error("Error saving progress: ", error);
+        //     }
+        // }
 
         // --- LOCAL STORAGE HANDLING ---
         const STORAGE_KEY = 'subwayMathExpress_progress';
