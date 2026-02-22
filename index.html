@@ -1447,10 +1447,19 @@
 
         // --- STORE FUNCTIONS ---
         function openStore() {
-            document.getElementById('store-modal').classList.remove('hidden');
-            document.getElementById('store-coin-count').textContent = gameStats.coins;
-            renderStoreItems();
-            renderConductorPreview();
+            console.log("🏪 Opening store...");
+            console.log("Game stats:", gameStats);
+            try {
+                document.getElementById('store-modal').classList.remove('hidden');
+                document.getElementById('store-coin-count').textContent = gameStats.coins;
+                console.log("Rendering store items...");
+                renderStoreItems();
+                console.log("Rendering conductor preview...");
+                renderConductorPreview();
+                console.log("✅ Store opened successfully");
+            } catch (error) {
+                console.error("❌ Error opening store:", error);
+            }
         }
 
         function renderStoreItems() {
