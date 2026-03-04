@@ -14,17 +14,18 @@
             --subway-blue: #0039A6;
             --subway-green: #6CBE45;
             --subway-yellow: #FCCC0A;
-            --dark-bg: #050810;
-            --card-bg: #0d1117;
-            --card-hover: #161b22;
+            --dark-bg: #000000;
+            --card-bg: #0a0a0a;
+            --card-hover: #1a1a1a;
             --accent-color: var(--subway-red);
         }
 
         body {
             font-family: 'Inter', sans-serif;
             overscroll-behavior: none;
-            background: linear-gradient(135deg, #020408 0%, #0a0e14 100%);
+            background: #000000;
             background-attachment: fixed;
+            color: #ffffff;
         }
 
         .subway-bg {
@@ -34,10 +35,10 @@
         }
 
         .card {
-            background: linear-gradient(135deg, var(--card-bg) 0%, #1a1f2e 100%);
+            background: linear-gradient(135deg, var(--card-bg) 0%, #151515 100%);
             border-radius: 1rem;
-            border: 2px solid rgba(238, 53, 46, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(238, 53, 46, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
             transition: all 0.3s ease-in-out;
         }
 
@@ -106,8 +107,8 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
+            background-color: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(12px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -115,13 +116,13 @@
         }
 
         .modal-content {
-            background: linear-gradient(135deg, var(--card-bg) 0%, #1a1f2e 100%);
+            background: linear-gradient(135deg, #0a0a0a 0%, #151515 100%);
             border: 2px solid var(--subway-red);
             padding: 2.5rem;
             border-radius: 1rem;
             max-width: 90%;
             width: 500px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95);
         }
 
         .coin-float {
@@ -144,6 +145,21 @@
 
         .pulse-glow {
             animation: pulseGlow 2s infinite;
+        }
+
+        .store-pulse {
+            animation: storePulse 1.5s infinite;
+        }
+
+        @keyframes storePulse {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(252, 204, 10, 0.6);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(252, 204, 10, 1);
+                transform: scale(1.05);
+            }
         }
 
         @keyframes pulseGlow {
@@ -507,7 +523,7 @@
             </div>
 
             <!-- Compact Stats Bar -->
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                 <!-- Coins -->
                 <div class="card p-3 text-center">
                     <div class="text-2xl sm:text-3xl font-black coin-icon">💰 <span id="coin-count">0</span></div>
@@ -524,11 +540,19 @@
                 </div>
 
                 <!-- Passengers -->
-                <div class="card p-3 text-center col-span-2 md:col-span-1">
+                <div class="card p-3 text-center">
                     <div class="text-xl sm:text-2xl font-bold">
                         👥 <span id="passenger-count">0</span>/<span id="max-passengers">30</span>
                     </div>
                     <div class="text-xs text-gray-400 mt-1">PASSENGERS</div>
+                </div>
+
+                <!-- STORE BUTTON - PROMINENT -->
+                <div class="card p-3 text-center cursor-pointer transition-transform store-pulse"
+                     onclick="openStore()"
+                     style="background: linear-gradient(135deg, #FCCC0A 0%, #FF6319 100%); border-color: #FCCC0A;">
+                    <div class="text-2xl sm:text-3xl font-black">🏪</div>
+                    <div class="text-xs font-bold text-gray-900 mt-1">STORE</div>
                 </div>
             </div>
 
