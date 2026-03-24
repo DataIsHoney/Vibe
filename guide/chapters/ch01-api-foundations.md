@@ -9,8 +9,22 @@ The **Anthropic API** is the mechanism by which your code communicates with Clau
 ## What Is Claude? What Is the SDK?
 
 - **Claude**: The AI model itself, trained by Anthropic. It understands and generates text, code, images (on supported models), and more.
-- **The API**: The service running on Anthropic's servers that hosts Claude. Your code sends HTTP requests to it.
-- **The SDK** (Software Development Kit): A Python or TypeScript library that wraps the raw HTTP API so you don't have to write low-level network code yourself. Think of it as a set of helper functions that handle the plumbing.
+- **The API**: The service running on Anthropic's servers that hosts Claude. Your code talks to it over the internet by sending structured text messages (specifically **HTTP requests** — HTTP is the same protocol your browser uses to load web pages).
+- **The SDK** (Software Development Kit): A Python or TypeScript library that wraps the raw API so you don't have to manually construct HTTP messages. It handles all the network plumbing — authentication headers, JSON formatting, connection management — for you. You just call Python functions.
+
+**You will almost always use the SDK, not raw HTTP.** Without the SDK, making an API call would require writing ~20 lines of HTTP boilerplate. With the SDK, it's 5 lines of readable Python.
+
+## How Much Will This Cost?
+
+This is the question every newcomer has, and it deserves an early answer.
+
+- **You are not charged for creating an API key or an account.** You only pay when you make API calls.
+- **You pay per token** (a unit of text — roughly ¾ of a word). Both what you send and what Claude generates count.
+- **The Hello World example below costs approximately $0.0003 (less than a tenth of a cent).** Running it 1,000 times costs ~$0.30.
+- **New accounts often receive free credits.** Check the Anthropic Console after signing up.
+- **Set a spending limit** in the Console under Settings → Limits before you start — this prevents any surprise charges.
+
+Chapter 8 covers cost in full detail. For now, know that small experiments cost fractions of a cent.
 
 **You will almost always use the SDK, not raw HTTP calls.** This guide focuses on the Python SDK.
 
@@ -153,13 +167,7 @@ client.messages.create(
 )
 ```
 
-| Parameter | Type | What it does |
-|-----------|------|-------------|
-| `model` | string | Which Claude model to use. See Chapter 7 for the full model list. |
-| `max_tokens` | integer | The maximum number of **tokens** Claude may generate in its response. Acts as a cost ceiling. |
-| `messages` | list | The conversation history. Each item has a `role` and `content`. |
-| `role` | string | Either `"user"` (your input) or `"assistant"` (Claude's prior response). |
-| `content` | string or list | The text of the message. Can also be a list for multi-modal content (images). |
+Before looking at the table, let's define **token** — because it appears in every API call:
 
 ### What Is a Token?
 
@@ -173,6 +181,16 @@ Examples:
 - `"Anthropic"` → 2 tokens (`Anthrop` + `ic`)
 
 Tokens matter because **you pay per token** — both the tokens you send (input) and the tokens Claude generates (output). See Chapter 8 for cost details.
+
+### Request Parameters
+
+| Parameter | Type | What it does |
+|-----------|------|-------------|
+| `model` | string | Which Claude model to use. See Chapter 7 for the full model list. |
+| `max_tokens` | integer | The maximum number of **tokens** Claude may generate in its response. Acts as a cost ceiling. |
+| `messages` | list | The conversation history. Each item has a `role` and `content`. |
+| `role` | string | Either `"user"` (your input) or `"assistant"` (Claude's prior response). |
+| `content` | string or list | The text of the message. Can also be a list for multi-modal content (images). |
 
 ---
 

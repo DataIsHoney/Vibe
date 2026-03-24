@@ -91,6 +91,8 @@ Opus is Claude's most powerful model, designed for tasks that require the deepes
 
 Several Claude models can analyze images. To include an image in an API call, you add an image content block to your message:
 
+**What is base64?** Images are binary files (sequences of bytes). The API communicates in text (JSON). **Base64** is a standard encoding that converts binary data into a string of plain text characters — it's how you include a binary file inside a JSON message. Python's built-in `base64` library handles this conversion automatically.
+
 ```python
 # vision_example.py
 import anthropic
@@ -163,9 +165,11 @@ Supported image formats: PNG, JPEG, GIF, WebP. Maximum image size: 5MB. You can 
 
 All current Claude 3, 3.5, and 4 family models support a **200,000 token input context window**. This is not a differentiator between models — they all support the same large context.
 
-The **output** context (max tokens you can request back) varies:
-- Claude 3 Haiku: up to 4,096 output tokens
-- Claude 3.5 and 4 models: up to 8,192 output tokens
+The **output** context (max tokens you can request back) is separate from the input context and has its own limits:
+- Claude 3 Haiku: up to 4,096 output tokens (~3,000 words)
+- Claude 3.5 and 4 models: up to 8,192 output tokens (~6,000 words)
+
+This means even though the model can *read* 200K tokens of input, it can only *generate* up to 8K tokens per response. If you need longer outputs, you'll need to use multiple calls (prompt chaining).
 
 ---
 

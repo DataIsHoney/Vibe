@@ -104,6 +104,8 @@ print(final)
 
 When subtasks are **independent** (don't depend on each other), run them simultaneously to save time.
 
+**What is `concurrent.futures`?** Python normally runs code one line at a time (sequentially). `concurrent.futures` is a built-in Python library that lets you run multiple functions at the same time (in parallel). `ThreadPoolExecutor` manages a pool of threads — think of threads as workers that can each independently make an API call simultaneously. This is an intermediate Python concept; if it looks complex, know that the sequential version (just running agents one after another with a loop) works fine — parallelism is purely a speed optimization.
+
 ```python
 # parallel_fan_out.py
 import anthropic
@@ -168,6 +170,8 @@ print(orchestrator_response.content[0].text)
 ## Passing Context Between Agents
 
 Each agent call is stateless — it only knows what you give it. Design your pipelines carefully:
+
+**What is a `dataclass`?** A dataclass is a Python feature (available since Python 3.7) that lets you define a simple class just for storing data — without writing a lot of boilerplate `__init__` code. `@dataclass` is a decorator (a modifier you put above a class definition) that automatically generates the setup code for you. You can think of it as a structured Python dictionary with named fields and optional default values. If you haven't used dataclasses, you can replace `PipelineState` with a plain dictionary — the concept is the same.
 
 ```python
 # context_passing.py
@@ -250,7 +254,9 @@ else:
 ```
 
 ### 2. Context Explosion
-As you pass data between agents, context grows. Summarize intermediate results before passing them downstream.
+**"Context explosion"** means the context window fills up because too much text is being passed between agents. Recall from Chapter 6 that every API call includes the full conversation — including everything passed to that agent. If Agent A produces 5,000 tokens and passes it all to Agent B, Agent B's input is already 5,000 tokens before it even starts working. Chain several agents like this and you can easily hit the 200K token limit or generate enormous costs.
+
+Solution: Summarize intermediate results before passing them downstream.
 
 ```python
 # context_summarizer.py

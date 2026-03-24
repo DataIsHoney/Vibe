@@ -178,6 +178,8 @@ Claude may follow these instructions if not properly guarded.
 
 ### Why it's especially dangerous in agentic systems
 
+**"Agentic"** describes any system where Claude takes actions in the real world — not just generating text, but actually doing things: sending emails, writing files, querying databases, calling APIs. Multi-agent systems (Chapter 4) are one example, but even a single Claude instance with tools that can take actions is "agentic."
+
 If your agents can send emails, write files, make API calls, or query databases, a prompt injection attack could cause real-world harm — not just a bad response.
 
 ### Mitigation strategies
@@ -221,7 +223,13 @@ What you should **never** send to the Anthropic API without careful consideratio
 | Financial account numbers | PCI DSS implications | Redact before sending |
 | Personally Identifiable Information (PII) | GDPR/CCPA implications | Minimize PII; pseudonymize where possible |
 
-> **Note**: This guide provides general awareness, not legal advice. Consult a lawyer for compliance with GDPR, HIPAA, CCPA, or other regulations applicable to your use case.
+**Regulatory definitions for awareness:**
+- **GDPR** (General Data Protection Regulation): A European Union law that governs how personal data of EU residents must be handled. Applies if your users are in the EU.
+- **HIPAA** (Health Insurance Portability and Accountability Act): A US law protecting the privacy of medical/health information. Applies if you handle protected health information (PHI).
+- **CCPA** (California Consumer Privacy Act): A California law giving consumers rights over their personal data.
+- **PCI DSS** (Payment Card Industry Data Security Standard): Rules for handling credit/debit card data.
+
+> **Note**: This guide provides general awareness, not legal advice. Consult a lawyer for compliance with any of these regulations.
 
 **Anthropic's data usage**: By default, Anthropic may use API inputs/outputs to improve models. Check Anthropic's privacy policy and available opt-out options for enterprise use cases.
 

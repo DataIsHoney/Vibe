@@ -25,7 +25,7 @@ A full page of text (250 words) → approximately 330 tokens
 
 ## Approximate Pricing Reference
 
-> **Important**: Prices change over time. Always check [console.anthropic.com](https://console.anthropic.com) for current pricing. The numbers below are illustrative.
+> **Important**: Prices change over time. Always check the **[Anthropic Pricing Page](https://www.anthropic.com/pricing)** (anthropic.com/pricing) for current rates. The numbers below are illustrative approximations.
 
 | Model | Input (per million tokens) | Output (per million tokens) |
 |-------|--------------------------|---------------------------|
@@ -193,9 +193,12 @@ print(f"Regular input tokens: {response.usage.input_tokens}")
 
 ## Batch API: 50% Off for Non-Real-Time Work
 
-The **Batch API** lets you submit up to 10,000 requests at once and receive results asynchronously (typically within 24 hours). In exchange, you get a **50% discount** on all tokens.
+Everything you've seen so far in this guide is the **real-time API** — you make a request and get a response back immediately (within seconds). The **Batch API** is a completely different mode: you submit a large batch of requests all at once, and Anthropic processes them in the background. You check back hours later to retrieve all the results. In exchange for giving up immediate responses, you get a **50% discount** on all tokens.
 
-**Use it for:**
+The Batch API uses the same `anthropic` Python library you already have — it's a different method call, not a different service.
+
+Use it for:
+
 - Generating product descriptions for your catalog (can wait overnight)
 - Processing customer feedback surveys
 - Data labeling and classification at scale

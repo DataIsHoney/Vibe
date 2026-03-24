@@ -19,7 +19,9 @@ Claude is a language model: it generates text based on patterns learned during t
 
 ## Defining a Tool
 
-A tool is described to Claude as a JSON schema with three required fields:
+A tool is described to Claude using **JSON schema** — a standardized format for describing the *shape* of data. You already know JSON (key-value pairs with curly braces). A JSON schema doesn't contain actual data — it describes what fields are allowed, their types, and which are required. Think of it as a blueprint, not a building.
+
+A tool definition has three required fields:
 
 ```python
 # tool_definition.py
@@ -55,6 +57,8 @@ or conditions in a specific location.""",
 ---
 
 ## The Complete Tool Use Cycle
+
+> **Important for beginners**: Tool use requires **two separate API calls**, not one. This is different from everything else in this guide so far, where one call → one response. With tool use: first call → Claude says "I want to call this tool" → your code runs the tool → second call → Claude gives the final answer.
 
 Here is every step in the tool use flow:
 
