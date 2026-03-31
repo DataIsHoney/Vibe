@@ -415,6 +415,39 @@
     .step-btn:hover { border-color: var(--red); }
     .step-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
+    /* Quiz */
+    .quiz-widget { border-color: rgba(252,204,10,0.2); }
+    .quiz-score { margin-left: auto; font-size: 18px; font-weight: 800; color: var(--yellow); flex-shrink: 0; }
+    .quiz-q { margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+    .quiz-q:last-child { border-bottom: none; }
+    .quiz-q-text { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+    .quiz-opts { display: flex; flex-direction: column; gap: 6px; }
+    .quiz-opt {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: 7px; padding: 9px 14px;
+      color: var(--text); font-size: 13px; text-align: left;
+      cursor: pointer; transition: background 0.15s, border-color 0.15s;
+    }
+    .quiz-opt:hover:not(:disabled) { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); }
+    .quiz-opt:disabled { cursor: not-allowed; }
+    .quiz-opt.quiz-correct { background: rgba(108,190,69,0.15); border-color: var(--green); color: var(--green); }
+    .quiz-opt.quiz-wrong   { background: rgba(238,53,46,0.15);  border-color: var(--red);   color: var(--red); }
+    .quiz-letter { font-weight: 800; font-size: 12px; flex-shrink: 0;
+      width: 20px; height: 20px; border-radius: 4px;
+      background: rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: center; }
+    .quiz-exp {
+      margin-top: 8px; font-size: 13px; color: var(--muted);
+      background: rgba(255,255,255,0.04); border-radius: 6px; padding: 10px 14px;
+      line-height: 1.5;
+    }
+    .quiz-complete {
+      text-align: center; padding: 16px;
+      background: rgba(108,190,69,0.1); border: 1px solid rgba(108,190,69,0.3);
+      border-radius: 8px; font-size: 15px; font-weight: 700; color: var(--green);
+    }
+
     /* ── Markdown typography ─────────────────────────── */
     #md-output { line-height: 1.75; font-size: 15px; }
     #md-output h1 { font-size: 26px; font-weight: 800; margin: 0 0 8px; color: #fff; }
@@ -673,6 +706,10 @@ function renderChapter(md, idx) {
   // Init dynamic widgets if present
   if (CHAPTERS[idx].id === 'ch03') { toolStep = 0; renderToolStep(); }
   if (CHAPTERS[idx].id === 'ch06') { ctxTokens = {system:0,turns:0,tools:0}; updateCtxBar(); }
+
+  // Inject knowledge check at end of chapters ch01–ch08
+  const chId = CHAPTERS[idx].id;
+  if (QUIZ[chId]) output.insertAdjacentHTML('beforeend', buildKnowledgeCheck(chId));
 
   document.getElementById('loading').style.display = 'none';
   document.getElementById('chapter-content').style.display = 'block';
@@ -1108,6 +1145,158 @@ function moveToolStep(dir) {
   if (next >= 0 && next < TOOL_STEPS.length) { toolStep = next; renderToolStep(); }
 }
 function jumpToolStep(i) { toolStep = i; renderToolStep(); }
+
+// ── Knowledge Check quiz data ────────────────────────────────────────────────
+const QUIZ = {
+  ch01: [
+    { q: "What is the correct order to start using the Anthropic API?",
+      opts: ["Write code → Install SDK → Get API key","Get API key → Install SDK → Write code","Get API key → Write code → Install SDK","Install SDK → Get API key → Write code"],
+      ans: 1, exp: "You need a valid API key to authenticate, the SDK must be installed before importing it, then you write your code." },
+    { q: "What is the safest way to provide your API key to a Python script?",
+      opts: ["Hardcode it as a string in the source file","Store it in a .env file and load with python-dotenv","Include it as a comment at the top of your file","Pass it as a command-line argument every time"],
+      ans: 1, exp: "Environment variables loaded from a .env file (excluded from version control) are the standard secure approach." },
+    { q: "How do you access Claude's response text from a Message object?",
+      opts: ["response.text","response.message","response.content[0].text","response.output"],
+      ans: 2, exp: "Claude's response is in response.content — a list of blocks. content[0] is a TextBlock; .text gives the string." },
+  ],
+  ch02: [
+    { q: "To reliably get a specific JSON format from Claude, which technique is MOST effective?",
+      opts: ["Zero-shot: just ask for JSON","Few-shot: provide 2-3 examples of the exact JSON format","Chain-of-thought: ask Claude to think step by step","Role assignment: tell Claude it's a 'JSON expert'"],
+      ans: 1, exp: "Few-shot examples showing exact input/output format is the most reliable way to enforce a specific output schema." },
+    { q: "Which temperature produces the MOST deterministic (consistent) output?",
+      opts: ["1.0","0.7","0.3","0.0"],
+      ans: 3, exp: "Temperature 0 means always pick the highest-probability next token — output is deterministic. Use it for classification and extraction." },
+    { q: "Where should persistent behavioral instructions (tone, persona, format rules) go?",
+      opts: ["At the end of the user message","In the system prompt","In the model parameter","As a separate API call before the main call"],
+      ans: 1, exp: "System prompts are processed before user messages and apply to the entire conversation." },
+  ],
+  ch03: [
+    { q: "In Claude's tool use architecture, which statement is TRUE?",
+      opts: ["Claude directly executes your Python functions","Claude decides which tool to call; your code executes it","Your code decides which tool to call; Claude executes it","Tools execute automatically without any code"],
+      ans: 1, exp: "Claude analyzes the conversation and outputs a tool_use block. Your code reads it and actually runs the function." },
+    { q: "After Claude returns a tool_use block, your next API call must include:",
+      opts: ["Only the tool result","Only the original user message","Original messages + Claude's full response + a tool_result message","A completely new conversation from scratch"],
+      ans: 2, exp: "The API requires: original messages, Claude's response with the tool_use block, and a tool_result message. Missing any causes an error." },
+    { q: "Before executing a tool with a file path Claude provided, you should:",
+      opts: ["Execute immediately — Claude outputs are always safe","Validate the path to prevent directory traversal attacks","Ask the user to confirm the path","Never allow file paths as tool arguments"],
+      ans: 1, exp: "Tool inputs from Claude (which processes user content) must be validated. An attacker could inject '../../etc/passwd' as a path." },
+  ],
+  ch04: [
+    { q: "When should you use a multi-agent system instead of a single API call?",
+      opts: ["Always — multi-agent is always better","When the task is too complex, can be parallelized, or needs intermediate verification","Only when using the Opus model","When the user explicitly asks for it"],
+      ans: 1, exp: "Multi-agent adds complexity and cost. Use it when a single prompt isn't enough, parts can run in parallel, or you need to verify intermediate outputs." },
+    { q: "Your pipeline has been running 10 minutes with no result. The MOST LIKELY cause is:",
+      opts: ["The model is too slow — switch to Haiku","An agent loop has no termination condition — add MAX_ITERATIONS","The system prompt is too short","You need more API keys"],
+      ans: 1, exp: "Infinite loops (agent calls agent calls agent…) are the most common cause of runaway pipelines. Always set a maximum iteration count." },
+    { q: "Agent 1 produces 3,000 tokens of research for Agent 2. The BEST approach is:",
+      opts: ["Pass all 3,000 tokens verbatim","Summarize to ~300 tokens before passing","Don't pass any context — Agent 2 starts fresh","Split into 10 separate files"],
+      ans: 1, exp: "Summarizing before handoff saves tokens, reduces cost, and focuses Agent 2 on what's relevant." },
+  ],
+  ch05: [
+    { q: "Which behavior is HARDCODED in Claude (cannot be changed by any system prompt)?",
+      opts: ["Following safe messaging guidelines around self-harm","Refusing to write explicit adult content","Refusing to help create bioweapons","Providing balanced perspectives on controversial topics"],
+      ans: 2, exp: "Helping create WMDs is an absolute hardcoded limit baked into training. Options A, B, D are softcoded defaults operators can adjust." },
+    { q: "In Anthropic's trust hierarchy, which statement is TRUE?",
+      opts: ["Users can override operator system prompt instructions","Operators can grant users more trust than the operator itself has","Operators can restrict users, but not expand user trust beyond operator limits","Anthropic's limits can be overridden by a sufficiently privileged operator"],
+      ans: 2, exp: "The hierarchy flows downward only: Anthropic > Operator > User. Operators cannot give users capabilities Anthropic prohibits." },
+    { q: "What is prompt injection?",
+      opts: ["Adding too many examples to a prompt","Malicious content in user input or processed data trying to override your system instructions","A technique for improving prompt quality","Sending prompts to multiple models at once"],
+      ans: 1, exp: "Prompt injection is an attack where content Claude processes contains instructions attempting to override the system prompt." },
+  ],
+  ch06: [
+    { q: "Your conversation history grows to 50,000 tokens. What is the MAIN problem?",
+      opts: ["Claude can't handle conversations that long","The system prompt competes with the conversation","Each API call costs more as history grows and may eventually exceed the 200K context limit","The model gets confused by very long conversations"],
+      ans: 2, exp: "You resend the entire history on every call, so costs grow linearly. At 200K tokens you'd also hit the context limit." },
+    { q: "When should you use prompt caching?",
+      opts: ["For all API calls regardless of size","When your stable prompt prefix is at least 1,024 tokens and repeated within 5 minutes","Only for Opus model calls","When you want to store user conversations on Anthropic's servers"],
+      ans: 1, exp: "Caching requires a minimum 1,024-token prefix. It's most valuable on large stable prompts repeated many times within the 5-minute cache TTL." },
+    { q: "What is RAG (Retrieval Augmented Generation)?",
+      opts: ["A way to train Claude on your own proprietary data","A technique where relevant content is fetched at runtime and injected into the prompt","A method for generating multiple responses simultaneously","A caching mechanism for reducing API costs"],
+      ans: 1, exp: "RAG solves the training cutoff and large-knowledge-base problems by retrieving relevant snippets and injecting them into the prompt." },
+  ],
+  ch07: [
+    { q: "You need to classify 100,000 customer support emails. Which model should you use?",
+      opts: ["claude-opus-4-5 — maximum accuracy","claude-sonnet-4-5 — balanced default","claude-haiku-4-5 — fast and cheap for high-volume simple tasks","Any model — classification quality is identical across all"],
+      ans: 2, exp: "Classification is simple enough for Haiku. Using Sonnet or Opus would cost 12-60x more with no meaningful quality difference for this task." },
+    { q: "For a production application, should you use an alias or a pinned model version?",
+      opts: ["Alias — it always points to the latest improvements","Pinned version — for reproducible, predictable behavior in production","It doesn't matter — they're always identical","Use aliases everywhere for simplicity"],
+      ans: 1, exp: "Pinned versions ensure your application's behavior doesn't change unexpectedly when Anthropic updates the model." },
+    { q: "How do you include an image in a message to Claude?",
+      opts: ["Send the image as a separate API parameter","Encode it as base64 and include it as an image content block in the messages list","Paste the image URL into the text of the user message","Images cannot be sent through the Anthropic API"],
+      ans: 1, exp: "Images are included as content blocks with type: 'image' inside the messages list, provided as base64-encoded data or as a public URL." },
+  ],
+  ch08: [
+    { q: "Which costs MORE per token?",
+      opts: ["Input tokens (what you send to Claude)","Output tokens (what Claude generates back)","They cost the same per token","It varies randomly by request"],
+      ans: 1, exp: "Output tokens typically cost 5-6x more than input tokens. Keep outputs concise and set max_tokens appropriately." },
+    { q: "The Batch API gives a 50% discount. What is the trade-off?",
+      opts: ["You can only use Haiku models","Results are asynchronous — you check back up to 24 hours later","You can only submit 10 requests at a time","You lose access to tools and system prompts"],
+      ans: 1, exp: "The Batch API is async: you submit a job and check back later. Ideal for offline processing that doesn't need immediate results." },
+    { q: "A 2,000-token system prompt is used 500 times/hour. The BIGGEST cost optimization is:",
+      opts: ["Reducing max_tokens from 512 to 256","Switching from Sonnet to Haiku","Enabling prompt caching on the system prompt","Switching from streaming to non-streaming"],
+      ans: 2, exp: "With 2,000 tokens × 500 calls/hour, caching reduces cached reads to ~10% of normal cost — saving ~90% on that traffic." },
+  ],
+};
+
+function buildKnowledgeCheck(chId) {
+  const qs = QUIZ[chId];
+  if (!qs) return '';
+  const qHtml = qs.map((q, qi) => `
+    <div class="quiz-q" id="qq-${chId}-${qi}">
+      <div class="quiz-q-text"><strong>Q${qi+1}.</strong> ${q.q}</div>
+      <div class="quiz-opts">
+        ${q.opts.map((o, oi) => `
+          <button class="quiz-opt" id="qo-${chId}-${qi}-${oi}"
+            onclick="answerQuiz('${chId}',${qi},${oi})">
+            <span class="quiz-letter">${'ABCD'[oi]}</span> ${o}
+          </button>
+        `).join('')}
+      </div>
+      <div class="quiz-exp" id="qe-${chId}-${qi}" style="display:none">${q.exp}</div>
+    </div>
+  `).join('');
+
+  return `
+<div class="widget quiz-widget" id="quiz-${chId}">
+  <div class="widget-hdr">
+    <span class="widget-icon" style="background:linear-gradient(135deg,var(--yellow),var(--orange))">🎯</span>
+    <div>
+      <div class="widget-title">Knowledge Check</div>
+      <div class="widget-sub">3 quick questions — instant feedback, not graded</div>
+    </div>
+    <div class="quiz-score" id="qs-${chId}">0 / 3</div>
+  </div>
+  <div class="quiz-questions">${qHtml}</div>
+  <div class="quiz-complete" id="qc-${chId}" style="display:none">
+    🏆 Chapter Complete! All questions answered correctly.
+  </div>
+</div>`;
+}
+
+const quizState = {};
+function answerQuiz(chId, qi, oi) {
+  if (!quizState[chId]) quizState[chId] = {};
+  if (quizState[chId][qi] !== undefined) return; // already answered
+  quizState[chId][qi] = oi;
+
+  const q = QUIZ[chId][qi];
+  const correct = oi === q.ans;
+  const opts = document.querySelectorAll(`[id^="qo-${chId}-${qi}-"]`);
+  opts.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.ans) btn.classList.add('quiz-correct');
+    else if (i === oi && !correct) btn.classList.add('quiz-wrong');
+  });
+  document.getElementById(`qe-${chId}-${qi}`).style.display = 'block';
+
+  // Update score
+  const correct_count = Object.entries(quizState[chId])
+    .filter(([k,v]) => QUIZ[chId][parseInt(k)].ans === v).length;
+  document.getElementById(`qs-${chId}`).textContent = `${correct_count} / 3`;
+  if (correct_count === 3) {
+    document.getElementById(`qc-${chId}`).style.display = 'block';
+  }
+}
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 buildNav();
