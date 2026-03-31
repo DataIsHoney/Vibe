@@ -278,6 +278,76 @@
       .chapter-grid { grid-template-columns: 1fr; }
     }
 
+    /* ── Shared widget styles ────────────────────────── */
+    .widget {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      margin: 28px 0;
+    }
+    .widget-hdr { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 18px; }
+    .widget-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .widget-title { font-size: 15px; font-weight: 700; color: #fff; }
+    .widget-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .widget-note { font-size: 12px; color: var(--muted); margin-top: 10px; }
+
+    /* Token calculator */
+    .calc-textarea {
+      width: 100%; min-height: 90px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-family: monospace; font-size: 13px;
+      padding: 10px 14px; resize: vertical;
+      outline: none;
+    }
+    .calc-textarea:focus { border-color: var(--orange); }
+    .calc-stats { display: flex; gap: 16px; margin: 14px 0; }
+    .calc-stat { text-align: center; flex: 1;
+      background: rgba(255,255,255,0.04); border-radius: 8px; padding: 10px; }
+    .cs-val { font-size: 22px; font-weight: 800; color: var(--orange); }
+    .cs-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .cost-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+    .cost-table th { background: rgba(255,255,255,0.06); padding: 8px 12px; text-align: left;
+      border: 1px solid var(--border); font-size: 12px; font-weight: 700; color: var(--muted); }
+    .cost-table td { padding: 8px 12px; border: 1px solid var(--border); color: var(--text); }
+    .cost-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+    /* Model cards */
+    .model-cards-grid { display: flex; flex-direction: column; gap: 10px; }
+    .model-card {
+      border: 1px solid var(--border); border-radius: 10px;
+      overflow: hidden; cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      padding: 14px 18px;
+    }
+    .model-card:hover { border-color: rgba(255,255,255,0.2); background: var(--card-hover); }
+    .model-card.mc-open { border-color: rgba(255,255,255,0.25); }
+    .mc-header { display: flex; align-items: center; gap: 12px; }
+    .mc-emoji { width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+    .mc-name-wrap { flex: 1; }
+    .mc-name { font-size: 16px; font-weight: 800; }
+    .mc-tag { font-size: 12px; color: var(--muted); margin-top: 1px; }
+    .mc-chevron { color: var(--muted); font-size: 11px; transition: transform 0.2s; }
+    .mc-open .mc-chevron { transform: rotate(180deg); }
+    .mc-bars { margin-top: 12px; display: flex; flex-direction: column; gap: 7px; }
+    .mc-bar-row { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); }
+    .mc-bar-row span:first-child { width: 68px; text-align: right; flex-shrink: 0; }
+    .mc-bar-row span:last-child { width: 32px; text-align: right; flex-shrink: 0; }
+    .mc-track { flex: 1; height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; }
+    .mc-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
+    .mc-detail { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+    .mc-section { margin-bottom: 10px; font-size: 13px; }
+    .mc-section ul { margin: 4px 0 0 18px; }
+    .mc-section li { margin: 2px 0; color: var(--text); }
+    .mc-price { font-size: 12px; color: var(--yellow);
+      background: rgba(252,204,10,0.08); padding: 7px 12px; border-radius: 6px; margin-top: 8px; }
+
     /* ── Markdown typography ─────────────────────────── */
     #md-output { line-height: 1.75; font-size: 15px; }
     #md-output h1 { font-size: 26px; font-weight: 800; margin: 0 0 8px; color: #fff; }
@@ -532,6 +602,7 @@ function renderChapter(md, idx) {
   output.innerHTML = marked.parse(md);
 
   enhanceCodeBlocks(output);
+  injectWidgets(output, idx);
 
   document.getElementById('loading').style.display = 'none';
   document.getElementById('chapter-content').style.display = 'block';
@@ -580,6 +651,175 @@ function enhanceCodeBlocks(container) {
     };
     pre.appendChild(btn);
   });
+}
+
+// ── Widget injection dispatcher ───────────────────────────────────────────────
+function injectWidgets(container, idx) {
+  const ch = CHAPTERS[idx].id;
+  if (ch === 'ch08') injectAfterHeading(container, 'Approximate Pricing Reference', buildTokenCalculator());
+  if (ch === 'ch07') injectAfterHeading(container, 'Model Comparison Table', buildModelCards());
+}
+
+function injectAfterHeading(container, text, html) {
+  const headings = container.querySelectorAll('h1,h2,h3,h4');
+  for (const h of headings) {
+    if (h.textContent.includes(text)) {
+      h.insertAdjacentHTML('afterend', html);
+      return true;
+    }
+  }
+  // Fallback: inject at top
+  container.insertAdjacentHTML('afterbegin', html);
+  return false;
+}
+
+// ── Token Calculator (ch08) ───────────────────────────────────────────────────
+function buildTokenCalculator() {
+  return `
+<div class="widget" id="w-token-calc">
+  <div class="widget-hdr">
+    <span class="widget-icon" style="background:linear-gradient(135deg,var(--orange),var(--yellow))">🧮</span>
+    <div>
+      <div class="widget-title">Live Token &amp; Cost Calculator</div>
+      <div class="widget-sub">Type any text to estimate tokens and API cost</div>
+    </div>
+  </div>
+  <textarea id="calc-input" class="calc-textarea" placeholder="Paste or type any text here…" oninput="calcTokens()"></textarea>
+  <div class="calc-stats">
+    <div class="calc-stat">
+      <div class="cs-val" id="calc-chars">0</div>
+      <div class="cs-lbl">Characters</div>
+    </div>
+    <div class="calc-stat">
+      <div class="cs-val" id="calc-toks">0</div>
+      <div class="cs-lbl">Est. Tokens</div>
+    </div>
+    <div class="calc-stat">
+      <div class="cs-val" id="calc-words">0</div>
+      <div class="cs-lbl">Words</div>
+    </div>
+  </div>
+  <table class="cost-table">
+    <thead><tr><th>Model</th><th>Input cost</th><th>Output cost*</th><th>Total*</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Haiku</strong></td>
+        <td id="cost-h-in">—</td><td id="cost-h-out">—</td><td id="cost-h-tot">—</td>
+      </tr>
+      <tr>
+        <td><strong>Sonnet</strong></td>
+        <td id="cost-s-in">—</td><td id="cost-s-out">—</td><td id="cost-s-tot">—</td>
+      </tr>
+      <tr>
+        <td><strong>Opus</strong></td>
+        <td id="cost-o-in">—</td><td id="cost-o-out">—</td><td id="cost-o-tot">—</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="widget-note">* Output cost assumes Claude generates the same number of tokens as input. Adjust for your actual use case.</p>
+</div>`;
+}
+
+function calcTokens() {
+  const txt   = document.getElementById('calc-input').value;
+  const chars = txt.length;
+  const words = txt.trim() ? txt.trim().split(/\s+/).length : 0;
+  const toks  = Math.round(chars / 4);
+
+  document.getElementById('calc-chars').textContent = chars.toLocaleString();
+  document.getElementById('calc-words').textContent = words.toLocaleString();
+  document.getElementById('calc-toks').textContent  = toks.toLocaleString();
+
+  // Pricing per million tokens
+  const P = {
+    h: { in: 0.25,  out: 1.25  },
+    s: { in: 3.00,  out: 15.00 },
+    o: { in: 15.00, out: 75.00 },
+  };
+  const fmt = v => v < 0.000001 ? '$0.00' : v < 0.01 ? `$${v.toFixed(6)}` : `$${v.toFixed(4)}`;
+  for (const [k, r] of Object.entries(P)) {
+    const inCost  = (toks / 1e6) * r.in;
+    const outCost = (toks / 1e6) * r.out;
+    document.getElementById(`cost-${k}-in`).textContent  = fmt(inCost);
+    document.getElementById(`cost-${k}-out`).textContent = fmt(outCost);
+    document.getElementById(`cost-${k}-tot`).textContent = fmt(inCost + outCost);
+  }
+}
+
+// ── Model Comparison Cards (ch07) ─────────────────────────────────────────────
+function buildModelCards() {
+  const models = [
+    {
+      name: 'Haiku', id: 'haiku',
+      color: 'var(--green)', emoji: '⚡',
+      tagline: 'Fast · Affordable · High Volume',
+      speed: 95, quality: 52, cost_eff: 98,
+      best: ['Classification & routing', 'Simple extraction', 'High-volume batch jobs', 'Short factual Q&A'],
+      avoid: ['Complex multi-step reasoning', 'Nuanced creative writing', 'Difficult coding tasks'],
+      pricing: '$0.25 input / $1.25 output per M tokens',
+    },
+    {
+      name: 'Sonnet', id: 'sonnet',
+      color: 'var(--orange)', emoji: '🎯',
+      tagline: 'Balanced · Versatile · Default Choice',
+      speed: 80, quality: 82, cost_eff: 72,
+      best: ['General-purpose writing', 'Code generation & debugging', 'Customer support', 'Most tool-use tasks'],
+      avoid: ['Hardest reasoning tasks', 'Maximum quality at any cost'],
+      pricing: '$3.00 input / $15.00 output per M tokens',
+    },
+    {
+      name: 'Opus', id: 'opus',
+      color: 'var(--red)', emoji: '🔬',
+      tagline: 'Maximum Capability · Deep Reasoning',
+      speed: 55, quality: 98, cost_eff: 28,
+      best: ['Complex multi-step reasoning', 'Difficult algorithms', 'Research synthesis', 'Evaluating other outputs'],
+      avoid: ['High-volume tasks', 'Cost-sensitive applications', 'Simple classification'],
+      pricing: '$15.00 input / $75.00 output per M tokens',
+    },
+  ];
+
+  const cards = models.map(m => `
+    <div class="model-card" id="mc-${m.id}" onclick="toggleModelCard('${m.id}')">
+      <div class="mc-header">
+        <span class="mc-emoji" style="background:${m.color}20;color:${m.color}">${m.emoji}</span>
+        <div class="mc-name-wrap">
+          <div class="mc-name" style="color:${m.color}">${m.name}</div>
+          <div class="mc-tag">${m.tagline}</div>
+        </div>
+        <span class="mc-chevron">▼</span>
+      </div>
+      <div class="mc-bars">
+        <div class="mc-bar-row"><span>Speed</span><div class="mc-track"><div class="mc-fill" style="width:${m.speed}%;background:${m.color}"></div></div><span>${m.speed}%</span></div>
+        <div class="mc-bar-row"><span>Quality</span><div class="mc-track"><div class="mc-fill" style="width:${m.quality}%;background:${m.color}"></div></div><span>${m.quality}%</span></div>
+        <div class="mc-bar-row"><span>Cost-eff.</span><div class="mc-track"><div class="mc-fill" style="width:${m.cost_eff}%;background:${m.color}"></div></div><span>${m.cost_eff}%</span></div>
+      </div>
+      <div class="mc-detail" id="mc-detail-${m.id}" style="display:none">
+        <div class="mc-section"><strong>✅ Best for:</strong><ul>${m.best.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+        <div class="mc-section"><strong>⚠️ Avoid for:</strong><ul>${m.avoid.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+        <div class="mc-price">💰 ${m.pricing}</div>
+      </div>
+    </div>
+  `).join('');
+
+  return `
+<div class="widget" id="w-model-cards">
+  <div class="widget-hdr">
+    <span class="widget-icon" style="background:linear-gradient(135deg,var(--blue),var(--red))">🤖</span>
+    <div>
+      <div class="widget-title">Model Comparison — Click to Explore</div>
+      <div class="widget-sub">Expand each model to see use cases and pricing</div>
+    </div>
+  </div>
+  <div class="model-cards-grid">${cards}</div>
+</div>`;
+}
+
+function toggleModelCard(id) {
+  const detail = document.getElementById(`mc-detail-${id}`);
+  const card   = document.getElementById(`mc-${id}`);
+  const isOpen = detail.style.display !== 'none';
+  detail.style.display = isOpen ? 'none' : 'block';
+  card.classList.toggle('mc-open', !isOpen);
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
