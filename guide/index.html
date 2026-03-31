@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Claude Architect Certification — Interactive Study Guide</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <!-- Markdown + syntax highlighting -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <style>
     :root {
       --bg: #050810;
@@ -273,6 +277,67 @@
       #content-wrap { padding: 28px 20px 60px; }
       .chapter-grid { grid-template-columns: 1fr; }
     }
+
+    /* ── Markdown typography ─────────────────────────── */
+    #md-output { line-height: 1.75; font-size: 15px; }
+    #md-output h1 { font-size: 26px; font-weight: 800; margin: 0 0 8px; color: #fff; }
+    #md-output h2 { font-size: 20px; font-weight: 700; margin: 40px 0 12px;
+      padding-bottom: 8px; border-bottom: 1px solid var(--border); color: #fff; }
+    #md-output h3 { font-size: 16px; font-weight: 700; margin: 28px 0 10px; color: var(--text); }
+    #md-output h4 { font-size: 14px; font-weight: 700; margin: 20px 0 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    #md-output p  { margin: 0 0 16px; color: var(--text); }
+    #md-output ul, #md-output ol { margin: 0 0 16px 24px; }
+    #md-output li { margin: 4px 0; color: var(--text); }
+    #md-output li::marker { color: var(--red); }
+    #md-output strong { font-weight: 700; color: #fff; }
+    #md-output em { font-style: italic; color: var(--muted); }
+    #md-output a { color: var(--orange); text-decoration: none; }
+    #md-output a:hover { text-decoration: underline; }
+    #md-output blockquote {
+      border-left: 3px solid var(--orange);
+      margin: 16px 0; padding: 12px 16px;
+      background: rgba(255,99,25,0.06);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      color: var(--muted); font-style: italic;
+    }
+    #md-output hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+    #md-output table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 14px; }
+    #md-output th { background: rgba(255,255,255,0.06); color: var(--text); font-weight: 700;
+      padding: 10px 14px; text-align: left; border: 1px solid var(--border); }
+    #md-output td { padding: 9px 14px; border: 1px solid var(--border); color: var(--text); vertical-align: top; }
+    #md-output tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+    #md-output code:not(pre code) {
+      background: rgba(255,255,255,0.08); color: var(--green);
+      padding: 2px 6px; border-radius: 4px; font-size: 13px; font-family: monospace;
+    }
+
+    /* ── Code blocks ─────────────────────────────────── */
+    #md-output pre {
+      position: relative;
+      background: #0d1117 !important;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin: 16px 0 24px;
+      overflow: auto;
+      padding: 16px !important;
+    }
+    #md-output pre code { background: none !important; padding: 0 !important; font-size: 13px !important; }
+    .code-lang {
+      position: absolute; top: 10px; right: 48px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      color: var(--muted); letter-spacing: .05em;
+      pointer-events: none;
+    }
+    .copy-btn {
+      position: absolute; top: 8px; right: 10px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      color: var(--muted); font-size: 11px; font-weight: 600;
+      padding: 3px 9px; border-radius: 5px;
+      cursor: pointer; transition: background 0.15s, color 0.15s;
+    }
+    .copy-btn:hover { background: rgba(255,255,255,0.12); color: var(--text); }
+    .copy-btn.copied { color: var(--green); border-color: var(--green); }
   </style>
 </head>
 <body>
@@ -458,14 +523,63 @@ async function loadChapter(idx) {
   }
 }
 
-// Placeholder — filled in next commit
+// ── Configure marked ─────────────────────────────────────────────────────────
+marked.setOptions({ gfm: true, breaks: false });
+
+// ── Render chapter ────────────────────────────────────────────────────────────
 function renderChapter(md, idx) {
+  const output = document.getElementById('md-output');
+  output.innerHTML = marked.parse(md);
+
+  enhanceCodeBlocks(output);
+
   document.getElementById('loading').style.display = 'none';
-  document.getElementById('md-output').innerHTML =
-    `<pre style="color:var(--muted);font-size:13px;white-space:pre-wrap">${
-      md.replace(/</g,'&lt;').slice(0, 2000)
-    }…</pre>`;
   document.getElementById('chapter-content').style.display = 'block';
+
+  // Scroll to top of content
+  document.getElementById('content-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  window.scrollTo(0, 0);
+}
+
+// ── Code block enhancements ───────────────────────────────────────────────────
+function enhanceCodeBlocks(container) {
+  container.querySelectorAll('pre code').forEach(block => {
+    // Detect language from class (highlight.js class like "language-python")
+    const cls = block.className || '';
+    const langMatch = cls.match(/language-(\w+)/);
+    const lang = langMatch ? langMatch[1] : '';
+
+    // Apply highlight.js
+    if (lang && hljs.getLanguage(lang)) {
+      block.innerHTML = hljs.highlight(block.textContent, { language: lang }).value;
+    } else {
+      hljs.highlightElement(block);
+    }
+
+    const pre = block.parentElement;
+    pre.style.position = 'relative';
+
+    // Language badge
+    if (lang && lang !== 'plaintext') {
+      const badge = document.createElement('span');
+      badge.className = 'code-lang';
+      badge.textContent = lang;
+      pre.appendChild(badge);
+    }
+
+    // Copy button
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = () => {
+      navigator.clipboard.writeText(block.textContent).then(() => {
+        btn.textContent = '✓ Copied';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+      });
+    };
+    pre.appendChild(btn);
+  });
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
