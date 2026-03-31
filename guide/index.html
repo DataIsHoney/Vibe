@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Architect Certification — Interactive Study Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <!-- Markdown + syntax highlighting -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <style>
+    :root {
+      --bg: #050810;
+      --card-bg: #0d1117;
+      --card-hover: #161b22;
+      --border: rgba(255,255,255,0.08);
+      --red: #EE352E;
+      --orange: #FF6319;
+      --green: #6CBE45;
+      --yellow: #FCCC0A;
+      --blue: #0039A6;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --sidebar-w: 268px;
+      --topbar-h: 52px;
+      --radius: 10px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Sidebar ─────────────────────────────────────── */
+    #sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: var(--card-bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      z-index: 200;
+      transition: transform 0.28s ease;
+    }
+
+    .sidebar-logo {
+      padding: 18px 20px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .sidebar-logo .logo-badge {
+      width: 34px; height: 34px;
+      background: var(--red);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 800; color: #fff;
+      flex-shrink: 0;
+    }
+    .sidebar-logo .logo-text { line-height: 1.2; }
+    .sidebar-logo .logo-title { font-size: 13px; font-weight: 700; color: var(--text); }
+    .sidebar-logo .logo-sub { font-size: 11px; color: var(--muted); }
+
+    #chapter-nav {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+    #chapter-nav::-webkit-scrollbar { width: 4px; }
+    #chapter-nav::-webkit-scrollbar-track { background: transparent; }
+    #chapter-nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 20px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: background 0.15s, border-color 0.15s;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.35;
+    }
+    .nav-item:hover { background: var(--card-hover); color: var(--text); }
+    .nav-item.active {
+      border-left-color: var(--red);
+      background: rgba(238,53,46,0.08);
+      color: var(--text);
+    }
+    .nav-item.visited .nav-num { background: var(--green); color: #000; }
+    .nav-num {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      color: var(--muted);
+      font-size: 10px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s, color 0.2s;
+    }
+    .nav-item.active .nav-num { background: var(--red); color: #fff; }
+
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .progress-label {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 11px; font-weight: 600; color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .progress-track {
+      height: 5px; border-radius: 3px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; border-radius: 3px;
+      background: linear-gradient(90deg, var(--red), var(--orange));
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+
+    /* ── Topbar ──────────────────────────────────────── */
+    #topbar {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-w);
+      right: 0;
+      height: var(--topbar-h);
+      background: rgba(5,8,16,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 0 28px;
+      z-index: 100;
+      transition: left 0.28s ease;
+    }
+
+    #hamburger {
+      display: none;
+      background: none; border: none;
+      color: var(--text); cursor: pointer;
+      padding: 6px; border-radius: 6px;
+      flex-shrink: 0;
+    }
+    #hamburger:hover { background: var(--card-hover); }
+
+    #breadcrumb {
+      font-size: 14px; font-weight: 600; color: var(--text);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    /* ── Main ────────────────────────────────────────── */
+    #main {
+      margin-left: var(--sidebar-w);
+      padding-top: var(--topbar-h);
+      min-height: 100vh;
+      transition: margin-left 0.28s ease;
+    }
+
+    #content-wrap {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 40px 36px 80px;
+    }
+
+    /* ── Welcome screen ─────────────────────────────── */
+    #welcome {
+      text-align: center;
+      padding: 60px 0;
+    }
+    #welcome .w-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 64px; height: 64px;
+      background: linear-gradient(135deg, var(--red), var(--orange));
+      border-radius: 16px;
+      font-size: 28px;
+      margin-bottom: 24px;
+    }
+    #welcome h1 {
+      font-size: 28px; font-weight: 800;
+      background: linear-gradient(135deg, #fff 0%, var(--muted) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+    }
+    #welcome p {
+      font-size: 16px; color: var(--muted); max-width: 500px; margin: 0 auto 32px;
+      line-height: 1.6;
+    }
+    .chapter-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; text-align: left; max-width: 560px; margin: 0 auto;
+    }
+    .chapter-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .chapter-card:hover { border-color: var(--red); background: var(--card-hover); }
+    .chapter-card .cc-num { font-size: 11px; font-weight: 700; color: var(--red); margin-bottom: 3px; }
+    .chapter-card .cc-title { font-size: 13px; font-weight: 600; color: var(--text); }
+
+    /* ── Loading ─────────────────────────────────────── */
+    #loading {
+      display: none;
+      text-align: center;
+      padding: 80px 0;
+    }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--red);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loading p { color: var(--muted); font-size: 14px; }
+
+    /* ── Chapter nav buttons ─────────────────────────── */
+    .ch-nav-btns {
+      display: flex; justify-content: space-between; gap: 12px;
+      margin-top: 52px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+    .ch-nav-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 20px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text); font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: border-color 0.15s, background 0.15s;
+    }
+    .ch-nav-btn:hover { border-color: var(--red); background: var(--card-hover); }
+    .ch-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* ── Mobile overlay ──────────────────────────────── */
+    #overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 150;
+    }
+
+    /* ── Responsive ──────────────────────────────────── */
+    @media (max-width: 768px) {
+      #sidebar { transform: translateX(-100%); }
+      #sidebar.open { transform: translateX(0); }
+      #topbar { left: 0; }
+      #main { margin-left: 0; }
+      #hamburger { display: flex; }
+      #overlay.show { display: block; }
+      #content-wrap { padding: 28px 20px 60px; }
+      .chapter-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Shared widget styles ────────────────────────── */
+    .widget {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      margin: 28px 0;
+    }
+    .widget-hdr { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 18px; }
+    .widget-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .widget-title { font-size: 15px; font-weight: 700; color: #fff; }
+    .widget-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .widget-note { font-size: 12px; color: var(--muted); margin-top: 10px; }
+
+    /* Token calculator */
+    .calc-textarea {
+      width: 100%; min-height: 90px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-family: monospace; font-size: 13px;
+      padding: 10px 14px; resize: vertical;
+      outline: none;
+    }
+    .calc-textarea:focus { border-color: var(--orange); }
+    .calc-stats { display: flex; gap: 16px; margin: 14px 0; }
+    .calc-stat { text-align: center; flex: 1;
+      background: rgba(255,255,255,0.04); border-radius: 8px; padding: 10px; }
+    .cs-val { font-size: 22px; font-weight: 800; color: var(--orange); }
+    .cs-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .cost-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+    .cost-table th { background: rgba(255,255,255,0.06); padding: 8px 12px; text-align: left;
+      border: 1px solid var(--border); font-size: 12px; font-weight: 700; color: var(--muted); }
+    .cost-table td { padding: 8px 12px; border: 1px solid var(--border); color: var(--text); }
+    .cost-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+    /* Model cards */
+    .model-cards-grid { display: flex; flex-direction: column; gap: 10px; }
+    .model-card {
+      border: 1px solid var(--border); border-radius: 10px;
+      overflow: hidden; cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      padding: 14px 18px;
+    }
+    .model-card:hover { border-color: rgba(255,255,255,0.2); background: var(--card-hover); }
+    .model-card.mc-open { border-color: rgba(255,255,255,0.25); }
+    .mc-header { display: flex; align-items: center; gap: 12px; }
+    .mc-emoji { width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+    .mc-name-wrap { flex: 1; }
+    .mc-name { font-size: 16px; font-weight: 800; }
+    .mc-tag { font-size: 12px; color: var(--muted); margin-top: 1px; }
+    .mc-chevron { color: var(--muted); font-size: 11px; transition: transform 0.2s; }
+    .mc-open .mc-chevron { transform: rotate(180deg); }
+    .mc-bars { margin-top: 12px; display: flex; flex-direction: column; gap: 7px; }
+    .mc-bar-row { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); }
+    .mc-bar-row span:first-child { width: 68px; text-align: right; flex-shrink: 0; }
+    .mc-bar-row span:last-child { width: 32px; text-align: right; flex-shrink: 0; }
+    .mc-track { flex: 1; height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; }
+    .mc-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
+    .mc-detail { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+    .mc-section { margin-bottom: 10px; font-size: 13px; }
+    .mc-section ul { margin: 4px 0 0 18px; }
+    .mc-section li { margin: 2px 0; color: var(--text); }
+    .mc-price { font-size: 12px; color: var(--yellow);
+      background: rgba(252,204,10,0.08); padding: 7px 12px; border-radius: 6px; margin-top: 8px; }
+
+    /* Trust Pyramid */
+    .pyramid-wrap { display: flex; flex-direction: column; gap: 8px; }
+    .pyramid-tier {
+      border: 1px solid; border-radius: 8px; padding: 12px 18px;
+      cursor: pointer; transition: filter 0.15s;
+    }
+    .pyramid-tier:hover { filter: brightness(1.15); }
+    .pyramid-tier.pt-open { filter: brightness(1.2); }
+    .pt-label { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .pt-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .pyramid-detail {
+      display: none;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 12px 16px; font-size: 13px; line-height: 1.6; color: var(--text);
+      margin-top: -4px;
+    }
+    .pyramid-flow { text-align: center; font-size: 12px; color: var(--muted);
+      margin-top: 4px; padding: 8px; }
+
+    /* Context window visualizer */
+    .ctx-bar-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .ctx-bar-track { flex: 1; height: 22px; border-radius: 6px;
+      background: rgba(255,255,255,0.06); overflow: hidden; display: flex; }
+    .ctx-seg { height: 100%; transition: width 0.35s ease; }
+    .ctx-pct { font-size: 13px; font-weight: 700; color: var(--text); width: 42px; text-align: right; }
+    .ctx-legend { font-size: 12px; color: var(--muted); display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
+    .ctx-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+    .ctx-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+    .ctx-btn {
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+      border-radius: 7px; color: var(--text); font-size: 13px; font-weight: 600;
+      padding: 8px 14px; cursor: pointer; transition: background 0.15s;
+    }
+    .ctx-btn:hover { background: rgba(255,255,255,0.12); }
+    .ctx-btn small { color: var(--muted); font-size: 11px; font-weight: 400; }
+    .ctx-reset { color: var(--muted); }
+    .ctx-warning { background: rgba(255,99,25,0.1); border: 1px solid rgba(255,99,25,0.3);
+      border-radius: 7px; padding: 10px 14px; font-size: 13px; color: var(--orange); margin-bottom: 8px; }
+    .ctx-counts { font-size: 12px; color: var(--muted); }
+
+    /* Tool use cycle */
+    .steps-progress { display: flex; gap: 6px; margin-bottom: 16px; justify-content: center; }
+    .step-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: rgba(255,255,255,0.12); cursor: pointer; transition: background 0.2s;
+    }
+    .step-dot.done { background: rgba(108,190,69,0.5); }
+    .step-dot.active { background: var(--red); transform: scale(1.25); }
+    .step-card { background: rgba(255,255,255,0.03); border-radius: 8px; padding: 16px 18px; min-height: 160px; }
+    .step-title { font-size: 15px; font-weight: 700; color: #fff; padding-left: 12px; margin-bottom: 10px; }
+    .step-desc { font-size: 14px; color: var(--text); line-height: 1.6; margin-bottom: 12px; }
+    .step-code {
+      background: #0d1117; border: 1px solid var(--border); border-radius: 7px;
+      padding: 12px 14px; font-size: 12px; color: var(--green);
+      white-space: pre-wrap; word-break: break-all; margin: 0;
+      font-family: monospace;
+    }
+    .step-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; }
+    .step-btn {
+      background: var(--card-hover); border: 1px solid var(--border);
+      border-radius: 7px; color: var(--text); font-size: 13px; font-weight: 600;
+      padding: 8px 18px; cursor: pointer; transition: border-color 0.15s;
+    }
+    .step-btn:hover { border-color: var(--red); }
+    .step-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* Quiz */
+    .quiz-widget { border-color: rgba(252,204,10,0.2); }
+    .quiz-score { margin-left: auto; font-size: 18px; font-weight: 800; color: var(--yellow); flex-shrink: 0; }
+    .quiz-q { margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+    .quiz-q:last-child { border-bottom: none; }
+    .quiz-q-text { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+    .quiz-opts { display: flex; flex-direction: column; gap: 6px; }
+    .quiz-opt {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: 7px; padding: 9px 14px;
+      color: var(--text); font-size: 13px; text-align: left;
+      cursor: pointer; transition: background 0.15s, border-color 0.15s;
+    }
+    .quiz-opt:hover:not(:disabled) { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); }
+    .quiz-opt:disabled { cursor: not-allowed; }
+    .quiz-opt.quiz-correct { background: rgba(108,190,69,0.15); border-color: var(--green); color: var(--green); }
+    .quiz-opt.quiz-wrong   { background: rgba(238,53,46,0.15);  border-color: var(--red);   color: var(--red); }
+    .quiz-letter { font-weight: 800; font-size: 12px; flex-shrink: 0;
+      width: 20px; height: 20px; border-radius: 4px;
+      background: rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: center; }
+    .quiz-exp {
+      margin-top: 8px; font-size: 13px; color: var(--muted);
+      background: rgba(255,255,255,0.04); border-radius: 6px; padding: 10px 14px;
+      line-height: 1.5;
+    }
+    .quiz-complete {
+      text-align: center; padding: 16px;
+      background: rgba(108,190,69,0.1); border: 1px solid rgba(108,190,69,0.3);
+      border-radius: 8px; font-size: 15px; font-weight: 700; color: var(--green);
+    }
+
+    /* ── Markdown typography ─────────────────────────── */
+    #md-output { line-height: 1.75; font-size: 15px; }
+    #md-output h1 { font-size: 26px; font-weight: 800; margin: 0 0 8px; color: #fff; }
+    #md-output h2 { font-size: 20px; font-weight: 700; margin: 40px 0 12px;
+      padding-bottom: 8px; border-bottom: 1px solid var(--border); color: #fff; }
+    #md-output h3 { font-size: 16px; font-weight: 700; margin: 28px 0 10px; color: var(--text); }
+    #md-output h4 { font-size: 14px; font-weight: 700; margin: 20px 0 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    #md-output p  { margin: 0 0 16px; color: var(--text); }
+    #md-output ul, #md-output ol { margin: 0 0 16px 24px; }
+    #md-output li { margin: 4px 0; color: var(--text); }
+    #md-output li::marker { color: var(--red); }
+    #md-output strong { font-weight: 700; color: #fff; }
+    #md-output em { font-style: italic; color: var(--muted); }
+    #md-output a { color: var(--orange); text-decoration: none; }
+    #md-output a:hover { text-decoration: underline; }
+    #md-output blockquote {
+      border-left: 3px solid var(--orange);
+      margin: 16px 0; padding: 12px 16px;
+      background: rgba(255,99,25,0.06);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      color: var(--muted); font-style: italic;
+    }
+    #md-output hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+    #md-output table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 14px; }
+    #md-output th { background: rgba(255,255,255,0.06); color: var(--text); font-weight: 700;
+      padding: 10px 14px; text-align: left; border: 1px solid var(--border); }
+    #md-output td { padding: 9px 14px; border: 1px solid var(--border); color: var(--text); vertical-align: top; }
+    #md-output tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+    #md-output code:not(pre code) {
+      background: rgba(255,255,255,0.08); color: var(--green);
+      padding: 2px 6px; border-radius: 4px; font-size: 13px; font-family: monospace;
+    }
+
+    /* ── Code blocks ─────────────────────────────────── */
+    #md-output pre {
+      position: relative;
+      background: #0d1117 !important;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin: 16px 0 24px;
+      overflow: auto;
+      padding: 16px !important;
+    }
+    #md-output pre code { background: none !important; padding: 0 !important; font-size: 13px !important; }
+    .code-lang {
+      position: absolute; top: 10px; right: 48px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      color: var(--muted); letter-spacing: .05em;
+      pointer-events: none;
+    }
+    .copy-btn {
+      position: absolute; top: 8px; right: 10px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      color: var(--muted); font-size: 11px; font-weight: 600;
+      padding: 3px 9px; border-radius: 5px;
+      cursor: pointer; transition: background 0.15s, color 0.15s;
+    }
+    .copy-btn:hover { background: rgba(255,255,255,0.12); color: var(--text); }
+    .copy-btn.copied { color: var(--green); border-color: var(--green); }
+  </style>
+</head>
+<body>
+
+<!-- Mobile overlay -->
+<div id="overlay" onclick="closeSidebar()"></div>
+
+<!-- Sidebar -->
+<aside id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-badge">CA</div>
+    <div class="logo-text">
+      <div class="logo-title">Claude Architect</div>
+      <div class="logo-sub">Certification Guide</div>
+    </div>
+  </div>
+  <nav id="chapter-nav"></nav>
+  <div class="sidebar-footer">
+    <div class="progress-label">
+      <span>Progress</span>
+      <span id="progress-text">0 / 10</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+</aside>
+
+<!-- Topbar -->
+<header id="topbar">
+  <button id="hamburger" onclick="toggleSidebar()" aria-label="Toggle menu">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <rect y="2" width="18" height="2" rx="1" fill="currentColor"/>
+      <rect y="8" width="18" height="2" rx="1" fill="currentColor"/>
+      <rect y="14" width="18" height="2" rx="1" fill="currentColor"/>
+    </svg>
+  </button>
+  <div id="breadcrumb">Select a chapter to begin</div>
+</header>
+
+<!-- Main content -->
+<main id="main">
+  <div id="content-wrap">
+
+    <!-- Welcome screen -->
+    <div id="welcome">
+      <div class="w-badge">⚡</div>
+      <h1>Claude Architect Certification</h1>
+      <p>An interactive study guide covering the Anthropic API, prompt engineering, tool use, multi-agent systems, safety, and cost optimization.</p>
+      <div class="chapter-grid" id="welcome-grid"></div>
+    </div>
+
+    <!-- Loading spinner -->
+    <div id="loading">
+      <div class="spinner"></div>
+      <p>Loading chapter…</p>
+    </div>
+
+    <!-- Chapter content (populated by JS) -->
+    <div id="chapter-content" style="display:none">
+      <div id="md-output"></div>
+      <div class="ch-nav-btns">
+        <button class="ch-nav-btn" id="btn-prev" onclick="navigateChapter(-1)">← Previous</button>
+        <button class="ch-nav-btn" id="btn-next" onclick="navigateChapter(1)">Next →</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+// ── Chapter list ──────────────────────────────────────────────────────────────
+const CHAPTERS = [
+  { id: 'ch01', file: 'chapters/ch01-api-foundations.md',         title: 'API Foundations' },
+  { id: 'ch02', file: 'chapters/ch02-prompt-engineering.md',      title: 'Prompt Engineering' },
+  { id: 'ch03', file: 'chapters/ch03-tool-use.md',                title: 'Tool Use' },
+  { id: 'ch04', file: 'chapters/ch04-multi-agent.md',             title: 'Multi-Agent Systems' },
+  { id: 'ch05', file: 'chapters/ch05-safety.md',                  title: 'Safety & Responsible AI' },
+  { id: 'ch06', file: 'chapters/ch06-context-system-prompts.md',  title: 'Context & System Prompts' },
+  { id: 'ch07', file: 'chapters/ch07-model-selection.md',         title: 'Model Selection' },
+  { id: 'ch08', file: 'chapters/ch08-cost-optimization.md',       title: 'Cost Optimization' },
+  { id: 'ch09', file: 'chapters/ch09-practice-questions.md',      title: 'Practice Questions' },
+  { id: 'ch10', file: 'chapters/ch10-quick-reference.md',         title: 'Quick Reference' },
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let currentIdx = -1;
+const visited  = new Set();
+
+// ── Build sidebar nav ─────────────────────────────────────────────────────────
+function buildNav() {
+  const nav  = document.getElementById('chapter-nav');
+  const grid = document.getElementById('welcome-grid');
+  CHAPTERS.forEach((ch, i) => {
+    // Sidebar link
+    const a = document.createElement('div');
+    a.className = 'nav-item';
+    a.dataset.idx = i;
+    a.innerHTML = `<span class="nav-num">${i + 1}</span><span>${ch.title}</span>`;
+    a.onclick = () => loadChapter(i);
+    nav.appendChild(a);
+
+    // Welcome grid card
+    const card = document.createElement('div');
+    card.className = 'chapter-card';
+    card.innerHTML = `<div class="cc-num">Chapter ${i + 1}</div><div class="cc-title">${ch.title}</div>`;
+    card.onclick = () => loadChapter(i);
+    grid.appendChild(card);
+  });
+}
+
+// ── Sidebar toggle (mobile) ───────────────────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ── Progress ──────────────────────────────────────────────────────────────────
+function updateProgress() {
+  const pct = (visited.size / CHAPTERS.length) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = `${visited.size} / ${CHAPTERS.length}`;
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function navigateChapter(dir) {
+  const next = currentIdx + dir;
+  if (next >= 0 && next < CHAPTERS.length) loadChapter(next);
+}
+
+// ── Load chapter placeholder (rendering added in Commit 2) ───────────────────
+async function loadChapter(idx) {
+  closeSidebar();
+  currentIdx = idx;
+
+  // Update sidebar active state
+  document.querySelectorAll('.nav-item').forEach((el, i) => {
+    el.classList.toggle('active', i === idx);
+    if (visited.has(i)) el.classList.add('visited');
+  });
+
+  // Show loading
+  document.getElementById('welcome').style.display = 'none';
+  document.getElementById('chapter-content').style.display = 'none';
+  document.getElementById('loading').style.display = 'block';
+
+  // Update breadcrumb
+  document.getElementById('breadcrumb').textContent =
+    `Chapter ${idx + 1}: ${CHAPTERS[idx].title}`;
+
+  // Update prev/next buttons
+  document.getElementById('btn-prev').disabled = idx === 0;
+  document.getElementById('btn-next').disabled = idx === CHAPTERS.length - 1;
+
+  // Mark visited
+  visited.add(idx);
+  updateProgress();
+  document.querySelector(`.nav-item[data-idx="${idx}"]`).classList.add('visited');
+
+  // Fetch & render (filled in Commit 2)
+  try {
+    const res = await fetch(CHAPTERS[idx].file);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const md = await res.text();
+    renderChapter(md, idx);
+  } catch (err) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('md-output').innerHTML =
+      `<div style="color:var(--red);padding:40px 0">
+        <strong>Failed to load chapter.</strong><br>
+        <small style="color:var(--muted)">${err.message}</small><br>
+        <small style="color:var(--muted);margin-top:8px;display:block">
+          If opening via file://, run a local server:<br>
+          <code style="color:var(--green)">python -m http.server 8080</code>
+          then open <code style="color:var(--green)">http://localhost:8080/guide/</code>
+        </small>
+      </div>`;
+    document.getElementById('chapter-content').style.display = 'block';
+  }
+}
+
+// ── Configure marked ─────────────────────────────────────────────────────────
+marked.setOptions({ gfm: true, breaks: false });
+
+// ── Render chapter ────────────────────────────────────────────────────────────
+function renderChapter(md, idx) {
+  const output = document.getElementById('md-output');
+  output.innerHTML = marked.parse(md);
+
+  enhanceCodeBlocks(output);
+  injectWidgets(output, idx);
+  // Init dynamic widgets if present
+  if (CHAPTERS[idx].id === 'ch03') { toolStep = 0; renderToolStep(); }
+  if (CHAPTERS[idx].id === 'ch06') { ctxTokens = {system:0,turns:0,tools:0}; updateCtxBar(); }
+
+  // Inject knowledge check at end of chapters ch01–ch08
+  const chId = CHAPTERS[idx].id;
+  if (QUIZ[chId]) output.insertAdjacentHTML('beforeend', buildKnowledgeCheck(chId));
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('chapter-content').style.display = 'block';
+
+  // Scroll to top of content
+  document.getElementById('content-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  window.scrollTo(0, 0);
+}
+
+// ── Code block enhancements ───────────────────────────────────────────────────
+function enhanceCodeBlocks(container) {
+  container.querySelectorAll('pre code').forEach(block => {
+    // Detect language from class (highlight.js class like "language-python")
+    const cls = block.className || '';
+    const langMatch = cls.match(/language-(\w+)/);
+    const lang = langMatch ? langMatch[1] : '';
+
+    // Apply highlight.js
+    if (lang && hljs.getLanguage(lang)) {
+      block.innerHTML = hljs.highlight(block.textContent, { language: lang }).value;
+    } else {
+      hljs.highlightElement(block);
+    }
+
+    const pre = block.parentElement;
+    pre.style.position = 'relative';
+
+    // Language badge
+    if (lang && lang !== 'plaintext') {
+      const badge = document.createElement('span');
+      badge.className = 'code-lang';
+      badge.textContent = lang;
+      pre.appendChild(badge);
+    }
+
+    // Copy button
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = () => {
+      navigator.clipboard.writeText(block.textContent).then(() => {
+        btn.textContent = '✓ Copied';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+      });
+    };
+    pre.appendChild(btn);
+  });
+}
+
+// ── Widget injection dispatcher ───────────────────────────────────────────────
+function injectWidgets(container, idx) {
+  const ch = CHAPTERS[idx].id;
+  if (ch === 'ch08') injectAfterHeading(container, 'Approximate Pricing Reference', buildTokenCalculator());
+  if (ch === 'ch07') injectAfterHeading(container, 'Model Comparison Table', buildModelCards());
+  if (ch === 'ch05') injectAfterHeading(container, '5.4 The Trust Hierarchy', buildTrustPyramid());
+  if (ch === 'ch06') injectAfterHeading(container, '6.4 What Is a Context Window', buildContextVisualizer());
+  if (ch === 'ch03') injectAfterHeading(container, '3.2 The Mental Model', buildToolUseCycle());
+}
+
+function injectAfterHeading(container, text, html) {
+  const headings = container.querySelectorAll('h1,h2,h3,h4');
+  for (const h of headings) {
+    if (h.textContent.includes(text)) {
+      h.insertAdjacentHTML('afterend', html);
+      return true;
+    }
+  }
+  // Fallback: inject at top
+  container.insertAdjacentHTML('afterbegin', html);
+  return false;
+}
+
+// ── Token Calculator (ch08) ───────────────────────────────────────────────────
+function buildTokenCalculator() {
+  return `
+<div class="widget" id="w-token-calc">
+  <div class="widget-hdr">
+    <span class="widget-icon" style="background:linear-gradient(135deg,var(--orange),var(--yellow))">🧮</span>
+    <div>
+      <div class="widget-title">Live Token &amp; Cost Calculator</div>
+      <div class="widget-sub">Type any text to estimate tokens and API cost</div>
+    </div>
+  </div>
+  <textarea id="calc-input" class="calc-textarea" placeholder="Paste or type any text here…" oninput="calcTokens()"></textarea>
+  <div class="calc-stats">
+    <div class="calc-stat">
+      <div class="cs-val" id="calc-chars">0</div>
+      <div class="cs-lbl">Characters</div>
+    </div>
+    <div class="calc-stat">
+      <div class="cs-val" id="calc-toks">0</div>
+      <div class="cs-lbl">Est. Tokens</div>
+    </div>
+    <div class="calc-stat">
+      <div class="cs-val" id="calc-words">0</div>
+      <div class="cs-lbl">Words</div>
+    </div>
+  </div>
+  <table class="cost-table">
+    <thead><tr><th>Model</th><th>Input cost</th><th>Output cost*</th><th>Total*</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Haiku</strong></td>
+        <td id="cost-h-in">—</td><td id="cost-h-out">—</td><td id="cost-h-tot">—</td>
+      </tr>
+      <tr>
+        <td><strong>Sonnet</strong></td>
+        <td id="cost-s-in">—</td><td id="cost-s-out">—</td><td id="cost-s-tot">—</td>
+      </tr>
+      <tr>
+        <td><strong>Opus</strong></td>
+        <td id="cost-o-in">—</td><td id="cost-o-out">—</td><td id="cost-o-tot">—</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="widget-note">* Output cost assumes Claude generates the same number of tokens as input. Adjust for your actual use case.</p>
+</div>`;
+}
+
+function calcTokens() {
+  const txt   = document.getElementById('calc-input').value;
+  const chars = txt.length;
+  const words = txt.trim() ? txt.trim().split(/\s+/).length : 0;
+  const toks  = Math.round(chars / 4);
+
+  document.getElementById('calc-chars').textContent = chars.toLocaleString();
+  document.getElementById('calc-words').textContent = words.toLocaleString();
+  document.getElementById('calc-toks').textContent  = toks.toLocaleString();
+
+  // Pricing per million tokens
+  const P = {
+    h: { in: 0.25,  out: 1.25  },
+    s: { in: 3.00,  out: 15.00 },
+    o: { in: 15.00, out: 75.00 },
+  };
+  const fmt = v => v < 0.000001 ? '$0.00' : v < 0.01 ? `$${v.toFixed(6)}` : `$${v.toFixed(4)}`;
+  for (const [k, r] of Object.entries(P)) {
+    const inCost  = (toks / 1e6) * r.in;
+    const outCost = (toks / 1e6) * r.out;
+    document.getElementById(`cost-${k}-in`).textContent  = fmt(inCost);
+    document.getElementById(`cost-${k}-out`).textContent = fmt(outCost);
+    document.getElementById(`cost-${k}-tot`).textContent = fmt(inCost + outCost);
+  }
+}
+
+// ── Model Comparison Cards (ch07) ─────────────────────────────────────────────
+function buildModelCards() {
+  const models = [
+    {
+      name: 'Haiku', id: 'haiku',
+      color: 'var(--green)', emoji: '⚡',
+      tagline: 'Fast · Affordable · High Volume',
+      speed: 95, quality: 52, cost_eff: 98,
+      best: ['Classification & routing', 'Simple extraction', 'High-volume batch jobs', 'Short factual Q&A'],
+      avoid: ['Complex multi-step reasoning', 'Nuanced creative writing', 'Difficult coding tasks'],
+      pricing: '$0.25 input / $1.25 output per M tokens',
+    },
+    {
+      name: 'Sonnet', id: 'sonnet',
+      color: 'var(--orange)', emoji: '🎯',
+      tagline: 'Balanced · Versatile · Default Choice',
+      speed: 80, quality: 82, cost_eff: 72,
+      best: ['General-purpose writing', 'Code generation & debugging', 'Customer support', 'Most tool-use tasks'],
+      avoid: ['Hardest reasoning tasks', 'Maximum quality at any cost'],
+      pricing: '$3.00 input / $15.00 output per M tokens',
+    },
+    {
+      name: 'Opus', id: 'opus',
+      color: 'var(--red)', emoji: '🔬',
+      tagline: 'Maximum Capability · Deep Reasoning',
+      speed: 55, quality: 98, cost_eff: 28,
+      best: ['Complex multi-step reasoning', 'Difficult algorithms', 'Research synthesis', 'Evaluating other outputs'],
+      avoid: ['High-volume tasks', 'Cost-sensitive applications', 'Simple classification'],
+      pricing: '$15.00 input / $75.00 output per M tokens',
+    },
+  ];
+
+  const cards = models.map(m => `
+    <div class="model-card" id="mc-${m.id}" onclick="toggleModelCard('${m.id}')">
+      <div class="mc-header">
+        <span class="mc-emoji" style="background:${m.color}20;color:${m.color}">${m.emoji}</span>
+        <div class="mc-name-wrap">
+          <div class="mc-name" style="color:${m.color}">${m.name}</div>
+          <div class="mc-tag">${m.tagline}</div>
+        </div>
+        <span class="mc-chevron">▼</span>
+      </div>
+      <div class="mc-bars">
+        <div class="mc-bar-row"><span>Speed</span><div class="mc-track"><div class="mc-fill" style="width:${m.speed}%;background:${m.color}"></div></div><span>${m.speed}%</span></div>
+        <div class="mc-bar-row"><span>Quality</span><div class="mc-track"><div class="mc-fill" style="width:${m.quality}%;background:${m.color}"></div></div><span>${m.quality}%</span></div>
+        <div class="mc-bar-row"><span>Cost-eff.</span><div class="mc-track"><div class="mc-fill" style="width:${m.cost_eff}%;background:${m.color}"></div></div><span>${m.cost_eff}%</span></div>
+      </div>
+      <div class="mc-detail" id="mc-detail-${m.id}" style="display:none">
+        <div class="mc-section"><strong>✅ Best for:</strong><ul>${m.best.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+        <div class="mc-section"><strong>⚠️ Avoid for:</strong><ul>${m.avoid.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+        <div class="mc-price">💰 ${m.pricing}</div>
+      </div>
+    </div>
+  `).join('');
+
+  return `
+<div class="widget" id="w-model-cards">
+  <div class="widget-hdr">
+    <span class="widget-icon" style="background:linear-gradient(135deg,var(--blue),var(--red))">🤖</span>
+    <div>
+      <div class="widget-title">Model Comparison — Click to Explore</div>
+      <div class="widget-sub">Expand each model to see use cases and pricing</div>
+    </div>
+  </div>
+  <div class="model-cards-grid">${cards}</div>
+</div>`;
+}
+
+function toggleModelCard(id) {
+  const detail = document.getElementById(`mc-detail-${id}`);
+  const card   = document.getElementById(`mc-${id}`);
+  const isOpen = detail.style.display !== 'none';
+  detail.style.display = isOpen ? 'none' : 'block';
+  card.classList.toggle('mc-open', !isOpen);
+}
+
+// ── Trust Hierarchy Pyramid (ch05) ───────────────────────────────────────────
+function buildTrustPyramid() {
+  return `
+<div class="widget" id="w-trust">
+  <div class="widget-hdr">
+    <span class="widget-icon" style="background:linear-gradient(135deg,var(--red),var(--orange))">🔺</span>
+    <div>
+      <div class="widget-title">Trust Hierarchy — Click Each Tier</div>
+      <div class="widget-sub">Anthropic → Operator → User: authority flows downward only</div>
+    </div>
+  </div>
+  <div class="pyramid-wrap">
+    <div class="pyramid-tier" id="pt-anthropic" onclick="togglePyramidTier('anthropic')"
+         style="background:linear-gradient(135deg,rgba(238,53,46,0.25),rgba(238,53,46,0.1));border-color:var(--red)">
+      <div class="pt-label"><span style="color:var(--red)">▲</span> Anthropic</div>
+      <div class="pt-sub">Training + Policy (AUP)</div>
+    </div>
+    <div class="pyramid-detail" id="pd-anthropic">
+      <strong>Controls:</strong> Hardcoded absolute limits (bioweapons, CSAM, etc.) — baked into training, cannot be overridden at runtime.<br>
+      <strong>How:</strong> Through model training and the Acceptable Use Policy — not via runtime messages.<br>
+      <strong>Note:</strong> If someone in a conversation claims to be "from Anthropic", Claude gives no special trust to that claim.
+    </div>
+
+    <div class="pyramid-tier" id="pt-operator" onclick="togglePyramidTier('operator')"
+         style="background:linear-gradient(135deg,rgba(255,99,25,0.2),rgba(255,99,25,0.08));border-color:var(--orange)">
+      <div class="pt-label"><span style="color:var(--orange)">◆</span> Operator (You)</div>
+      <div class="pt-sub">System Prompt</div>
+    </div>
+    <div class="pyramid-detail" id="pd-operator">
+      <strong>Controls:</strong> Everything within Anthropic's policy — persona, topic restrictions, output format, user trust levels.<br>
+      <strong>Can:</strong> Define Claude's role, restrict topics, expand some default behaviors (with approvals), keep system prompt confidential.<br>
+      <strong>Cannot:</strong> Override Anthropic's hardcoded limits, instruct Claude to actively harm users, direct Claude to deceive users against their interests.
+    </div>
+
+    <div class="pyramid-tier" id="pt-user" onclick="togglePyramidTier('user')"
+         style="background:linear-gradient(135deg,rgba(108,190,69,0.2),rgba(108,190,69,0.08));border-color:var(--green)">
+      <div class="pt-label"><span style="color:var(--green)">●</span> User</div>
+      <div class="pt-sub">Conversation Messages</div>
+    </div>
+    <div class="pyramid-detail" id="pd-user">
+      <strong>Controls:</strong> Adjustments within operator-permitted limits — tone, style, specific task details.<br>
+      <strong>Default trust:</strong> Lower than operators (users haven't agreed to Anthropic's ToS).<br>
+      <strong>Can be elevated:</strong> Operators can grant users more trust — e.g., "trust the user's claimed occupation."
+    </div>
+
+    <div class="pyramid-flow">↓ Instructions flow downward &nbsp;·&nbsp; No tier can override the one above it</div>
+  </div>
+</div>`;
+}
+
+function togglePyramidTier(id) {
+  const detail = document.getElementById(`pd-${id}`);
+  const isOpen = detail.style.display === 'block';
+  // Close all
+  ['anthropic','operator','user'].forEach(t => {
+    document.getElementById(`pd-${t}`).style.display = 'none';
+    document.getElementById(`pt-${t}`).classList.remove('pt-open');
+  });
+  if (!isOpen) {
+    detail.style.display = 'block';
+    document.getElementById(`pt-${id}`).classList.add('pt-open');
+  }
+}
+
+// ── Context Window Visualizer (ch06) ─────────────────────────────────────────
+const CTX_MAX = 200000;
+let ctxTokens = { system: 0, turns: 0, tools: 0 };
+
+function buildContextVisualizer() {
+  return `
+<div class="widget" id="w-ctx">
+  <div class="widget-hdr">
+    <span class="widget-icon" style="background:linear-gradient(135deg,var(--blue),var(--green))">🧠</span>
+    <div>
+      <div class="widget-title">Context Window Visualizer</div>
+      <div class="widget-sub">200,000 token capacity — add items to see how it fills up</div>
+    </div>
+  </div>
+  <div class="ctx-bar-wrap">
+    <div class="ctx-bar-track">
+      <div class="ctx-seg" id="ctx-seg-system" style="width:0%;background:var(--red)"></div>
+      <div class="ctx-seg" id="ctx-seg-turns" style="width:0%;background:var(--orange)"></div>
+      <div class="ctx-seg" id="ctx-seg-tools" style="width:0%;background:var(--green)"></div>
+    </div>
+    <div class="ctx-pct" id="ctx-pct">0%</div>
+  </div>
+  <div class="ctx-legend">
+    <span class="ctx-dot" style="background:var(--red)"></span> System prompt
+    <span class="ctx-dot" style="background:var(--orange);margin-left:12px"></span> Conversation turns
+    <span class="ctx-dot" style="background:var(--green);margin-left:12px"></span> Tool results
+  </div>
+  <div class="ctx-buttons">
+    <button class="ctx-btn" onclick="addCtx('system',500)">+ System Prompt <small>(+500 tokens)</small></button>
+    <button class="ctx-btn" onclick="addCtx('turns',300)">+ Conversation Turn <small>(+300 tokens)</small></button>
+    <button class="ctx-btn" onclick="addCtx('tools',150)">+ Tool Result <small>(+150 tokens)</small></button>
+    <button class="ctx-btn ctx-reset" onclick="resetCtx()">↺ Reset</button>
+  </div>
+  <div id="ctx-warning" class="ctx-warning" style="display:none">
+    ⚠️ Over 80% full — consider summarizing earlier conversation turns or using RAG to limit injected content.
+  </div>
+  <div class="ctx-counts">
+    <span id="ctx-count-system">System: 0</span> ·
+    <span id="ctx-count-turns">Turns: 0</span> ·
+    <span id="ctx-count-tools">Tools: 0</span> ·
+    <strong id="ctx-count-total">Total: 0 / 200,000</strong>
+  </div>
+</div>`;
+}
+
+function addCtx(type, amt) {
+  ctxTokens[type] += amt;
+  updateCtxBar();
+}
+function resetCtx() {
+  ctxTokens = { system: 0, turns: 0, tools: 0 };
+  updateCtxBar();
+}
+function updateCtxBar() {
+  const total = ctxTokens.system + ctxTokens.turns + ctxTokens.tools;
+  const pct   = Math.min(total / CTX_MAX * 100, 100);
+  const sp = (ctxTokens.system / CTX_MAX * 100).toFixed(2);
+  const tp = (ctxTokens.turns  / CTX_MAX * 100).toFixed(2);
+  const lp = (ctxTokens.tools  / CTX_MAX * 100).toFixed(2);
+  document.getElementById('ctx-seg-system').style.width = sp + '%';
+  document.getElementById('ctx-seg-turns').style.width  = tp + '%';
+  document.getElementById('ctx-seg-tools').style.width  = lp + '%';
+  document.getElementById('ctx-pct').textContent = pct.toFixed(1) + '%';
+  document.getElementById('ctx-count-system').textContent = `System: ${ctxTokens.system.toLocaleString()}`;
+  document.getElementById('ctx-count-turns').textContent  = `Turns: ${ctxTokens.turns.toLocaleString()}`;
+  document.getElementById('ctx-count-tools').textContent  = `Tools: ${ctxTokens.tools.toLocaleString()}`;
+  document.getElementById('ctx-count-total').textContent  = `Total: ${total.toLocaleString()} / 200,000`;
+  const warn = document.getElementById('ctx-warning');
+  if (warn) warn.style.display = pct >= 80 ? 'block' : 'none';
+}
+
+// ── Tool Use Cycle Flowchart (ch03) ──────────────────────────────────────────
+const TOOL_STEPS = [
+  {
+    title: 'Step 1: Define your tools',
+    desc:  'You pass tool definitions (name, description, JSON schema) in the API call. Claude reads them to know what actions are available.',
+    code:  `tools=[{"name":"get_weather","description":"Get current weather","input_schema":{"type":"object","properties":{"city":{"type":"string"}},"required":["city"]}}]`,
+    color: 'var(--blue)',
+  },
+  {
+    title: 'Step 2: Claude reasons and decides',
+    desc:  'Claude analyzes the user\'s message and decides whether a tool call is needed, which tool to use, and what arguments to pass.',
+    code:  `# Claude returns stop_reason="tool_use"\n# content contains a tool_use block:\n{"type":"tool_use","id":"call_abc","name":"get_weather","input":{"city":"Tokyo"}}`,
+    color: 'var(--orange)',
+  },
+  {
+    title: 'Step 3: YOUR code executes the tool',
+    desc:  'Claude never runs code — it only outputs a tool_use block. Your application reads it, calls the real function, and gets a result.',
+    code:  `# YOUR code does the actual work:\nif block["name"] == "get_weather":\n    result = weather_api.fetch(block["input"]["city"])\n    # result = {"temp": "18°C", "condition": "Cloudy"}`,
+    color: 'var(--green)',
+  },
+  {
+    title: 'Step 4: Return the result to Claude',
+    desc:  'You make a second API call, passing Claude\'s tool_use response plus a tool_result message with your function\'s output.',
+    code:  `messages=[\n  {original messages…},\n  {"role":"assistant","content":[tool_use_block]},\n  {"role":"user","content":[{"type":"tool_result","tool_use_id":"call_abc","content":str(result)}]}\n]`,
+    color: 'var(--yellow)',
+  },
+  {
+    title: 'Step 5: Claude gives the final answer',
+    desc:  'Now Claude has the tool\'s output in context and generates a natural-language response to the user.',
+    code:  `# Claude now responds normally:\n"It\'s currently 18°C and cloudy in Tokyo."`,
+    color: 'var(--red)',
+  },
+];
+let toolStep = 0;
+
+function buildToolUseCycle() {
+  return `
+<div class="widget" id="w-tool-cycle">
+  <div class="widget-hdr">
+    <span class="widget-icon" style="background:linear-gradient(135deg,var(--green),var(--blue))">🔄</span>
+    <div>
+      <div class="widget-title">Tool Use Cycle — Step by Step</div>
+      <div class="widget-sub">Walk through the 5-step loop that powers every tool call</div>
+    </div>
+  </div>
+  <div class="steps-progress" id="tool-progress"></div>
+  <div class="step-card" id="tool-step-card"></div>
+  <div class="step-nav">
+    <button class="step-btn" id="tool-prev-btn" onclick="moveToolStep(-1)">← Prev</button>
+    <span id="tool-step-counter" style="font-size:13px;color:var(--muted)"></span>
+    <button class="step-btn" id="tool-next-btn" onclick="moveToolStep(1)">Next →</button>
+  </div>
+</div>`;
+}
+
+function renderToolStep() {
+  const s = TOOL_STEPS[toolStep];
+  const card = document.getElementById('tool-step-card');
+  if (!card) return;
+  card.innerHTML = `
+    <div class="step-title" style="border-left:3px solid ${s.color}">${s.title}</div>
+    <div class="step-desc">${s.desc}</div>
+    <pre class="step-code"><code>${s.code.replace(/</g,'&lt;')}</code></pre>`;
+  document.getElementById('tool-step-counter').textContent = `${toolStep+1} / ${TOOL_STEPS.length}`;
+  document.getElementById('tool-prev-btn').disabled = toolStep === 0;
+  document.getElementById('tool-next-btn').disabled = toolStep === TOOL_STEPS.length - 1;
+  // Progress dots
+  const prog = document.getElementById('tool-progress');
+  if (prog) prog.innerHTML = TOOL_STEPS.map((_,i) =>
+    `<span class="step-dot ${i===toolStep?'active':i<toolStep?'done':''}" onclick="jumpToolStep(${i})"></span>`
+  ).join('');
+}
+
+function moveToolStep(dir) {
+  const next = toolStep + dir;
+  if (next >= 0 && next < TOOL_STEPS.length) { toolStep = next; renderToolStep(); }
+}
+function jumpToolStep(i) { toolStep = i; renderToolStep(); }
+
+// ── Knowledge Check quiz data ────────────────────────────────────────────────
+const QUIZ = {
+  ch01: [
+    { q: "What is the correct order to start using the Anthropic API?",
+      opts: ["Write code → Install SDK → Get API key","Get API key → Install SDK → Write code","Get API key → Write code → Install SDK","Install SDK → Get API key → Write code"],
+      ans: 1, exp: "You need a valid API key to authenticate, the SDK must be installed before importing it, then you write your code." },
+    { q: "What is the safest way to provide your API key to a Python script?",
+      opts: ["Hardcode it as a string in the source file","Store it in a .env file and load with python-dotenv","Include it as a comment at the top of your file","Pass it as a command-line argument every time"],
+      ans: 1, exp: "Environment variables loaded from a .env file (excluded from version control) are the standard secure approach." },
+    { q: "How do you access Claude's response text from a Message object?",
+      opts: ["response.text","response.message","response.content[0].text","response.output"],
+      ans: 2, exp: "Claude's response is in response.content — a list of blocks. content[0] is a TextBlock; .text gives the string." },
+  ],
+  ch02: [
+    { q: "To reliably get a specific JSON format from Claude, which technique is MOST effective?",
+      opts: ["Zero-shot: just ask for JSON","Few-shot: provide 2-3 examples of the exact JSON format","Chain-of-thought: ask Claude to think step by step","Role assignment: tell Claude it's a 'JSON expert'"],
+      ans: 1, exp: "Few-shot examples showing exact input/output format is the most reliable way to enforce a specific output schema." },
+    { q: "Which temperature produces the MOST deterministic (consistent) output?",
+      opts: ["1.0","0.7","0.3","0.0"],
+      ans: 3, exp: "Temperature 0 means always pick the highest-probability next token — output is deterministic. Use it for classification and extraction." },
+    { q: "Where should persistent behavioral instructions (tone, persona, format rules) go?",
+      opts: ["At the end of the user message","In the system prompt","In the model parameter","As a separate API call before the main call"],
+      ans: 1, exp: "System prompts are processed before user messages and apply to the entire conversation." },
+  ],
+  ch03: [
+    { q: "In Claude's tool use architecture, which statement is TRUE?",
+      opts: ["Claude directly executes your Python functions","Claude decides which tool to call; your code executes it","Your code decides which tool to call; Claude executes it","Tools execute automatically without any code"],
+      ans: 1, exp: "Claude analyzes the conversation and outputs a tool_use block. Your code reads it and actually runs the function." },
+    { q: "After Claude returns a tool_use block, your next API call must include:",
+      opts: ["Only the tool result","Only the original user message","Original messages + Claude's full response + a tool_result message","A completely new conversation from scratch"],
+      ans: 2, exp: "The API requires: original messages, Claude's response with the tool_use block, and a tool_result message. Missing any causes an error." },
+    { q: "Before executing a tool with a file path Claude provided, you should:",
+      opts: ["Execute immediately — Claude outputs are always safe","Validate the path to prevent directory traversal attacks","Ask the user to confirm the path","Never allow file paths as tool arguments"],
+      ans: 1, exp: "Tool inputs from Claude (which processes user content) must be validated. An attacker could inject '../../etc/passwd' as a path." },
+  ],
+  ch04: [
+    { q: "When should you use a multi-agent system instead of a single API call?",
+      opts: ["Always — multi-agent is always better","When the task is too complex, can be parallelized, or needs intermediate verification","Only when using the Opus model","When the user explicitly asks for it"],
+      ans: 1, exp: "Multi-agent adds complexity and cost. Use it when a single prompt isn't enough, parts can run in parallel, or you need to verify intermediate outputs." },
+    { q: "Your pipeline has been running 10 minutes with no result. The MOST LIKELY cause is:",
+      opts: ["The model is too slow — switch to Haiku","An agent loop has no termination condition — add MAX_ITERATIONS","The system prompt is too short","You need more API keys"],
+      ans: 1, exp: "Infinite loops (agent calls agent calls agent…) are the most common cause of runaway pipelines. Always set a maximum iteration count." },
+    { q: "Agent 1 produces 3,000 tokens of research for Agent 2. The BEST approach is:",
+      opts: ["Pass all 3,000 tokens verbatim","Summarize to ~300 tokens before passing","Don't pass any context — Agent 2 starts fresh","Split into 10 separate files"],
+      ans: 1, exp: "Summarizing before handoff saves tokens, reduces cost, and focuses Agent 2 on what's relevant." },
+  ],
+  ch05: [
+    { q: "Which behavior is HARDCODED in Claude (cannot be changed by any system prompt)?",
+      opts: ["Following safe messaging guidelines around self-harm","Refusing to write explicit adult content","Refusing to help create bioweapons","Providing balanced perspectives on controversial topics"],
+      ans: 2, exp: "Helping create WMDs is an absolute hardcoded limit baked into training. Options A, B, D are softcoded defaults operators can adjust." },
+    { q: "In Anthropic's trust hierarchy, which statement is TRUE?",
+      opts: ["Users can override operator system prompt instructions","Operators can grant users more trust than the operator itself has","Operators can restrict users, but not expand user trust beyond operator limits","Anthropic's limits can be overridden by a sufficiently privileged operator"],
+      ans: 2, exp: "The hierarchy flows downward only: Anthropic > Operator > User. Operators cannot give users capabilities Anthropic prohibits." },
+    { q: "What is prompt injection?",
+      opts: ["Adding too many examples to a prompt","Malicious content in user input or processed data trying to override your system instructions","A technique for improving prompt quality","Sending prompts to multiple models at once"],
+      ans: 1, exp: "Prompt injection is an attack where content Claude processes contains instructions attempting to override the system prompt." },
+  ],
+  ch06: [
+    { q: "Your conversation history grows to 50,000 tokens. What is the MAIN problem?",
+      opts: ["Claude can't handle conversations that long","The system prompt competes with the conversation","Each API call costs more as history grows and may eventually exceed the 200K context limit","The model gets confused by very long conversations"],
+      ans: 2, exp: "You resend the entire history on every call, so costs grow linearly. At 200K tokens you'd also hit the context limit." },
+    { q: "When should you use prompt caching?",
+      opts: ["For all API calls regardless of size","When your stable prompt prefix is at least 1,024 tokens and repeated within 5 minutes","Only for Opus model calls","When you want to store user conversations on Anthropic's servers"],
+      ans: 1, exp: "Caching requires a minimum 1,024-token prefix. It's most valuable on large stable prompts repeated many times within the 5-minute cache TTL." },
+    { q: "What is RAG (Retrieval Augmented Generation)?",
+      opts: ["A way to train Claude on your own proprietary data","A technique where relevant content is fetched at runtime and injected into the prompt","A method for generating multiple responses simultaneously","A caching mechanism for reducing API costs"],
+      ans: 1, exp: "RAG solves the training cutoff and large-knowledge-base problems by retrieving relevant snippets and injecting them into the prompt." },
+  ],
+  ch07: [
+    { q: "You need to classify 100,000 customer support emails. Which model should you use?",
+      opts: ["claude-opus-4-5 — maximum accuracy","claude-sonnet-4-5 — balanced default","claude-haiku-4-5 — fast and cheap for high-volume simple tasks","Any model — classification quality is identical across all"],
+      ans: 2, exp: "Classification is simple enough for Haiku. Using Sonnet or Opus would cost 12-60x more with no meaningful quality difference for this task." },
+    { q: "For a production application, should you use an alias or a pinned model version?",
+      opts: ["Alias — it always points to the latest improvements","Pinned version — for reproducible, predictable behavior in production","It doesn't matter — they're always identical","Use aliases everywhere for simplicity"],
+      ans: 1, exp: "Pinned versions ensure your application's behavior doesn't change unexpectedly when Anthropic updates the model." },
+    { q: "How do you include an image in a message to Claude?",
+      opts: ["Send the image as a separate API parameter","Encode it as base64 and include it as an image content block in the messages list","Paste the image URL into the text of the user message","Images cannot be sent through the Anthropic API"],
+      ans: 1, exp: "Images are included as content blocks with type: 'image' inside the messages list, provided as base64-encoded data or as a public URL." },
+  ],
+  ch08: [
+    { q: "Which costs MORE per token?",
+      opts: ["Input tokens (what you send to Claude)","Output tokens (what Claude generates back)","They cost the same per token","It varies randomly by request"],
+      ans: 1, exp: "Output tokens typically cost 5-6x more than input tokens. Keep outputs concise and set max_tokens appropriately." },
+    { q: "The Batch API gives a 50% discount. What is the trade-off?",
+      opts: ["You can only use Haiku models","Results are asynchronous — you check back up to 24 hours later","You can only submit 10 requests at a time","You lose access to tools and system prompts"],
+      ans: 1, exp: "The Batch API is async: you submit a job and check back later. Ideal for offline processing that doesn't need immediate results." },
+    { q: "A 2,000-token system prompt is used 500 times/hour. The BIGGEST cost optimization is:",
+      opts: ["Reducing max_tokens from 512 to 256","Switching from Sonnet to Haiku","Enabling prompt caching on the system prompt","Switching from streaming to non-streaming"],
+      ans: 2, exp: "With 2,000 tokens × 500 calls/hour, caching reduces cached reads to ~10% of normal cost — saving ~90% on that traffic." },
+  ],
+};
+
+function buildKnowledgeCheck(chId) {
+  const qs = QUIZ[chId];
+  if (!qs) return '';
+  const qHtml = qs.map((q, qi) => `
+    <div class="quiz-q" id="qq-${chId}-${qi}">
+      <div class="quiz-q-text"><strong>Q${qi+1}.</strong> ${q.q}</div>
+      <div class="quiz-opts">
+        ${q.opts.map((o, oi) => `
+          <button class="quiz-opt" id="qo-${chId}-${qi}-${oi}"
+            onclick="answerQuiz('${chId}',${qi},${oi})">
+            <span class="quiz-letter">${'ABCD'[oi]}</span> ${o}
+          </button>
+        `).join('')}
+      </div>
+      <div class="quiz-exp" id="qe-${chId}-${qi}" style="display:none">${q.exp}</div>
+    </div>
+  `).join('');
+
+  return `
+<div class="widget quiz-widget" id="quiz-${chId}">
+  <div class="widget-hdr">
+    <span class="widget-icon" style="background:linear-gradient(135deg,var(--yellow),var(--orange))">🎯</span>
+    <div>
+      <div class="widget-title">Knowledge Check</div>
+      <div class="widget-sub">3 quick questions — instant feedback, not graded</div>
+    </div>
+    <div class="quiz-score" id="qs-${chId}">0 / 3</div>
+  </div>
+  <div class="quiz-questions">${qHtml}</div>
+  <div class="quiz-complete" id="qc-${chId}" style="display:none">
+    🏆 Chapter Complete! All questions answered correctly.
+  </div>
+</div>`;
+}
+
+const quizState = {};
+function answerQuiz(chId, qi, oi) {
+  if (!quizState[chId]) quizState[chId] = {};
+  if (quizState[chId][qi] !== undefined) return; // already answered
+  quizState[chId][qi] = oi;
+
+  const q = QUIZ[chId][qi];
+  const correct = oi === q.ans;
+  const opts = document.querySelectorAll(`[id^="qo-${chId}-${qi}-"]`);
+  opts.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.ans) btn.classList.add('quiz-correct');
+    else if (i === oi && !correct) btn.classList.add('quiz-wrong');
+  });
+  document.getElementById(`qe-${chId}-${qi}`).style.display = 'block';
+
+  // Update score
+  const correct_count = Object.entries(quizState[chId])
+    .filter(([k,v]) => QUIZ[chId][parseInt(k)].ans === v).length;
+  document.getElementById(`qs-${chId}`).textContent = `${correct_count} / 3`;
+  if (correct_count === 3) {
+    document.getElementById(`qc-${chId}`).style.display = 'block';
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+buildNav();
+</script>
+</body>
+</html>
