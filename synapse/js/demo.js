@@ -34,11 +34,14 @@ export const DEMO_QUIZZES = {
   },
 };
 
+/* Demo mode only has 3 sample quizzes. Report whether the topic actually
+   matched one, so the caller can be honest about a substitution instead of
+   silently swapping in an unrelated quiz. */
 export function demoQuiz(topic) {
   const key = (topic || "").toLowerCase().trim();
-  if (key.includes("internet") || key.includes("network") || key.includes("web")) return DEMO_QUIZZES["how the internet works"];
-  if (key.includes("compound") || key.includes("interest") || key.includes("money") || key.includes("invest")) return DEMO_QUIZZES["compound interest"];
-  return DEMO_QUIZZES.default;
+  if (key.includes("internet") || key.includes("network") || key.includes("web")) return { ...DEMO_QUIZZES["how the internet works"], matched: true };
+  if (key.includes("compound") || key.includes("interest") || key.includes("money") || key.includes("invest")) return { ...DEMO_QUIZZES["compound interest"], matched: true };
+  return { ...DEMO_QUIZZES.default, matched: false };
 }
 
 export function demoPath(goal) {

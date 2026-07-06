@@ -58,6 +58,9 @@ export async function startQuiz(topic) {
       .filter(q => Array.isArray(q.options) && q.options.length >= 2 && q.answer >= 0 && q.answer < q.options.length)
       .slice(0, 5);
     if (!quiz.questions.length) throw new Error("Couldn't build a quiz for that topic — try rephrasing it.");
+    if (!hasKey() && quiz.matched === false) {
+      toast(`<span class="demo-tag">DEMO</span> Only 3 sample quizzes exist without an API key — here's the closest one: <b>${esc(quiz.topic)}</b>`);
+    }
     QZ = { quiz, i: 0, correct: 0, misses: [], topic };
     paintQuestion();
   } catch (err) {

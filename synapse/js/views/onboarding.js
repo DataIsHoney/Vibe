@@ -1,18 +1,29 @@
-/* Onboarding wizard: name/avatar → level → goals → interests → API key. */
+/* Onboarding wizard: name/avatar → level → goals → interests → API key.
+   Every step (after the first) offers Back, and both goals and interests
+   accept free-typed entries in addition to the suggestion chips. */
 
 import { $, $$, esc, toast, burst } from "../ui.js";
 import { S, save, newUser, AUDIENCES } from "../state.js";
 import { enterApp } from "../shell.js";
 import { go } from "../router.js";
 
-const OB = { step: 0, name: "", emoji: "🦊", audience: "adult", goals: [], interests: [], key: "", goalDraft: "" };
+const OB = { step: 0, name: "", emoji: "🦊", audience: "adult", goals: [], interests: [], key: "", goalDraft: "", interestDraft: "" };
 const OB_EMOJIS = ["🦊", "🐙", "🦉", "🐯", "🦄", "🐸", "🚀", "🌟"];
 const GOAL_SUGGESTIONS = ["Get better at math", "Understand AI & how LLMs work", "Learn to code", "Personal finance & investing", "Physics from first principles", "History that sticks", "Learn Spanish", "Biology & how life works"];
 const INTEREST_SUGGESTIONS = ["Space", "Music", "Sports", "Cooking", "Video games", "Nature", "Movies", "Building things", "Animals", "Art"];
 
 export function startOnboarding() {
-  Object.assign(OB, { step: 0, name: "", emoji: "🦊", audience: "adult", goals: [], interests: [], key: S.settings.apiKey, goalDraft: "" });
+  Object.assign(OB, { step: 0, name: "", emoji: "🦊", audience: "adult", goals: [], interests: [], key: S.settings.apiKey, goalDraft: "", interestDraft: "" });
   go("onboarding");
+}
+
+/* Back + primary action row. Back is omitted on the first step (nowhere to go). */
+function footer(nextId, nextLabel) {
+  return `
+    <div class="row" style="margin-top:14px; flex-wrap:nowrap">
+      ${OB.step > 0 ? `<button class="btn ghost" id="ob-back">← Back</button>` : ""}
+      <button class="btn" id="${nextId}" style="flex:1">${nextLabel}</button>
+    </div>`;
 }
 
 export function renderOnboarding() {
@@ -47,7 +58,7 @@ export function renderOnboarding() {
           <button class="q-option ${OB.audience === k ? "correct" : ""}" data-aud="${k}" style="margin-top:0">
             <b>${a.label}</b><br><span class="tiny">${esc(a.prompt.split(".")[0])}.</span>
           </button>`).join("")}
-        <button class="btn block" id="ob-next">Next →</button>
+        ${footer("ob-next", "Next →")}
       </div>`,
     () => `
       <h2>What do you want to learn?</h2>
@@ -56,14 +67,16 @@ export function renderOnboarding() {
         <div class="row">${GOAL_SUGGESTIONS.map(g => `<span class="chip ${OB.goals.includes(g) ? "on" : ""}" data-goal="${esc(g)}">${esc(g)}</span>`).join("")}</div>
         <div class="row" style="flex-wrap:nowrap"><input type="text" id="ob-goal-custom" placeholder="Or type your own goal…" value="${esc(OB.goalDraft)}"><button class="btn small ghost" id="ob-goal-add">Add</button></div>
         <div id="ob-goal-own" class="row">${OB.goals.filter(g => !GOAL_SUGGESTIONS.includes(g)).map(g => `<span class="chip on" data-goal="${esc(g)}">${esc(g)} ✕</span>`).join("")}</div>
-        <button class="btn block" id="ob-next">Next →</button>
+        ${footer("ob-next", "Next →")}
       </div>`,
     () => `
       <h2>What are you into?</h2>
       <p class="muted tiny" style="margin:6px 0 14px">I'll build analogies and examples around these — associations make memories stick.</p>
       <div class="card stack">
         <div class="row">${INTEREST_SUGGESTIONS.map(g => `<span class="chip ${OB.interests.includes(g) ? "on" : ""}" data-int="${esc(g)}">${esc(g)}</span>`).join("")}</div>
-        <button class="btn block" id="ob-next">Next →</button>
+        <div class="row" style="flex-wrap:nowrap"><input type="text" id="ob-int-custom" placeholder="Or type your own interest…" value="${esc(OB.interestDraft)}"><button class="btn small ghost" id="ob-int-add">Add</button></div>
+        <div id="ob-int-own" class="row">${OB.interests.filter(g => !INTEREST_SUGGESTIONS.includes(g)).map(g => `<span class="chip on" data-int="${esc(g)}">${esc(g)} ✕</span>`).join("")}</div>
+        ${footer("ob-next", "Next →")}
       </div>`,
     () => `
       <h2>Power up the tutor</h2>
@@ -74,7 +87,7 @@ export function renderOnboarding() {
           <input type="password" id="ob-key" placeholder="sk-ant-…" value="${esc(OB.key)}">
           <p class="tiny" style="margin-top:8px">Get one at console.anthropic.com → API keys. No key? Demo mode still lets you try quizzes & flashcards.</p>
         </div>
-        <button class="btn block" id="ob-finish">Start learning 🚀</button>
+        ${footer("ob-finish", "Start learning 🚀")}
         <button class="btn block ghost" id="ob-skip">Skip — try demo mode</button>
       </div>`,
   ];
@@ -104,8 +117,24 @@ export function renderOnboarding() {
   const gInp = $("#ob-goal-custom", v);
   if (gInp) {
     gInp.oninput = e => { OB.goalDraft = e.target.value; }; // survive re-renders
-    gInp.onkeydown = e => { if (e.key === "Enter") addGoal(); };
+    gInp.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); addGoal(); } };
   }
+
+  const addInterest = () => {
+    const inp = $("#ob-int-custom", v);
+    const g = inp.value.trim();
+    if (g && !OB.interests.includes(g)) { OB.interests.push(g); OB.interestDraft = ""; renderOnboarding(); }
+  };
+  const iAdd = $("#ob-int-add", v);
+  if (iAdd) iAdd.onclick = addInterest;
+  const iInp = $("#ob-int-custom", v);
+  if (iInp) {
+    iInp.oninput = e => { OB.interestDraft = e.target.value; }; // survive re-renders
+    iInp.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); addInterest(); } };
+  }
+
+  const back = $("#ob-back", v);
+  if (back) back.onclick = () => { OB.step--; renderOnboarding(); };
 
   const next = $("#ob-next", v);
   if (next) next.onclick = () => {
