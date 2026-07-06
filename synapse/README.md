@@ -35,7 +35,7 @@ synapse/
     └── views/          onboarding, home, tutor, quiz, review, paths, settings
 ```
 
-- **Model:** `claude-opus-4-8` by default (Sonnet 5 / Haiku 4.5 selectable).
+- **Model:** locked to `claude-haiku-4-5` for everyone — no user-facing picker, so per-session cost stays predictable as usage grows. Enforced in `state.js`, not just defaulted, so it can't be reintroduced via a stale profile or a re-imported backup.
 - **API:** raw `fetch` against `api.anthropic.com/v1/messages` with the
   `anthropic-dangerous-direct-browser-access` CORS header — BYO key, stored in
   localStorage, sent only to Anthropic. No backend, no key custody.

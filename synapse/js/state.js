@@ -7,18 +7,34 @@ import { refreshHeader } from "./shell.js";
 
 const STORE_KEY = "synapse.v1";
 
+/* Model is locked to Haiku 4.5 for cost control — there is no user-facing
+   picker (see settings.js). Enforced here, not just used as a default, so
+   it can't survive a stale localStorage value or a re-imported backup. */
+export const LOCKED_MODEL = "claude-haiku-4-5";
+export const LOCKED_MODEL_LABEL = "Claude Haiku 4.5";
+
 export let S = load();
 
 function load() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      parsed.settings = parsed.settings || {};
+      parsed.settings.model = LOCKED_MODEL;
+      return parsed;
+    }
   } catch (e) { /* corrupted store -> start fresh */ }
-  return { users: [], activeUserId: null, settings: { apiKey: "", model: "claude-opus-4-8" } };
+  return { users: [], activeUserId: null, settings: { apiKey: "", model: LOCKED_MODEL } };
 }
 
 export function save() { localStorage.setItem(STORE_KEY, JSON.stringify(S)); }
-export function replaceState(next) { S = next; save(); }
+export function replaceState(next) {
+  next.settings = next.settings || {};
+  next.settings.model = LOCKED_MODEL; // imported backups can't reintroduce a different model
+  S = next;
+  save();
+}
 export function resetAll() { localStorage.removeItem(STORE_KEY); }
 
 export function me() { return S.users.find(u => u.id === S.activeUserId) || null; }

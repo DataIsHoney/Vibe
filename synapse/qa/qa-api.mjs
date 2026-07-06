@@ -18,7 +18,7 @@ await page.addInitScript(() => {
   const today = new Date().toISOString().slice(0, 10);
   localStorage.setItem("synapse.v1", JSON.stringify({
     activeUserId: "u1",
-    settings: { apiKey: "sk-ant-test-mock", model: "claude-opus-4-8" },
+    settings: { apiKey: "sk-ant-test-mock", model: "claude-haiku-4-5" }, // model is locked app-wide; state.js enforces this regardless of what's seeded here
     users: [{
       id: "u1", name: "Mocky", emoji: "🦉", audience: "adult",
       goals: ["Understand volcanoes"], interests: ["Nature"], createdAt: today,

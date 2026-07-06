@@ -129,6 +129,7 @@ async function personaJoe() {
   if (!/hosted|invite code/i.test(settingsText) && settingsText.includes("API key")) {
     flag(P, "settings assumes the reader knows what an 'Anthropic API key' is — no plain-language framing for non-technical users");
   }
+  check(P, "no model picker in settings — Haiku 4.5 is locked, shown as fixed text", (await page.locator("#set-model").count()) === 0 && settingsText.includes("Claude Haiku 4.5"));
   await page.screenshot({ path: `${SHOTS}/joe-01-settings.png` });
   await page.close();
 }
@@ -312,6 +313,37 @@ async function personaDad() {
 for (const p of [personaMaya, personaJoe, personaSam, personaPriya, personaDad]) {
   try { await p(); } catch (e) { check(p.name, "FATAL", false, e.message); }
 }
+
+/* =====================================================================
+   SYSTEM CHECK — the model lock survives a tampered/stale profile, not
+   just fresh installs. Someone editing localStorage directly (or
+   re-importing an old backup from before the lock existed) shouldn't be
+   able to bring back a non-Haiku model.
+   ===================================================================== */
+async function checkModelLockSurvivesTampering() {
+  const P = "System (model lock)";
+  const page = await freshPage(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    localStorage.setItem("synapse.v1", JSON.stringify({
+      activeUserId: "u1",
+      settings: { apiKey: "", model: "claude-opus-4-8" }, // simulates a stale/tampered profile
+      users: [{
+        id: "u1", name: "Tamper", emoji: "🦊", audience: "adult",
+        goals: [], interests: [], createdAt: today,
+        xp: 0, level: 1, streak: { current: 0, best: 0, lastDay: null, freezes: 1 },
+        activity: {}, cards: [], paths: [], chat: [], badges: [],
+        stats: { quizzes: 0, quizCorrect: 0, quizTotal: 0, reviews: 0, messages: 0, topicsQuizzed: {} },
+      }],
+    }));
+  });
+  await page.waitForSelector("#view-home.active", { timeout: 5000 });
+  const storedModel = await page.evaluate(() => JSON.parse(localStorage.getItem("synapse.v1")).settings.model);
+  check(P, "a tampered/stale model value is coerced back to Haiku 4.5 in storage", storedModel === "claude-haiku-4-5");
+  await page.click('.iconbtn[title="Settings"]');
+  check(P, "settings UI reflects the locked model regardless of what was seeded", (await page.locator("#view-settings").innerText()).includes("Claude Haiku 4.5"));
+  await page.close();
+}
+try { await checkModelLockSurvivesTampering(); } catch (e) { check("System (model lock)", "FATAL", false, e.message); }
 
 console.log("\n--- FRICTION LOG (UX gaps, not bugs) ---");
 if (!friction.length) console.log("(none found)");

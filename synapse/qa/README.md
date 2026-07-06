@@ -15,7 +15,7 @@ Playwright end-to-end tests. Three suites:
   user probing edge cases (zero goals/interests, mid-quiz quit, deleting
   every flashcard, cancelling a destructive reset). Logs two kinds of
   findings: ✅/❌ assertions (bugs if failing) and 🟡 FRICTION notes (real
-  UX gaps that work but should be backlogged). 20 checks.
+  UX gaps that work but should be backlogged), plus 2 checks that the model lock survives a tampered profile/import. 24 checks.
 
 Run:
 

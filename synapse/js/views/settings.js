@@ -2,16 +2,10 @@
    export / import / reset. */
 
 import { $, $$, esc, toast, todayISO } from "../ui.js";
-import { S, save, me, hasKey, AUDIENCES, replaceState, resetAll } from "../state.js";
+import { S, save, me, hasKey, AUDIENCES, replaceState, resetAll, LOCKED_MODEL_LABEL } from "../state.js";
 import { refreshHeader, enterApp } from "../shell.js";
 import { go } from "../router.js";
 import { startOnboarding } from "./onboarding.js";
-
-const MODELS = [
-  ["claude-opus-4-8", "Claude Opus 4.8 — smartest (default)"],
-  ["claude-sonnet-5", "Claude Sonnet 5 — fast & sharp"],
-  ["claude-haiku-4-5", "Claude Haiku 4.5 — cheapest"],
-];
 
 export function renderSettings() {
   const u = me();
@@ -28,9 +22,7 @@ export function renderSettings() {
         </div>
         <div>
           <label class="lbl">Model</label>
-          <select id="set-model">
-            ${MODELS.map(([id, label]) => `<option value="${id}" ${S.settings.model === id ? "selected" : ""}>${label}</option>`).join("")}
-          </select>
+          <p class="tiny" style="margin-top:2px">${esc(LOCKED_MODEL_LABEL)} — fixed for everyone to keep costs predictable, not user-configurable.</p>
         </div>
         <button class="btn small" id="set-save">Save</button>
       </div>
@@ -74,7 +66,6 @@ export function renderSettings() {
 
   $("#set-save", v).onclick = () => {
     S.settings.apiKey = $("#set-key", v).value.trim();
-    S.settings.model = $("#set-model", v).value;
     save();
     toast("Saved ✓");
     renderSettings();

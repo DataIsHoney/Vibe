@@ -2,7 +2,7 @@
    7-day activity chart, active path progress, badges. */
 
 import { $, esc } from "../ui.js";
-import { me, hasKey, totalXpForLevel, BADGES, S } from "../state.js";
+import { me, hasKey, totalXpForLevel, BADGES, LOCKED_MODEL_LABEL } from "../state.js";
 import { dueCards } from "../srs.js";
 
 export function renderHome() {
@@ -28,7 +28,7 @@ export function renderHome() {
     <div class="stack">
       <div>
         <h1 style="font-size:24px">${greeting()}, ${esc(u.name)} ${u.emoji}</h1>
-        <p class="tiny">${hasKey() ? `Tutor online · ${esc(S.settings.model)}` : `<span class="demo-tag">DEMO MODE</span> — add an API key in ⚙️ to unlock the tutor`}</p>
+        <p class="tiny">${hasKey() ? `Tutor online · ${esc(LOCKED_MODEL_LABEL)}` : `<span class="demo-tag">DEMO MODE</span> — add an API key in ⚙️ to unlock the tutor`}</p>
       </div>
 
       <div class="stat-grid">
