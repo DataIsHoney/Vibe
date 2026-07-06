@@ -55,15 +55,19 @@ async function personaMaya() {
 
   await page.click('[data-goal="Get better at math"]');
   await page.click("#ob-next"); // -> interests
-  await page.click('[data-int="Animals"]');
-  // she types her own interest instead of settling for a suggestion chip
-  await page.fill("#ob-int-custom", "Dinosaurs");
-  await page.click("#ob-int-add");
-  check(P, "custom interest chip added", (await page.locator('#ob-int-own .chip').count()) === 1);
+  await page.click('[data-int-insert="Animals"]');
+  check(P, "tapping an inspiration chip appends it to the free-text field", (await page.locator("#ob-int-text").inputValue()) === "Animals");
+  // she also types her own interest that isn't in the suggestion list at all
+  await page.fill("#ob-int-text", "Animals, Dinosaurs");
   await page.click("#ob-next"); // -> key
   await page.click("#ob-skip");
   await page.waitForSelector("#view-home.active");
-  check(P, "onboarding completes with custom interest", (await page.locator("#view-home").innerText()).includes("Maya K."));
+  check(P, "onboarding completes with a free-typed interest", (await page.locator("#view-home").innerText()).includes("Maya K."));
+
+  // confirm the free-typed interest actually made it into her profile, not just the textarea
+  await page.click('.iconbtn[title="Settings"]');
+  check(P, "free-typed interest ('Dinosaurs') persisted to the profile", (await page.locator("#view-settings").innerText()).includes("Dinosaurs"));
+  await page.click('nav.tabs button[data-v="home"]');
   await page.screenshot({ path: `${SHOTS}/maya-01-home.png` });
 
   // she asks for a quiz on HER topic, not a suggestion chip
@@ -111,7 +115,7 @@ async function personaJoe() {
   check(P, "un-submitted goal draft survives a Back/Next round-trip", draftPreserved === "Understand my new hearing aids");
   await page.click("#ob-goal-add");
   await page.click("#ob-next"); // -> interests
-  await page.click('[data-int="Music"]');
+  await page.click('[data-int-insert="Music"]');
   await page.click("#ob-next"); // -> key
   await page.click("#ob-skip");
   await page.waitForSelector("#view-home.active");
@@ -143,7 +147,7 @@ async function personaSam() {
   await page.click("#ob-next");
   await page.click('[data-goal="Physics from first principles"]');
   await page.click("#ob-next");
-  await page.click('[data-int="Video games"]');
+  await page.click('[data-int-insert="Video games"]');
   await page.click("#ob-next");
   await page.click("#ob-skip");
   await page.waitForSelector("#view-home.active");

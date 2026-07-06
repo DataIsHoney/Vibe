@@ -1,20 +1,35 @@
 /* Onboarding wizard: name/avatar → level → goals → interests → API key.
-   Every step (after the first) offers Back, and both goals and interests
-   accept free-typed entries in addition to the suggestion chips. */
+   Every step (after the first) offers Back. Goals use suggestion chips +
+   a custom-add field; interests are a free-text prompt (most real interests
+   don't fit a 10-item pick-list) with suggestion chips as tap-to-insert
+   inspiration rather than the primary interaction. */
 
 import { $, $$, esc, toast, burst } from "../ui.js";
 import { S, save, newUser, AUDIENCES } from "../state.js";
 import { enterApp } from "../shell.js";
 import { go } from "../router.js";
 
-const OB = { step: 0, name: "", emoji: "🦊", audience: "adult", goals: [], interests: [], key: "", goalDraft: "", interestDraft: "" };
+const OB = { step: 0, name: "", emoji: "🦊", audience: "adult", goals: [], interests: [], key: "", goalDraft: "", interestsText: "" };
 const OB_EMOJIS = ["🦊", "🐙", "🦉", "🐯", "🦄", "🐸", "🚀", "🌟"];
 const GOAL_SUGGESTIONS = ["Get better at math", "Understand AI & how LLMs work", "Learn to code", "Personal finance & investing", "Physics from first principles", "History that sticks", "Learn Spanish", "Biology & how life works"];
 const INTEREST_SUGGESTIONS = ["Space", "Music", "Sports", "Cooking", "Video games", "Nature", "Movies", "Building things", "Animals", "Art"];
 
 export function startOnboarding() {
-  Object.assign(OB, { step: 0, name: "", emoji: "🦊", audience: "adult", goals: [], interests: [], key: S.settings.apiKey, goalDraft: "", interestDraft: "" });
+  Object.assign(OB, { step: 0, name: "", emoji: "🦊", audience: "adult", goals: [], interests: [], key: S.settings.apiKey, goalDraft: "", interestsText: "" });
   go("onboarding");
+}
+
+/* Comma- or newline-separated free text -> a deduped array of interests. */
+function parseInterests(text) {
+  const seen = new Set();
+  const out = [];
+  for (const raw of text.split(/[,\n]/)) {
+    const t = raw.trim();
+    if (!t || seen.has(t.toLowerCase())) continue;
+    seen.add(t.toLowerCase());
+    out.push(t);
+  }
+  return out;
 }
 
 /* Back + primary action row. Back is omitted on the first step (nowhere to go). */
@@ -71,11 +86,13 @@ export function renderOnboarding() {
       </div>`,
     () => `
       <h2>What are you into?</h2>
-      <p class="muted tiny" style="margin:6px 0 14px">I'll build analogies and examples around these — associations make memories stick.</p>
+      <p class="muted tiny" style="margin:6px 0 14px">Tell me anything — hobbies, shows, sports, games, whatever comes to mind. I'll build analogies and examples around them; associations make memories stick.</p>
       <div class="card stack">
-        <div class="row">${INTEREST_SUGGESTIONS.map(g => `<span class="chip ${OB.interests.includes(g) ? "on" : ""}" data-int="${esc(g)}">${esc(g)}</span>`).join("")}</div>
-        <div class="row" style="flex-wrap:nowrap"><input type="text" id="ob-int-custom" placeholder="Or type your own interest…" value="${esc(OB.interestDraft)}"><button class="btn small ghost" id="ob-int-add">Add</button></div>
-        <div id="ob-int-own" class="row">${OB.interests.filter(g => !INTEREST_SUGGESTIONS.includes(g)).map(g => `<span class="chip on" data-int="${esc(g)}">${esc(g)} ✕</span>`).join("")}</div>
+        <textarea id="ob-int-text" rows="3" style="resize:vertical; min-height:78px" placeholder="e.g. rock climbing, K-pop, sourdough bread, chess, true crime podcasts…">${esc(OB.interestsText)}</textarea>
+        <div>
+          <p class="tiny" style="margin-bottom:8px">Need ideas? Tap to add one:</p>
+          <div class="row">${INTEREST_SUGGESTIONS.map(g => `<span class="chip ${OB.interests.some(i => i.toLowerCase() === g.toLowerCase()) ? "on" : ""}" data-int-insert="${esc(g)}">${esc(g)}</span>`).join("")}</div>
+        </div>
         ${footer("ob-next", "Next →")}
       </div>`,
     () => `
@@ -101,12 +118,6 @@ export function renderOnboarding() {
     OB.goals = OB.goals.includes(g) ? OB.goals.filter(x => x !== g) : [...OB.goals, g];
     renderOnboarding();
   });
-  $$("[data-int]", v).forEach(b => b.onclick = () => {
-    const g = b.dataset.int;
-    OB.interests = OB.interests.includes(g) ? OB.interests.filter(x => x !== g) : [...OB.interests, g];
-    renderOnboarding();
-  });
-
   const addGoal = () => {
     const inp = $("#ob-goal-custom", v);
     const g = inp.value.trim();
@@ -120,18 +131,20 @@ export function renderOnboarding() {
     gInp.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); addGoal(); } };
   }
 
-  const addInterest = () => {
-    const inp = $("#ob-int-custom", v);
-    const g = inp.value.trim();
-    if (g && !OB.interests.includes(g)) { OB.interests.push(g); OB.interestDraft = ""; renderOnboarding(); }
-  };
-  const iAdd = $("#ob-int-add", v);
-  if (iAdd) iAdd.onclick = addInterest;
-  const iInp = $("#ob-int-custom", v);
-  if (iInp) {
-    iInp.oninput = e => { OB.interestDraft = e.target.value; }; // survive re-renders
-    iInp.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); addInterest(); } };
+  const intText = $("#ob-int-text", v);
+  if (intText) {
+    intText.oninput = e => {
+      OB.interestsText = e.target.value;
+      OB.interests = parseInterests(OB.interestsText); // survive re-renders elsewhere in the wizard
+    };
   }
+  $$("[data-int-insert]", v).forEach(c => c.onclick = () => {
+    const word = c.dataset.intInsert;
+    if (OB.interests.some(i => i.toLowerCase() === word.toLowerCase())) return; // already typed
+    OB.interestsText = OB.interestsText.trim() ? `${OB.interestsText.trim()}, ${word}` : word;
+    OB.interests = parseInterests(OB.interestsText);
+    renderOnboarding();
+  });
 
   const back = $("#ob-back", v);
   if (back) back.onclick = () => { OB.step--; renderOnboarding(); };

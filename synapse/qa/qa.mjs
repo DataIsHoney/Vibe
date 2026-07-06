@@ -27,8 +27,8 @@ try {
   await page.click("#ob-goal-add");
   check("custom goal chip added", await page.locator('#ob-goal-own .chip').count() === 1);
   await page.click("#ob-next");
-  await page.click('[data-int="Space"]');
-  await page.click('[data-int="Video games"]');
+  await page.click('[data-int-insert="Space"]');
+  await page.click('[data-int-insert="Video games"]');
   await page.click("#ob-next");
   check("step 5: api key screen", await page.locator("#ob-skip").count() === 1);
   await page.screenshot({ path: SHOTS + "/01-onboarding.png" });
